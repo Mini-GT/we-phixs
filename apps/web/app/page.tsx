@@ -1,8 +1,5 @@
 import Image, { type ImageProps } from "next/image";
-import { Button } from "@repo/ui/button";
-import styles from "./page.module.css";
-import { getUsers } from "../api/user";
-import { type User } from "@repo/types"
+import Canvas from "./canvas";
 
 type Props = Omit<ImageProps, "src"> & {
   srcLight: string;
@@ -20,10 +17,10 @@ const ThemeImage = (props: Props) => {
   );
 };
 
-export default async function Home() {
-  const users: User[] = await getUsers();
-  console.log(users)
+export default function Home() {
   return (
-    <canvas id="canvas" className="bg-white" >Canvas</canvas>
+    // <div className="border-black">
+      <Canvas />
+    // </div>
   );
 }

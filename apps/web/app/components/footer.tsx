@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function Footer() {
 
   return (
-    <div className="mt-15 bg-white text-white">
+    <div className="h-[200px] bg-white text-white">
       <header className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-2 sm:gap-8 border-b border-gray-300 pb-4 mb-4">
         <Link href="/" className="flex items-center text-4xl font-bold gap-2">
           <span className="text-white select-none">
@@ -34,12 +34,6 @@ export default function Footer() {
           </div>
         </div>
       </header>
-
-      <section>
-        <h2 className="text-xl font-semibold mb-3 text-gray-600">BRAND LIST</h2>
-        <p className="mb-4 text-gray-600">Search device by brand name.</p>
-      </section>
-
       <footer className="mt-10 text-sm text-gray-600">
         <div className="flex flex-wrap gap-4 mb-2">
           <a href="#" className="hover:text-gray-900">Terms of service</a>

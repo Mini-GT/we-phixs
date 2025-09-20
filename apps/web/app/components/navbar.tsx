@@ -4,8 +4,8 @@ export default function Navbar() {
   const user = null
   return (
     <>
-      <header className="w-full text-gray-700 bg-white border-b-1">
-        <div className="w-full h-15 flex md:flex-row sm:py-2 items-center gap-6">
+      <header className="text-gray-700 bg-white border-b-1">
+        <div className="flex h-[59px] gap-6">
           <Link href="/" className="flex flex-wrap flex-shrink-1 sm:flex-shrink-0 text-xl sm:text-2xl items-center justify-center font-black text-gray-900 select-none">
             <span>We</span>
             <span className="text-indigo-600">Phix</span>
