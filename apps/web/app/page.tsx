@@ -19,8 +19,8 @@ const ThemeImage = (props: Props) => {
 
 export default function Home() {
   return (
-    // <div className="border-black">
+    <div className="flex flex-col items-center border-black w-full">
       <Canvas />
-    // </div>
+    </div>
   );
 }
