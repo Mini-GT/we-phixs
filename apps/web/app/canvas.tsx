@@ -1,87 +1,156 @@
-"use client"
+"use client";
+import { useRef, useEffect, useState } from "react";
 
-import { MouseEventHandler, useEffect, useRef, useState } from "react";
-import { useWindowSize } from "@uidotdev/usehooks";
+type Cell = { x: number; y: number; color: string };
 
 export default function Canvas() {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null)
-  const [drawing, setDrawing] = useState(false)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const [lastMouse, setLastMouse] = useState({ x: 0, y: 0 });
+  const [scale, setScale] = useState(1);
+  const [filledCells, setFilledCells] = useState<Cell[]>([]);
+  const [tool, setTool] = useState<"draw" | "move" | null>(null)
 
+  const cellSize = 10;
+  const gridSize = 300;
+
+  // draw everything
   useEffect(() => {
-    const canvas = document.getElementById('canvas') as HTMLCanvasElement | null
-    const cellSize = 5
-    const gridSize = 1500
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-    
-    if(!canvas) return
-    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-    // creates canvas screen size
-    canvas.width = gridSize
-    canvas.height = window.innerHeight - 260
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    if(!ctx) return
+    ctx.save();
+    ctx.translate(panOffset.x, panOffset.y);
+    ctx.scale(scale, scale);
 
-    // creates grid
-    for (let x = 0; x < canvas.width; x++) {
-      for (let y = 0; y < gridSize; y++) {
-        // ctx.strokeStyle = "#eee" 
-        ctx.fillStyle = '#eee'
-        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize)
-      }
+    // draw grid
+    // ctx.strokeStyle = "#eee";
+    for (let x = 0; x <= gridSize; x++) {
+      ctx.beginPath();
+      ctx.moveTo(x * cellSize, 0);
+      ctx.lineTo(x * cellSize, gridSize * cellSize);
+      ctx.stroke();
     }
-      // ctx.fillStyle = 'green'
-      // ctx.fillRect(10, 10, 200, 200)
+    for (let y = 0; y <= gridSize; y++) {
+      ctx.beginPath();
+      ctx.moveTo(0, y * cellSize);
+      ctx.lineTo(gridSize * cellSize, y * cellSize);
+      ctx.stroke();
+    }
 
-    // adds click event to canvas
+    // draw filled cells
+    filledCells.forEach(cell => {
+      ctx.fillStyle = cell.color;
+      ctx.fillRect(cell.x * cellSize, cell.y * cellSize, cellSize, cellSize);
+    });
+
+    ctx.restore();
+  }, [panOffset, scale, filledCells]);
+
+  // handle clicks -> add cell
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
     const handleClick = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect()
-      const x = e.clientX - rect.left
-      const y = e.clientY - rect.top
+      // if(tool !== "draw") return;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
 
-      const cellX = Math.floor(x / cellSize)
-      const cellY = Math.floor(y / cellSize)
+      const adjustedX = (x - panOffset.x) / scale;
+      const adjustedY = (y - panOffset.y) / scale;
 
-      console.log(`Clicked cell: (${cellX}, ${cellY})`)
-      // ctx.fillStyle = 'green'
-      // ctx.fillRect(x, y, cellSize, cellSize)
-      // console.log("Canvas coords:", x, y)
-      ctx.fillStyle = "green"
-      ctx.fillRect(cellX * cellSize, cellY * cellSize, cellSize, cellSize)
-    }
-    
-    canvas.addEventListener("click", handleClick)
-    return () => canvas.removeEventListener("click", handleClick)
-  }, [])
+      const cellX = Math.floor(adjustedX / cellSize);
+      const cellY = Math.floor(adjustedY / cellSize);
+      console.log(`Clicked cell: (${cellX}, ${cellY})`);
 
-  // const handleMouseDown = (e: MouseEvent) => {
-  //   setDrawing(true)   
-  //   const { clientX, clientY } = e
-  //   console.log(clientX, clientY)
-  // }
+      // check bounds
+      if(cellX < 0 || cellY < 0 || cellX >= gridSize || cellY >= gridSize) return;
+
+      // store in state
+      setFilledCells(prev => [...prev, { x: cellX, y: cellY, color: "yellow" }]);
+    };
+
+    canvas.addEventListener("click", handleClick);
+    return () => canvas.removeEventListener("click", handleClick);
+  }, [panOffset, scale]);
+
+  // wheel pan/zoom
+  useEffect(() => {
+  const handleWheel = (event: WheelEvent) => {
+    event.preventDefault();
+    const zoomIntensity = 0.001; // smoother zoom
+    const delta = event.deltaY * -zoomIntensity;
+
+    setScale(prev => {
+      let newScale = prev + delta;
+      if (newScale < 0.1) newScale = 0.1; // prevent zoom too small
+      if (newScale > 5) newScale = 5;     // prevent infinite zoom
+      return newScale;
+    });
+  };
+
+    window.addEventListener("wheel", handleWheel, { passive: false });
+    return () => window.removeEventListener("wheel", handleWheel);
+  }, []);
+
+  // mouse drag panning
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsPanning(true);
+    setLastMouse({ x: e.clientX, y: e.clientY });
+  };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if(!drawing) return
-    const { clientX, clientY } = e
-    console.log(clientX, clientY)
-  }
+    if (!isPanning) return;
+    const dx = e.clientX - lastMouse.x;
+    const dy = e.clientY - lastMouse.y;
+
+    setPanOffset(prev => ({
+      x: prev.x + dx,
+      y: prev.y + dy,
+    }));
+
+    setLastMouse({ x: e.clientX, y: e.clientY });
+  };
 
   const handleMouseUp = () => {
-    setDrawing(false)
-  }
+    setIsPanning(false);
+  };
 
   return (
-    <canvas 
-      ref={canvasRef} 
-      id="canvas" 
-      className="bg-white"
-      // width={`${width && width - 260}`}
-      // height={`${height && height - 260}`}
-      // onMouseDown={handleMouseDown}
-      // onMouseMove={handleMouseMove}
-      // onMouseUp={handleMouseUp}
-    >
-      Canvas
-    </canvas>
+    <div>
+      <div className="flex gap-2 bg-white mb-2 text-black p-2">
+        <button
+          className="border px-2"
+          onClick={() => setScale(prev => Math.max(0.2, prev - 0.1))}
+        >
+          -
+        </button>
+        <span>{new Intl.NumberFormat("en-GB",{ style: "percent" }).format(scale)}</span>
+        <button
+          className="border px-2"
+          onClick={() => setScale(prev => prev + 0.1)}
+        >
+          +
+        </button>
+      </div>
+      <canvas 
+        ref={canvasRef} 
+        className="bg-white border w-full h-screen" 
+        onMouseMove={handleMouseMove}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+      />
+    </div>
   );
 }
