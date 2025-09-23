@@ -13,6 +13,7 @@ export default function Canvas() {
   const [filledCells, setFilledCells] = useState<Cell[]>([]);
   const [tool, setTool] = useState<"draw" | "move" | null>(null)
   const pressKeys = usePressedKeys()
+  const [isDragging, setIsDragging] = useState(false)
 
   const cellSize = 10;
   const gridSize = 300;
@@ -70,6 +71,7 @@ export default function Canvas() {
     if (!canvas) return;
 
     const handleClick = (e: MouseEvent) => {
+      if(isDragging) return;
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
@@ -96,7 +98,7 @@ export default function Canvas() {
 
     canvas.addEventListener("click", handleClick);
     return () => canvas.removeEventListener("click", handleClick);
-  }, [panOffset, scale]);
+  }, [panOffset, scale, isDragging]);
 
   // wheel pan/zoom
   useEffect(() => {
@@ -120,6 +122,7 @@ export default function Canvas() {
   // mouse drag panning
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsPanning(true);
+    setIsDragging(false);
     setLastMouse({ x: e.clientX, y: e.clientY });
   };
 
@@ -127,6 +130,10 @@ export default function Canvas() {
     if (!isPanning) return;
     const dx = e.clientX - lastMouse.x;
     const dy = e.clientY - lastMouse.y;
+
+    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) { 
+      setIsDragging(true); // mark as drag
+    }
 
     setPanOffset(prev => ({
       x: prev.x + dx,
@@ -159,7 +166,7 @@ export default function Canvas() {
       </div>
       <canvas 
         ref={canvasRef} 
-        className="bg-black border w-full h-screen" 
+        className={`bg-black border w-full h-screen ${isDragging ? "dragging" : ""}`} 
         onMouseMove={handleMouseMove}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
