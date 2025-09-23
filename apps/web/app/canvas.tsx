@@ -1,6 +1,9 @@
 "use client";
 import { useRef, useEffect, useState } from "react";
 import { usePressedKeys } from "./hooks/presskeys";
+import PrimaryButton from "./ui/primaryButton";
+import IconButton from "./ui/iconButton";
+import { BarChart, Brush, Icon, Search } from "lucide-react";
 
 type Cell = { x: number; y: number; color: string };
 
@@ -27,6 +30,8 @@ export default function Canvas() {
 
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    // ctx.imageSmoothingEnabled = false;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // calculate scaled zoom out/in offset
@@ -40,21 +45,22 @@ export default function Canvas() {
     ctx.scale(scale, scale);
 
     // draw grid
-    ctx.strokeStyle = "white";
+    // ctx.strokeStyle = "white";
+    // ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
     ctx.fillStyle = "white"
     ctx.fillRect(0 , 0, gridSize * cellSize, gridSize * cellSize)
-    for (let x = 0; x <= gridSize; x++) {
-      ctx.beginPath();
-      ctx.moveTo(x * cellSize, 0);
-      ctx.lineTo(x * cellSize, gridSize * cellSize);
-      ctx.stroke();
-    }
-    for (let y = 0; y <= gridSize; y++) {
-      ctx.beginPath();
-      ctx.moveTo(0, y * cellSize);
-      ctx.lineTo(gridSize * cellSize, y * cellSize);
-      ctx.stroke();
-    }
+    // for (let x = 0; x <= gridSize; x++) {
+    //   ctx.beginPath();
+    //   ctx.moveTo(x * cellSize, 0);
+    //   ctx.lineTo(x * cellSize, gridSize * cellSize);
+    //   ctx.stroke();
+    // }
+    // for (let y = 0; y <= gridSize; y++) {
+    //   ctx.beginPath();
+    //   ctx.moveTo(0, y * cellSize);
+    //   ctx.lineTo(gridSize * cellSize, y * cellSize);
+    //   ctx.stroke();
+    // }
 
     // draw filled cells
     filledCells.forEach(cell => {
@@ -93,7 +99,7 @@ export default function Canvas() {
       if(cellX < 0 || cellY < 0 || cellX >= gridSize || cellY >= gridSize) return;
 
       // store in state
-      setFilledCells(prev => [...prev, { x: cellX, y: cellY, color: "yellow" }]);
+      setFilledCells(prev => [...prev, { x: cellX, y: cellY, color: "green" }]);
     };
 
     canvas.addEventListener("click", handleClick);
@@ -102,18 +108,18 @@ export default function Canvas() {
 
   // wheel pan/zoom
   useEffect(() => {
-  const handleWheel = (event: WheelEvent) => {
-    event.preventDefault();
-    const zoomIntensity = 0.001; // smoother zoom
-    const delta = event.deltaY * -zoomIntensity;
+    const handleWheel = (event: WheelEvent) => {
+      event.preventDefault();
+      const zoomIntensity = 0.001; // smoother zoom
+      const delta = event.deltaY * -zoomIntensity;
 
-    setScale(prev => {
-      let newScale = prev + delta;
-      if (newScale < 0.2) newScale = 0.2; // prevent zoom too small
-      if (newScale > 5) newScale = 5;     // prevent infinite zoom
-      return newScale;
-    });
-  };
+      setScale(prev => {
+        let newScale = prev + delta;
+        if (newScale < 0.2) newScale = 0.2; // prevent zoom too small
+        if (newScale > 5) newScale = 5;     // prevent infinite zoom
+        return newScale;
+      });
+    };
 
     window.addEventListener("wheel", handleWheel, { passive: false });
     return () => window.removeEventListener("wheel", handleWheel);
@@ -132,9 +138,9 @@ export default function Canvas() {
     const dy = e.clientY - lastMouse.y;
 
     if (Math.abs(dx) > 2 || Math.abs(dy) > 2) { 
-      setIsDragging(true); // mark as drag
+      setIsDragging(true);
     }
-
+    
     setPanOffset(prev => ({
       x: prev.x + dx,
       y: prev.y + dy,
@@ -149,24 +155,36 @@ export default function Canvas() {
 
   return (
     <div>
-      <div className="flex gap-2 bg-white mb-2 text-black p-2">
-        <button
-          className="border px-2"
-          onClick={() => setScale(prev => Math.max(0.2, prev - 0.1))}
-        >
-          -
-        </button>
-        <span>{new Intl.NumberFormat("en-GB",{ style: "percent" }).format(scale)}</span>
-        <button
-          className="border px-2"
-          onClick={() => setScale(prev => prev + 0.1)}
-        >
-          +
-        </button>
+      <div className="absolute flex flex-col gap-2 m-2 right-0">
+        <PrimaryButton>Log in</PrimaryButton>
+        <div className="flex flex-col gap-2 items-end">
+          {/* <IconButton>
+            <Search className="w-5 h-5 text-gray-600" />
+          </IconButton> */}
+          <IconButton>
+            <BarChart className="w-5 h-5 text-gray-600" />
+          </IconButton>
+
+          <IconButton
+            onClick={() => setScale(prev => Math.max(0.2, prev - 0.1))}
+          >
+            <span className="font-bold text-gray-600">-</span>
+          </IconButton>
+
+          <IconButton
+            onClick={() => setScale(prev => prev + 0.1)}
+          >
+            <span className="font-bold text-gray-600">+</span>
+          </IconButton>
+        </div>
+      </div>
+
+      <div className="absolute flex justify-center w-full bottom-0 mb-4 ">
+        <PrimaryButton className="text-2xl py-4 px-7 flex items-center gap-2"><Brush size={20} fill="white"/>Paint</PrimaryButton>
       </div>
       <canvas 
         ref={canvasRef} 
-        className={`bg-black border w-full h-screen ${isDragging ? "dragging" : ""}`} 
+        className={`bg-[#F5F2EE] border w-full h-screen ${isDragging ? "dragging" : ""}`} 
         onMouseMove={handleMouseMove}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
