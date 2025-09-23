@@ -99,8 +99,25 @@ export default function Canvas() {
       // check bounds
       if(cellX < 0 || cellY < 0 || cellX >= gridSize || cellY >= gridSize) return;
 
-      // store in state
-      setFilledCells(prev => [...prev, { x: cellX, y: cellY, color: selected || "black" }]);
+      // store in state 
+      setFilledCells(prev => {
+        // overwrite if its filled with color instead of placing it on top
+        const existingIndex = prev.findIndex(c => c.x === cellX && c.y === cellY);
+
+        if (existingIndex !== -1) {
+          const updated = [...prev];
+          const existingCell = updated[existingIndex]!; // non-null assertion, safe because of the check
+          updated[existingIndex] = {
+            x: existingCell.x,
+            y: existingCell.y,
+            color: selected || "black"
+          };
+          return updated;
+        }
+
+        return [...prev, { x: cellX, y: cellY, color: selected || "black" }];
+      });
+
     };
 
     canvas.addEventListener("click", handleClick);
