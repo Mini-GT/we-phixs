@@ -4,6 +4,7 @@ import { usePressedKeys } from "./hooks/presskeys";
 import PrimaryButton from "./ui/primaryButton";
 import IconButton from "./ui/iconButton";
 import { BarChart, Brush, Icon, Search } from "lucide-react";
+import ColorPalette from "./components/colorPalette";
 
 type Cell = { x: number; y: number; color: string };
 
@@ -17,7 +18,7 @@ export default function Canvas() {
   const [tool, setTool] = useState<"draw" | "move" | null>(null)
   const pressKeys = usePressedKeys()
   const [isDragging, setIsDragging] = useState(false)
-
+  const [selected, setSelected] = useState<string | null>(null)
   const cellSize = 10;
   const gridSize = 300;
 
@@ -99,12 +100,12 @@ export default function Canvas() {
       if(cellX < 0 || cellY < 0 || cellX >= gridSize || cellY >= gridSize) return;
 
       // store in state
-      setFilledCells(prev => [...prev, { x: cellX, y: cellY, color: "green" }]);
+      setFilledCells(prev => [...prev, { x: cellX, y: cellY, color: selected || "black" }]);
     };
 
     canvas.addEventListener("click", handleClick);
     return () => canvas.removeEventListener("click", handleClick);
-  }, [panOffset, scale, isDragging]);
+  }, [panOffset, scale, isDragging, selected]);
 
   // wheel pan/zoom
   useEffect(() => {
@@ -179,8 +180,9 @@ export default function Canvas() {
         </div>
       </div>
 
-      <div className="absolute flex justify-center w-full bottom-0 mb-4 ">
-        <PrimaryButton className="text-2xl py-4 px-7 flex items-center gap-2"><Brush size={20} fill="white"/>Paint</PrimaryButton>
+      <div className="absolute flex justify-center w-full bottom-0">
+        {/* <PrimaryButton className="text-2xl py-4 px-7 flex items-center gap-2"><Brush size={20} fill="white"/>Paint</PrimaryButton> */}
+        <ColorPalette selected={selected} setSelected={setSelected} />
       </div>
       <canvas 
         ref={canvasRef} 
