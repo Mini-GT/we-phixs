@@ -1,5 +1,6 @@
 "use client";
 import { useRef, useEffect, useState } from "react";
+import { usePressedKeys } from "./hooks/presskeys";
 
 type Cell = { x: number; y: number; color: string };
 
@@ -11,6 +12,7 @@ export default function Canvas() {
   const [scale, setScale] = useState(1);
   const [filledCells, setFilledCells] = useState<Cell[]>([]);
   const [tool, setTool] = useState<"draw" | "move" | null>(null)
+  const pressKeys = usePressedKeys()
 
   const cellSize = 10;
   const gridSize = 300;
@@ -24,15 +26,22 @@ export default function Canvas() {
 
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // calculate scaled zoom out/in offset
+    const scaleWidth = canvas.width * scale;
+    const scaleHeight = canvas.height * scale;
+    const scaleOffSetX = (scaleWidth - canvas.width) / 2;
+    const scaleOffSetY = (scaleHeight - canvas.height) / 2;
+
     ctx.save();
-    ctx.translate(panOffset.x, panOffset.y);
+    ctx.translate(panOffset.x * scale - scaleOffSetX, panOffset.y * scale - scaleOffSetY);
     ctx.scale(scale, scale);
 
     // draw grid
-    // ctx.strokeStyle = "#eee";
+    ctx.strokeStyle = "white";
+    ctx.fillStyle = "white"
+    ctx.fillRect(0 , 0, gridSize * cellSize, gridSize * cellSize)
     for (let x = 0; x <= gridSize; x++) {
       ctx.beginPath();
       ctx.moveTo(x * cellSize, 0);
@@ -61,13 +70,18 @@ export default function Canvas() {
     if (!canvas) return;
 
     const handleClick = (e: MouseEvent) => {
-      // if(tool !== "draw") return;
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
+      
+      // calculate scaled zoom out/in offset
+      const scaleWidth = canvas.width * scale;
+      const scaleHeight = canvas.height * scale;
+      const scaleOffSetX = (scaleWidth - canvas.width) / 2;
+      const scaleOffSetY = (scaleHeight - canvas.height) / 2;
 
-      const adjustedX = (x - panOffset.x) / scale;
-      const adjustedY = (y - panOffset.y) / scale;
+      const adjustedX = (x + scaleOffSetX - panOffset.x * scale) / scale;
+      const adjustedY = (y + scaleOffSetY - panOffset.y * scale) / scale;
 
       const cellX = Math.floor(adjustedX / cellSize);
       const cellY = Math.floor(adjustedY / cellSize);
@@ -93,7 +107,7 @@ export default function Canvas() {
 
     setScale(prev => {
       let newScale = prev + delta;
-      if (newScale < 0.1) newScale = 0.1; // prevent zoom too small
+      if (newScale < 0.2) newScale = 0.2; // prevent zoom too small
       if (newScale > 5) newScale = 5;     // prevent infinite zoom
       return newScale;
     });
@@ -145,7 +159,7 @@ export default function Canvas() {
       </div>
       <canvas 
         ref={canvasRef} 
-        className="bg-white border w-full h-screen" 
+        className="bg-black border w-full h-screen" 
         onMouseMove={handleMouseMove}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
