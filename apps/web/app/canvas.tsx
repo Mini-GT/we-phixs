@@ -31,7 +31,6 @@ export default function Canvas() {
 
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    // ctx.imageSmoothingEnabled = false;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -82,9 +81,9 @@ export default function Canvas() {
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-      
+
       // calculate scaled zoom out/in offset
-      const scaleWidth = canvas.width * scale;
+      const scaleWidth = canvas.width * scale + 10; // fix: x offset when placing a cell (not long term as it only fixes the center of the screen and not the sides)
       const scaleHeight = canvas.height * scale;
       const scaleOffSetX = (scaleWidth - canvas.width) / 2;
       const scaleOffSetY = (scaleHeight - canvas.height) / 2;
@@ -126,28 +125,76 @@ export default function Canvas() {
 
   // wheel pan/zoom
   useEffect(() => {
-    const handleWheel = (event: WheelEvent) => {
-      event.preventDefault();
-      const zoomIntensity = 0.001; // smoother zoom
-      const delta = event.deltaY * -zoomIntensity;
+  const canvas = canvasRef.current;
+  if (!canvas) return;
 
-      setScale(prev => {
-        let newScale = prev + delta;
-        if (newScale < 0.2) newScale = 0.2; // prevent zoom too small
-        if (newScale > 5) newScale = 5;     // prevent infinite zoom
-        return newScale;
-      });
-    };
+  const handleWheel = (event: WheelEvent) => {
+    event.preventDefault();
+    
+    const rect = canvas.getBoundingClientRect();
+    const centerX = event.clientX - rect.left;
+    const centerY = event.clientY - rect.top;
+    
+    const zoomIntensity = 0.001;
+    const delta = event.deltaY * -zoomIntensity;
+    
+    setScale(prevScale => {
+      let newScale = prevScale + delta;
+      if (newScale < 0.2) newScale = 0.2;
+      if (newScale > 5) newScale = 5;
+      
+      // calculate world coordinates under the mouse BEFORE scaling
+      const scaleWidth = canvas.width * prevScale;
+      const scaleHeight = canvas.height * prevScale;
+      const scaleOffSetX = (scaleWidth - canvas.width) / 2;
+      const scaleOffSetY = (scaleHeight - canvas.height) / 2;
+      
+      const worldX = (centerX + scaleOffSetX - panOffset.x * prevScale) / prevScale;
+      const worldY = (centerY + scaleOffSetY - panOffset.y * prevScale) / prevScale;
+      
+      // calculate new offsets after scaling
+      const newScaleWidth = canvas.width * newScale;
+      const newScaleHeight = canvas.height * newScale;
+      const newScaleOffSetX = (newScaleWidth - canvas.width) / 2;
+      const newScaleOffSetY = (newScaleHeight - canvas.height) / 2;
+      
+      // Adjust pan offset to keep the world point under the mouse
+      const newPanX = (centerX + newScaleOffSetX - worldX * newScale) / newScale;
+      const newPanY = (centerY + newScaleOffSetY - worldY * newScale) / newScale;
+      
+      setPanOffset({ x: newPanX, y: newPanY });
+      
+      return newScale;
+    });
+  };
 
-    window.addEventListener("wheel", handleWheel, { passive: false });
-    return () => window.removeEventListener("wheel", handleWheel);
-  }, []);
+    canvas.addEventListener("wheel", handleWheel, { passive: false });
+    return () => canvas.removeEventListener("wheel", handleWheel);
+  }, [panOffset]);
+
+  // useEffect(() => {
+  //   const handleWheel = (event: WheelEvent) => {
+  //     event.preventDefault();
+  //     const zoomIntensity = 0.001; // smoother zoom
+  //     const delta = event.deltaY * -zoomIntensity;
+
+  //     setScale(prev => {
+  //       let newScale = prev + delta;
+  //       if (newScale < 0.2) newScale = 0.2; // prevent zoom too small
+  //       if (newScale > 5) newScale = 5;     // prevent infinite zoom
+  //       return newScale;
+  //     });
+  //   };
+
+  //   window.addEventListener("wheel", handleWheel, { passive: false });
+  //   return () => window.removeEventListener("wheel", handleWheel);
+  // }, []);
 
   // mouse drag panning
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsPanning(true);
     setIsDragging(false);
-    setLastMouse({ x: e.clientX, y: e.clientY });
+    setLastMouse({ x: e.clientX, y: e.clientY});
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -171,6 +218,44 @@ export default function Canvas() {
     setIsPanning(false);
   };
 
+  const zoomToCenter = (zoomDelta: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    // Use center of canvas as zoom point
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    
+    setScale(prevScale => {
+      let newScale = prevScale + zoomDelta;
+      if (newScale < 0.2) newScale = 0.2;
+      if (newScale > 5) newScale = 5;
+      
+      // Calculate world coordinates at center BEFORE scaling
+      const scaleWidth = canvas.width * prevScale;
+      const scaleHeight = canvas.height * prevScale;
+      const scaleOffSetX = (scaleWidth - canvas.width) / 2;
+      const scaleOffSetY = (scaleHeight - canvas.height) / 2;
+      
+      const worldX = (centerX + scaleOffSetX - panOffset.x * prevScale) / prevScale;
+      const worldY = (centerY + scaleOffSetY - panOffset.y * prevScale) / prevScale;
+      
+      // Calculate new offsets after scaling
+      const newScaleWidth = canvas.width * newScale;
+      const newScaleHeight = canvas.height * newScale;
+      const newScaleOffSetX = (newScaleWidth - canvas.width) / 2;
+      const newScaleOffSetY = (newScaleHeight - canvas.height) / 2;
+      
+      // Adjust pan offset to keep the center point centered
+      const newPanX = (centerX + newScaleOffSetX - worldX * newScale) / newScale;
+      const newPanY = (centerY + newScaleOffSetY - worldY * newScale) / newScale;
+      
+      setPanOffset({ x: newPanX, y: newPanY });
+      
+      return newScale;
+    });
+  };
+
   return (
     <div>
       <div className="absolute flex flex-col gap-2 m-2 right-0">
@@ -184,13 +269,13 @@ export default function Canvas() {
           </IconButton>
 
           <IconButton
-            onClick={() => setScale(prev => Math.max(0.2, prev - 0.1))}
+            onClick={() => zoomToCenter(-0.1)}
           >
             <span className="font-bold text-gray-600">-</span>
           </IconButton>
 
           <IconButton
-            onClick={() => setScale(prev => prev + 0.1)}
+            onClick={() => zoomToCenter(0.1)}
           >
             <span className="font-bold text-gray-600">+</span>
           </IconButton>
