@@ -1,4 +1,6 @@
-import { useState } from "react"
+import { Brush, X } from "lucide-react";
+import IconButton from "../ui/iconButton";
+import PrimaryButton from "../ui/primaryButton";
 
 const colors = [
   "#000000", "#4a4a4a", "#7a7a7a", "#a0a0a0", "#d1d1d1", "#ffffff",
@@ -14,18 +16,33 @@ const colors = [
 type ColorPaletteProps = {
   selected: string | null
   setSelected: (color: string) => void;
+  setTool: (tool: "paint" | null) => void;
 }
 
-export default function ColorPalette({ selected, setSelected }: ColorPaletteProps) {
+export default function ColorPalette({ selected, setSelected, setTool }: ColorPaletteProps) {
 
   return (
-    <div className="p-4 w-full bg-white rounded-t-xl border border-2 border-gray-300">
-      {/* <h2 className="text-lg font-semibold mb-2">Paint pixel</h2> */}
-      <div className="grid grid-cols-30 gap-1">
+    <div className="p-4 w-full bg-white rounded-t-4xl border border-2 border-gray-300">
+      <div className="flex items-center justify-between">
+        {selected && (
+          <div className="flex items-center gap-2">
+            <span className="text-gray-600 font-bold">Selected: </span>
+            <span className="w-6 h-6 rounded border" style={{ backgroundColor: selected }} />
+            {/* <span className="text-sm">{selected}</span> */}
+          </div>
+        )}
+        <IconButton className="text-gray-600 w-1 h-1 ml-auto border border-gray-300" >
+          <X onClick={() => setTool(null)} size={20} />
+        </IconButton>
+      </div>
+      <div className="grid grid-cols-30 mt-3 mb-4 gap-1">
         {colors.map((color, i) => (
           <button
             key={i}
-            onClick={() => setSelected(color)}
+            onClick={() => {
+              setSelected(color)
+              setTool("paint")
+            }}
             className={`
               w-full h-8 rounded-md border cursor-pointer 
               ${selected === color ? "border-blue-500 border-3" : "border-gray-300"}
@@ -34,12 +51,7 @@ export default function ColorPalette({ selected, setSelected }: ColorPaletteProp
           />
         ))}
       </div>
-      {selected && (
-        <div className="mt-3 flex items-center gap-2">
-          <span className="w-6 h-6 rounded border" style={{ backgroundColor: selected }} />
-          <span className="text-sm">{selected}</span>
-        </div>
-      )}
+      <PrimaryButton className="text-2xl m-auto py-4 px-7 flex items-center gap-2"><Brush size={20} fill="white"/>Paint 50/50</PrimaryButton>
     </div>
   )
 }

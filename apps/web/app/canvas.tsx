@@ -15,7 +15,7 @@ export default function Canvas() {
   const [lastMouse, setLastMouse] = useState({ x: 0, y: 0 });
   const [scale, setScale] = useState(1);
   const [filledCells, setFilledCells] = useState<Cell[]>([]);
-  const [tool, setTool] = useState<"draw" | "move" | null>(null)
+  const [tool, setTool] = useState<"paint" | "move" | null>(null)
   const pressKeys = usePressedKeys()
   const [isDragging, setIsDragging] = useState(false)
   const [selected, setSelected] = useState<string | null>(null)
@@ -190,6 +190,11 @@ export default function Canvas() {
   //   return () => window.removeEventListener("wheel", handleWheel);
   // }, []);
 
+  // set drag to false so the cursor gets change
+  useEffect(() => {
+    if(!isPanning) setIsDragging(false)
+  }, [isPanning])
+
   // mouse drag panning
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsPanning(true);
@@ -205,7 +210,7 @@ export default function Canvas() {
     if (Math.abs(dx) > 2 || Math.abs(dy) > 2) { 
       setIsDragging(true);
     }
-    
+
     setPanOffset(prev => ({
       x: prev.x + dx,
       y: prev.y + dy,
@@ -283,12 +288,24 @@ export default function Canvas() {
       </div>
 
       <div className="absolute flex justify-center w-full bottom-0">
-        {/* <PrimaryButton className="text-2xl py-4 px-7 flex items-center gap-2"><Brush size={20} fill="white"/>Paint</PrimaryButton> */}
-        <ColorPalette selected={selected} setSelected={setSelected} />
+        {tool !== "paint" || !tool ? 
+          <PrimaryButton 
+            className="text-2xl py-4 px-7 flex mb-4 items-center gap-2"
+            onClick={() => setTool("paint")}
+          >
+            <Brush size={20} fill="white"/>Paint 50/50
+          </PrimaryButton> 
+          :
+          <ColorPalette 
+            selected={selected} 
+            setSelected={setSelected} 
+            setTool={setTool}
+          />
+        }
       </div>
       <canvas 
         ref={canvasRef} 
-        className={`bg-[#F5F2EE] border w-full h-screen ${isDragging ? "dragging" : ""}`} 
+        className={`bg-[#F5F2EE] border w-full h-screen square-cursor ${isDragging ? "dragging" : ""}`} 
         onMouseMove={handleMouseMove}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
