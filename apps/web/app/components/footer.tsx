@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Footer() {
@@ -20,16 +21,16 @@ export default function Footer() {
           </div>
           <div className="flex gap-2">
             <button className="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer">
-              <img className="object-cover" src="/imgs/discord.png" alt="Discord" />
+              <Image className="object-cover" src="/imgs/discord.png" alt="Discord" />
             </button>
             <button className="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer">
-              <img className="object-cover" src="/imgs/reddit.png" alt="Reddit" />
+              <Image className="object-cover" src="/imgs/reddit.png" alt="Reddit" />
             </button>
             <button className="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer">
-              <img className="object-cover" src="/imgs/twitter.png" alt="Twitter" />
+              <Image className="object-cover" src="/imgs/twitter.png" alt="Twitter" />
             </button>
             <button className="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer">
-              <img className="object-cover" src="/imgs/telegram.png" alt="Telegram" />
+              <Image className="object-cover" src="/imgs/telegram.png" alt="Telegram" />
             </button>
           </div>
         </div>
