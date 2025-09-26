@@ -2,7 +2,7 @@
 import { useRef, useEffect, useState } from "react";
 import PrimaryButton from "./ui/primaryButton";
 import IconButton from "./ui/iconButton";
-import { BarChart, Brush } from "lucide-react";
+import { BarChart, Brush, ZoomInIcon, ZoomOutIcon } from "lucide-react";
 import ColorPalette from "./components/colorPalette";
 import { Cell } from "@repo/types";
 import { useAppSounds } from "./hooks/useSounds";
@@ -309,19 +309,18 @@ export default function Canvas() {
           <IconButton
             onClick={() => zoomToCenter(-0.1)}
           >
-            <span className="font-bold text-gray-600">-</span>
+            <ZoomOutIcon className="text-gray-500" />
           </IconButton>
 
           <IconButton
             onClick={() => zoomToCenter(0.1)}
           >
-            <span className="font-bold text-gray-600">+</span>
+            <ZoomInIcon className="text-gray-500" />
           </IconButton>
         </div>
       </div>
 
       <div className="absolute flex flex-col items-center justify-center w-full bottom-0">
-        {/* {isOpen &&   */}
         <ColorPalette 
           countdown={countdown}
           totalPaints={totalPaints}
@@ -329,10 +328,8 @@ export default function Canvas() {
           setSelected={setSelected} 
           setTool={setTool}
           isOpen={isOpen}
-          setIsOpen={setIsOpen}
           paintBtn={paintBtn}
         />
-        {/* } */}
         {!isOpen && <PrimaryButton 
           className="text-2xl py-4 px-7 flex max-w-fit bottom-0 mb-4 items-center gap-2"
           onClick={paintBtn}

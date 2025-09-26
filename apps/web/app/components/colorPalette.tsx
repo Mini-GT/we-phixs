@@ -22,11 +22,10 @@ type ColorPaletteProps = {
   setTool: (tool: "paint" | null) => void;
   totalPaints: number;
   isOpen: boolean;
-  setIsOpen: Dispatch<SetStateAction<boolean>>;
   paintBtn: () => void;
 }
 
-export default function ColorPalette({ selected, setSelected, setTool, totalPaints, countdown, isOpen, setIsOpen, paintBtn }: ColorPaletteProps) {
+export default function ColorPalette({ selected, setSelected, setTool, totalPaints, countdown, isOpen, paintBtn }: ColorPaletteProps) {
   const { playBtnSoft } = useAppSounds()
   
   return (
