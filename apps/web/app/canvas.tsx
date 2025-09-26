@@ -1,24 +1,28 @@
 "use client";
 import { useRef, useEffect, useState } from "react";
-import { usePressedKeys } from "./hooks/presskeys";
 import PrimaryButton from "./ui/primaryButton";
 import IconButton from "./ui/iconButton";
-import { BarChart, Brush, Icon, Search } from "lucide-react";
+import { BarChart, Brush } from "lucide-react";
 import ColorPalette from "./components/colorPalette";
-
-type Cell = { x: number; y: number; color: string };
+import { Cell } from "@repo/types";
+import { useAppSounds } from "./hooks/useSounds";
 
 export default function Canvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
-  const [isPanning, setIsPanning] = useState(false);
+  const [isPanning, setIsPanning] = useState<boolean>(false);
   const [lastMouse, setLastMouse] = useState({ x: 0, y: 0 });
-  const [scale, setScale] = useState(1);
+  const [scale, setScale] = useState<number>(1);
   const [filledCells, setFilledCells] = useState<Cell[]>([]);
-  const [tool, setTool] = useState<"paint" | "move" | null>(null)
-  const pressKeys = usePressedKeys()
-  const [isDragging, setIsDragging] = useState(false)
-  const [selected, setSelected] = useState<string | null>(null)
+  const [tool, setTool] = useState<"paint" | "move" | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [totalPaints, setTotalPaints] = useState<number>(50);
+  const [countdown, setCountdown] = useState<number>(30);
+  const [shouldCountDown, setShouldCountDown] = useState<boolean>(false)
+  const [isOpen, setIsOpen] = useState<boolean>(false)
+  const sounds = useAppSounds()
+
   const cellSize = 10;
   const gridSize = 300;
 
@@ -64,7 +68,7 @@ export default function Canvas() {
 
     // draw filled cells
     filledCells.forEach(cell => {
-      ctx.fillStyle = cell.color;
+      ctx.fillStyle = cell.color || "";
       ctx.fillRect(cell.x * cellSize, cell.y * cellSize, cellSize, cellSize);
     });
 
@@ -77,7 +81,7 @@ export default function Canvas() {
     if (!canvas) return;
 
     const handleClick = (e: MouseEvent) => {
-      if(isDragging) return;
+      if(isDragging || !totalPaints || !selected) return;
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
@@ -93,7 +97,7 @@ export default function Canvas() {
 
       const cellX = Math.floor(adjustedX / cellSize);
       const cellY = Math.floor(adjustedY / cellSize);
-      console.log(`Clicked cell: (${cellX}, ${cellY})`);
+      // console.log(`Clicked cell: (${cellX}, ${cellY})`);
 
       // check bounds
       if(cellX < 0 || cellY < 0 || cellX >= gridSize || cellY >= gridSize) return;
@@ -109,19 +113,43 @@ export default function Canvas() {
           updated[existingIndex] = {
             x: existingCell.x,
             y: existingCell.y,
-            color: selected || "black"
+            color: selected
           };
           return updated;
         }
 
-        return [...prev, { x: cellX, y: cellY, color: selected || "black" }];
+        return [...prev, { x: cellX, y: cellY, color: selected }];
       });
-
+      setTotalPaints(prev => prev - 1)
     };
 
     canvas.addEventListener("click", handleClick);
     return () => canvas.removeEventListener("click", handleClick);
-  }, [panOffset, scale, isDragging, selected]);
+  }, [panOffset, scale, isDragging, selected, totalPaints]);
+  
+  // start countdown (we are separating this to stop the countdown from freezing the timer whenever user clicks)
+  useEffect(() => {
+    totalPaints < 50 ? setShouldCountDown(true) : setShouldCountDown(false)
+  }, [totalPaints])
+
+  // refill paints if its less than 50 every 30 secs
+  useEffect(() => {
+    if(!shouldCountDown) return
+
+    let timer: NodeJS.Timeout;
+      timer = setInterval(() => {
+        setCountdown(prev => {
+          if (prev <= 1) {
+            setTotalPaints(current => current < 50 ? current + 1 : current);
+            sounds.playSuccess()
+            return 30; // reset countdown
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    
+    return () => clearInterval(timer);
+  }, [shouldCountDown]);
 
   // wheel pan/zoom
   useEffect(() => {
@@ -261,6 +289,11 @@ export default function Canvas() {
     });
   };
 
+  const paintBtn = () => {
+    setIsOpen(prev => !prev)
+    isOpen ? sounds.playPnlExpand() : sounds.playPnlCollapse()
+  }
+
   return (
     <div>
       <div className="absolute flex flex-col gap-2 m-2 right-0">
@@ -287,20 +320,29 @@ export default function Canvas() {
         </div>
       </div>
 
-      <div className="absolute flex justify-center w-full bottom-0">
-        {tool !== "paint" || !tool ? 
-          <PrimaryButton 
-            className="text-2xl py-4 px-7 flex mb-4 items-center gap-2"
-            onClick={() => setTool("paint")}
-          >
-            <Brush size={20} fill="white"/>Paint 50/50
-          </PrimaryButton> 
-          :
-          <ColorPalette 
-            selected={selected} 
-            setSelected={setSelected} 
-            setTool={setTool}
-          />
+      <div className="absolute flex flex-col items-center justify-center w-full bottom-0">
+        {/* {isOpen &&   */}
+        <ColorPalette 
+          countdown={countdown}
+          totalPaints={totalPaints}
+          selected={selected} 
+          setSelected={setSelected} 
+          setTool={setTool}
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          paintBtn={paintBtn}
+        />
+        {/* } */}
+        {!isOpen && <PrimaryButton 
+          className="text-2xl py-4 px-7 flex max-w-fit bottom-0 mb-4 items-center gap-2"
+          onClick={paintBtn}
+        >
+          <Brush size={20} fill="white"/>
+          <div className="flex items-center gap-1">
+            Paint <span>{totalPaints}</span>/50 
+            {totalPaints < 50 && <span className="text-sm">{`(00:${countdown})`}</span>}
+          </div>
+        </PrimaryButton>
         }
       </div>
       <canvas 

@@ -1,6 +1,8 @@
 import { Brush, X } from "lucide-react";
 import IconButton from "../ui/iconButton";
 import PrimaryButton from "../ui/primaryButton";
+import { Dispatch, SetStateAction } from "react";
+import { useAppSounds } from "../hooks/useSounds";
 
 const colors = [
   "#000000", "#4a4a4a", "#7a7a7a", "#a0a0a0", "#d1d1d1", "#ffffff",
@@ -14,15 +16,21 @@ const colors = [
 ]
 
 type ColorPaletteProps = {
-  selected: string | null
+  countdown: number;
+  selected: string | null;
   setSelected: (color: string) => void;
   setTool: (tool: "paint" | null) => void;
+  totalPaints: number;
+  isOpen: boolean;
+  setIsOpen: Dispatch<SetStateAction<boolean>>;
+  paintBtn: () => void;
 }
 
-export default function ColorPalette({ selected, setSelected, setTool }: ColorPaletteProps) {
-
+export default function ColorPalette({ selected, setSelected, setTool, totalPaints, countdown, isOpen, setIsOpen, paintBtn }: ColorPaletteProps) {
+  const { playBtnSoft } = useAppSounds()
+  
   return (
-    <div className="p-4 w-full bg-white rounded-t-4xl border border-2 border-gray-300">
+    <div className={`absolute bottom-0 p-4 w-full bg-white rounded-t-4xl border-2 border-gray-300 transform transition-all duration-300 ease-out ${isOpen ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"}`}>
       <div className="flex items-center justify-between">
         {selected && (
           <div className="flex items-center gap-2">
@@ -32,7 +40,7 @@ export default function ColorPalette({ selected, setSelected, setTool }: ColorPa
           </div>
         )}
         <IconButton className="text-gray-600 w-1 h-1 ml-auto border border-gray-300" >
-          <X onClick={() => setTool(null)} size={20} />
+          <X className="w-full h-full p-2" onClick={paintBtn} />
         </IconButton>
       </div>
       <div className="grid grid-cols-30 mt-3 mb-4 gap-1">
@@ -42,6 +50,7 @@ export default function ColorPalette({ selected, setSelected, setTool }: ColorPa
             onClick={() => {
               setSelected(color)
               setTool("paint")
+              playBtnSoft()
             }}
             className={`
               w-full h-8 rounded-md border cursor-pointer 
@@ -51,7 +60,13 @@ export default function ColorPalette({ selected, setSelected, setTool }: ColorPa
           />
         ))}
       </div>
-      <PrimaryButton className="text-2xl m-auto py-4 px-7 flex items-center gap-2"><Brush size={20} fill="white"/>Paint 50/50</PrimaryButton>
+      <PrimaryButton onClick={paintBtn} className="text-2xl m-auto py-4 px-7 flex items-center gap-2">
+        <Brush size={20} fill="white"/>
+        <div className="flex items-center gap-2">
+          Paint <span>{totalPaints}</span>/50
+          {totalPaints < 50 && <span className="text-sm">{`(00:${countdown})`}</span>}
+        </div>
+      </PrimaryButton>
     </div>
   )
 }
