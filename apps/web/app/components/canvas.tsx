@@ -3,18 +3,21 @@ import { useRef, useEffect, useState } from "react";
 import PrimaryButton from "./ui/primaryButton";
 import IconButton from "./ui/iconButton";
 import { BarChart, Brush, ZoomInIcon, ZoomOutIcon } from "lucide-react";
-import ColorPalette from "./components/colorPalette";
 import { Cell } from "@repo/types";
-import { useAppSounds } from "./hooks/useSounds";
+import { useAppSounds } from "@/hooks/useSounds";
+import ColorPalette from "./colorPalette";
 
-export default function Canvas() {
+type CanvasProp = {
+  children: React.ReactNode;
+}
+
+export default function Canvas({children}: CanvasProp) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState<boolean>(false);
   const [lastMouse, setLastMouse] = useState({ x: 0, y: 0 });
   const [scale, setScale] = useState<number>(1);
   const [filledCells, setFilledCells] = useState<Cell[]>([]);
-  const [tool, setTool] = useState<"paint" | "move" | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [totalPaints, setTotalPaints] = useState<number>(50);
@@ -186,7 +189,7 @@ export default function Canvas() {
       const newScaleOffSetX = (newScaleWidth - canvas.width) / 2;
       const newScaleOffSetY = (newScaleHeight - canvas.height) / 2;
       
-      // Adjust pan offset to keep the world point under the mouse
+      // adjust pan offset to keep the world point under the mouse
       const newPanX = (centerX + newScaleOffSetX - worldX * newScale) / newScale;
       const newPanY = (centerY + newScaleOffSetY - worldY * newScale) / newScale;
       
@@ -255,7 +258,6 @@ export default function Canvas() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Use center of canvas as zoom point
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
     
@@ -264,7 +266,6 @@ export default function Canvas() {
       if (newScale < 0.2) newScale = 0.2;
       if (newScale > 5) newScale = 5;
       
-      // Calculate world coordinates at center BEFORE scaling
       const scaleWidth = canvas.width * prevScale;
       const scaleHeight = canvas.height * prevScale;
       const scaleOffSetX = (scaleWidth - canvas.width) / 2;
@@ -273,13 +274,11 @@ export default function Canvas() {
       const worldX = (centerX + scaleOffSetX - panOffset.x * prevScale) / prevScale;
       const worldY = (centerY + scaleOffSetY - panOffset.y * prevScale) / prevScale;
       
-      // Calculate new offsets after scaling
       const newScaleWidth = canvas.width * newScale;
       const newScaleHeight = canvas.height * newScale;
       const newScaleOffSetX = (newScaleWidth - canvas.width) / 2;
       const newScaleOffSetY = (newScaleHeight - canvas.height) / 2;
       
-      // Adjust pan offset to keep the center point centered
       const newPanX = (centerX + newScaleOffSetX - worldX * newScale) / newScale;
       const newPanY = (centerY + newScaleOffSetY - worldY * newScale) / newScale;
       
@@ -297,7 +296,7 @@ export default function Canvas() {
   return (
     <div>
       <div className="absolute flex flex-col gap-2 m-2 right-0">
-        <PrimaryButton>Log in</PrimaryButton>
+        {children}
         <div className="flex flex-col gap-2 items-end">
           {/* <IconButton>
             <Search className="w-5 h-5 text-gray-600" />
@@ -326,7 +325,6 @@ export default function Canvas() {
           totalPaints={totalPaints}
           selected={selected} 
           setSelected={setSelected} 
-          setTool={setTool}
           isOpen={isOpen}
           paintBtn={paintBtn}
         />
