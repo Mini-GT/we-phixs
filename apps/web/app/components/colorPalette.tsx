@@ -1,7 +1,6 @@
 import { Brush, X } from "lucide-react";
-import IconButton from "../ui/iconButton";
-import PrimaryButton from "../ui/primaryButton";
-import { Dispatch, SetStateAction } from "react";
+import IconButton from "./ui/iconButton";
+import PrimaryButton from "./ui/primaryButton";
 import { useAppSounds } from "../hooks/useSounds";
 
 const colors = [
@@ -19,13 +18,12 @@ type ColorPaletteProps = {
   countdown: number;
   selected: string | null;
   setSelected: (color: string) => void;
-  setTool: (tool: "paint" | null) => void;
   totalPaints: number;
   isOpen: boolean;
   paintBtn: () => void;
 }
 
-export default function ColorPalette({ selected, setSelected, setTool, totalPaints, countdown, isOpen, paintBtn }: ColorPaletteProps) {
+export default function ColorPalette({ selected, setSelected, totalPaints, countdown, isOpen, paintBtn }: ColorPaletteProps) {
   const { playBtnSoft } = useAppSounds()
   
   return (
@@ -48,7 +46,6 @@ export default function ColorPalette({ selected, setSelected, setTool, totalPain
             key={i}
             onClick={() => {
               setSelected(color)
-              setTool("paint")
               playBtnSoft()
             }}
             className={`

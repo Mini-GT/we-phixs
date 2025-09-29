@@ -1,26 +1,38 @@
-import Image, { type ImageProps } from "next/image";
-import Canvas from "./canvas";
+"use client"
 
-type Props = Omit<ImageProps, "src"> & {
-  srcLight: string;
-  srcDark: string;
-};
+import { useState } from "react";
+// import Image, { type ImageProps } from "next/image";
+import Canvas from "./components/canvas";
+import Login from "./components/login";
+import LoginForm from "./components/form/loginForm";
+import CardModal from "./components/cardModal";
+import { useComponent } from "./context/component.context";
 
-const ThemeImage = (props: Props) => {
-  const { srcLight, srcDark, ...rest } = props;
+// type Props = Omit<ImageProps, "src"> & {
+//   srcLight: string;
+//   srcDark: string;
+// };
 
-  return (
-    <>
-      <Image {...rest} src={srcLight} className="imgLight" />
-      <Image {...rest} src={srcDark} className="imgDark" />
-    </>
-  );
-};
+// const ThemeImage = (props: Props) => {
+//   const { srcLight, srcDark, ...rest } = props;
+
+//   return (
+//     <>
+//       <Image {...rest} src={srcLight} className="imgLight" />
+//       <Image {...rest} src={srcDark} className="imgDark" />
+//     </>
+//   );
+// };
 
 export default function Home() {
+  const { component, setComponent } = useComponent()
+
   return (
     <div className="flex flex-col items-center border-black w-full">
-      <Canvas />
+      {component === "loginForm" && <LoginForm />}
+      <Canvas>
+        <Login setComponent={setComponent} />
+      </Canvas>
     </div>
   );
 }
