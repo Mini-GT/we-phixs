@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import Navbar from "./components/navbar";
-import Footer from "./components/footer";
-import { ComponentContext, ComponentProvider } from "./context/component.context";
+import { ComponentProvider } from "./context/component.context";
+import TanstackProvider from "./components/providers/tanstackProvider";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -19,6 +18,7 @@ export const metadata: Metadata = {
   description: "A collaborative pixel art that turns your imagination into pixels",
 };
 
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -27,11 +27,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <ComponentProvider>
-          {/* <Navbar /> */}
-          {children}
-          {/* <Footer /> */}
-        </ComponentProvider>
+        <TanstackProvider>
+          <ComponentProvider>
+            {children}
+          </ComponentProvider>
+        </TanstackProvider>
       </body>
     </html>
   );
