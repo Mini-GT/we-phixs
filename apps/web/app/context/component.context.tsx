@@ -1,17 +1,18 @@
 "use client"
 
 import { ContextProviderProps } from "@/types/context";
+import { ComponentStateValue } from "@repo/types";
 import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
 
 type ComponentContextType = {
-  component: "loginForm" | null,
-  setComponent: Dispatch<SetStateAction<"loginForm" | null>>
+  component: ComponentStateValue
+  setComponent: Dispatch<SetStateAction<ComponentStateValue>>
 }
 
 export const ComponentContext = createContext<ComponentContextType | undefined>(undefined)
 
 export function ComponentProvider({ children }: ContextProviderProps) {
-  const [component, setComponent] = useState<"loginForm" | null>(null)
+  const [component, setComponent] = useState<ComponentStateValue>(null)
   
   return (
     <ComponentContext value={{ component, setComponent }}>

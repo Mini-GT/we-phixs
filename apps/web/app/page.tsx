@@ -7,6 +7,7 @@ import Login from "./components/login";
 import LoginForm from "./components/form/loginForm";
 import CardModal from "./components/cardModal";
 import { useComponent } from "./context/component.context";
+import RegisterForm from "./components/form/registerForm";
 
 // type Props = Omit<ImageProps, "src"> & {
 //   srcLight: string;
@@ -29,7 +30,8 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center border-black w-full">
-      {component === "loginForm" && <LoginForm />}
+      {component === "loginForm" && <LoginForm setComponent={setComponent} />}
+      {component === "registerForm" && <RegisterForm setComponent={setComponent} />}
       <Canvas>
         <Login setComponent={setComponent} />
       </Canvas>

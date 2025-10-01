@@ -1,10 +1,10 @@
 "use client"
 
-import { Dispatch, SetStateAction } from "react";
+import { ComponentState, Dispatch, SetStateAction } from "react";
 import PrimaryButton from "./ui/primaryButton";
 
 type LoginProps = {
-  setComponent: Dispatch<SetStateAction<"loginForm" | null>>
+  setComponent: Dispatch<SetStateAction<ComponentState>>
 }
 
 export default function Login({setComponent}: LoginProps) {

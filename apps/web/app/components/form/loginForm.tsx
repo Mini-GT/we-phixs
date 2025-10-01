@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 // import { type LoginRegisterFormProps } from "~/types/globals.type";
 // import authService from "~/services/auth.service";
 // import { usePopupButton } from "~/context/popupButtonContext";
@@ -10,9 +10,14 @@ import Link from "next/link";
 import CardModal from "../cardModal";
 import Image from "next/image";
 import { pixelify_sans } from "@/fonts/fonts";
+import { ComponentStateValue } from "@repo/types";
 // import { useUser } from "~/context/userContext";
 
-export default function LoginForm() {
+export type LoginRegisterFormProps = {
+  setComponent: Dispatch<SetStateAction<ComponentStateValue>>;
+}
+
+export default function LoginForm({setComponent}: LoginRegisterFormProps) {
   const [loginFormData, setLoginFormData] = useState({
     email: "",
     password: "",
@@ -71,7 +76,7 @@ export default function LoginForm() {
       <CardContent>
         <h2 className="relative flex items-center justify-center text-3xl font-bold text-center text-gray-900">
           <Image width={40} height={40} src="/imgs/logo.png" alt="wephix logo" />
-          <span className={`${pixelify_sans.className}`}>We Phix</span>
+          <span className={`${pixelify_sans.className}`}>Login</span>
         </h2>
         <form method="POST" onSubmit={handleSubmit} className="mt-4">
           <div className="relative mb-4">
@@ -129,11 +134,17 @@ export default function LoginForm() {
             {/* Login */}
           </Button>
           <Link
-            className="flex items-center border-1 rounded-md cursor-pointer gap-2 overflow-hidden"
-            href="http://localhost:3000/auth/google"
+            className="flex items-center justify-center border-1 rounded-md cursor-pointer gap-2 overflow-hidden"
+            href={`${process.env.NEXT_PUBLIC_discordRedirect}`}
           >
-            <Image height={20} width={20} src="/imgs/google.png" alt="google" />
-            Continue with Google
+            <Image 
+              width={32} 
+              height={33} 
+              src="/imgs/discord.png" 
+              alt="google" 
+              className="w-auto h-auto"
+            />
+            Continue with Discord
           </Link>
           
         </form>
@@ -141,17 +152,10 @@ export default function LoginForm() {
           <span>Don't have an account?</span>
           <button 
             className="text-blue-600 hover:underline cursor-pointer"
-            // onClick={() => handleAuthMode("register")}
+            onClick={() => setComponent("registerForm")}
           >
             Register
           </button> 
-          {/* <span> or </span>  
-          <button 
-            className="text-blue-600 hover:underline cursor-pointer"
-            onClick={() => handleAuthMode("verify")}
-          >
-            Verify
-          </button> */}
         </div>
       </CardContent>
     </CardModal>
