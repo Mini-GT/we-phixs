@@ -1,19 +1,24 @@
 type User = {
-  id: number
-  name: string
-  age: number
-}
+  id: string;
+  createdAt: string;
+  email: string;
+  status: Status;
+  role: Role;
+  pixes_painted: number;
+};
 
-type DiscordUser = {
-  id: string
-  username: string
-  global_name: string
-  email: string
-  avatar: string
-  verified: boolean
-}
+type Role = "USER" | "ADMIN" | "MODERATOR" | "DEMO";
 
-export type {
-  User,
-  DiscordUser
-}
+type Status = "verified" | "unverified" | "banned" | "pending" | "suspended";
+
+type DiscordFields = {
+  discordId: string;
+  username: string;
+  global_name: string;
+  avatar: string;
+  verified: boolean;
+};
+
+type DiscordUser = User & DiscordFields;
+
+export type { User, DiscordUser, Role, Status };
