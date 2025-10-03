@@ -15,9 +15,9 @@ import { ComponentStateValue } from "@repo/types";
 
 export type LoginRegisterFormProps = {
   setComponent: Dispatch<SetStateAction<ComponentStateValue>>;
-}
+};
 
-export default function LoginForm({setComponent}: LoginRegisterFormProps) {
+export default function LoginForm({ setComponent }: LoginRegisterFormProps) {
   const [loginFormData, setLoginFormData] = useState({
     email: "",
     password: "",
@@ -28,19 +28,19 @@ export default function LoginForm({setComponent}: LoginRegisterFormProps) {
   // const navigation = useNavigation()
   // const { setUser } = useUser()
   // const fetcher = useFetcher()
-  
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    console.log(loginFormData)
+    console.log(loginFormData);
     // setError(null);
     // const res = await authService.login({ ...loginFormData });
     // if(res.status === 400) {
     //   setError(res.message.message.password[0])
     //   setEmailError(res.message.message.email[1] ?? res.message.message.email[0])
-    // } 
+    // }
     // else if(res.status === 401) {
     //   setError(res.message.message)
-    // } 
+    // }
     // else {
     //   const { accessToken, refreshToken, userData } = res
     //   fetcher.submit(
@@ -55,7 +55,7 @@ export default function LoginForm({setComponent}: LoginRegisterFormProps) {
     //   setLoginFormData({ email: "", password: "" });
     //   redirect("/")
     // }
-  };
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLoginFormData({ ...loginFormData, [e.target.name]: e.target.value });
@@ -64,10 +64,10 @@ export default function LoginForm({setComponent}: LoginRegisterFormProps) {
     if (error) {
       const timer = setTimeout(() => {
         setError(null);
-        setEmailError(null)
+        setEmailError(null);
       }, 2000);
-  
-      return () => clearTimeout(timer)
+
+      return () => clearTimeout(timer);
     }
   }, [error]);
 
@@ -112,8 +112,8 @@ export default function LoginForm({setComponent}: LoginRegisterFormProps) {
             {error && <p className="absolute text-[red] text-xs">{error}</p>}
           </div>
           <div className="flex justify-between items-center text-sm mb-4">
-            <Link 
-              href="/password/forgot" 
+            <Link
+              href="/password/forgot"
               className="text-blue-600 hover:underline"
               // onClick={() => setPopupButton(prevState => ({
               //   ...prevState,
@@ -123,10 +123,7 @@ export default function LoginForm({setComponent}: LoginRegisterFormProps) {
               Forgot Password?
             </Link>
           </div>
-          <Button
-            type="submit" 
-            className="w-full mb-4 cursor-pointer"
-          >
+          <Button type="submit" className="w-full mb-4 cursor-pointer">
             {/* {navigation.state === "loading"
             ? "Submitting..."
             : "Submit"} */}
@@ -137,25 +134,24 @@ export default function LoginForm({setComponent}: LoginRegisterFormProps) {
             className="flex items-center justify-center border-1 rounded-md cursor-pointer gap-2 overflow-hidden"
             href={`${process.env.NEXT_PUBLIC_discordRedirect}`}
           >
-            <Image 
-              width={32} 
-              height={33} 
-              src="/imgs/discord.png" 
-              alt="google" 
+            <Image
+              width={32}
+              height={32}
+              src="/imgs/discord.png"
+              alt="google"
               className="w-auto h-auto"
             />
             Continue with Discord
           </Link>
-          
         </form>
         <div className="mt-4 flex justify-center gap-2 text-sm text-nowrap">
           <span>Don't have an account?</span>
-          <button 
+          <button
             className="text-blue-600 hover:underline cursor-pointer"
             onClick={() => setComponent("registerForm")}
           >
             Register
-          </button> 
+          </button>
         </div>
       </CardContent>
     </CardModal>

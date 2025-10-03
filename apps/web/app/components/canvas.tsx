@@ -9,9 +9,9 @@ import ColorPalette from "./colorPalette";
 
 type CanvasProp = {
   children: React.ReactNode;
-}
+};
 
-export default function Canvas({children}: CanvasProp) {
+export default function Canvas({ children }: CanvasProp) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState<boolean>(false);
@@ -22,9 +22,9 @@ export default function Canvas({children}: CanvasProp) {
   const [selected, setSelected] = useState<string | null>(null);
   const [totalPaints, setTotalPaints] = useState<number>(50);
   const [countdown, setCountdown] = useState<number>(30);
-  const [shouldCountDown, setShouldCountDown] = useState<boolean>(false)
-  const [isOpen, setIsOpen] = useState<boolean>(false)
-  const sounds = useAppSounds()
+  const [shouldCountDown, setShouldCountDown] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const sounds = useAppSounds();
 
   const cellSize = 10;
   const gridSize = 300;
@@ -54,8 +54,8 @@ export default function Canvas({children}: CanvasProp) {
     // draw grid
     // ctx.strokeStyle = "white";
     // ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
-    ctx.fillStyle = "white"
-    ctx.fillRect(0 , 0, gridSize * cellSize, gridSize * cellSize)
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, gridSize * cellSize, gridSize * cellSize);
     // for (let x = 0; x <= gridSize; x++) {
     //   ctx.beginPath();
     //   ctx.moveTo(x * cellSize, 0);
@@ -70,7 +70,7 @@ export default function Canvas({children}: CanvasProp) {
     // }
 
     // draw filled cells
-    filledCells.forEach(cell => {
+    filledCells.forEach((cell) => {
       ctx.fillStyle = cell.color || "";
       ctx.fillRect(cell.x * cellSize, cell.y * cellSize, cellSize, cellSize);
     });
@@ -84,7 +84,7 @@ export default function Canvas({children}: CanvasProp) {
     if (!canvas) return;
 
     const handleClick = (e: MouseEvent) => {
-      if(isDragging || !totalPaints || !selected) return;
+      if (isDragging || !totalPaints || !selected) return;
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
@@ -103,12 +103,12 @@ export default function Canvas({children}: CanvasProp) {
       // console.log(`Clicked cell: (${cellX}, ${cellY})`);
 
       // check bounds
-      if(cellX < 0 || cellY < 0 || cellX >= gridSize || cellY >= gridSize) return;
+      if (cellX < 0 || cellY < 0 || cellX >= gridSize || cellY >= gridSize) return;
 
-      // store in state 
-      setFilledCells(prev => {
+      // store in state
+      setFilledCells((prev) => {
         // overwrite if its filled with color instead of placing it on top
-        const existingIndex = prev.findIndex(c => c.x === cellX && c.y === cellY);
+        const existingIndex = prev.findIndex((c) => c.x === cellX && c.y === cellY);
 
         if (existingIndex !== -1) {
           const updated = [...prev];
@@ -116,88 +116,88 @@ export default function Canvas({children}: CanvasProp) {
           updated[existingIndex] = {
             x: existingCell.x,
             y: existingCell.y,
-            color: selected
+            color: selected,
           };
           return updated;
         }
 
         return [...prev, { x: cellX, y: cellY, color: selected }];
       });
-      setTotalPaints(prev => prev - 1)
+      setTotalPaints((prev) => prev - 1);
     };
 
     canvas.addEventListener("click", handleClick);
     return () => canvas.removeEventListener("click", handleClick);
   }, [panOffset, scale, isDragging, selected, totalPaints]);
-  
+
   // start countdown (we are separating this to stop the countdown from freezing the timer whenever user clicks)
   useEffect(() => {
-    totalPaints < 50 ? setShouldCountDown(true) : setShouldCountDown(false)
-  }, [totalPaints])
+    totalPaints < 50 ? setShouldCountDown(true) : setShouldCountDown(false);
+  }, [totalPaints]);
 
   // refill paints if its less than 50 every 30 secs
   useEffect(() => {
-    if(!shouldCountDown) return
+    if (!shouldCountDown) return;
 
     let timer: NodeJS.Timeout;
-      timer = setInterval(() => {
-        setCountdown(prev => {
-          if (prev <= 1) {
-            setTotalPaints(current => current < 50 ? current + 1 : current);
-            sounds.playSuccess()
-            return 30; // reset countdown
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    
+    timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          setTotalPaints((current) => (current < 50 ? current + 1 : current));
+          sounds.playSuccess();
+          return 30; // reset countdown
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
     return () => clearInterval(timer);
   }, [shouldCountDown]);
 
   // wheel pan/zoom
   useEffect(() => {
-  const canvas = canvasRef.current;
-  if (!canvas) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-  const handleWheel = (event: WheelEvent) => {
-    event.preventDefault();
-    
-    const rect = canvas.getBoundingClientRect();
-    const centerX = event.clientX - rect.left;
-    const centerY = event.clientY - rect.top;
-    
-    const zoomIntensity = 0.001;
-    const delta = event.deltaY * -zoomIntensity;
-    
-    setScale(prevScale => {
-      let newScale = prevScale + delta;
-      if (newScale < 0.2) newScale = 0.2;
-      if (newScale > 5) newScale = 5;
-      
-      // calculate world coordinates under the mouse BEFORE scaling
-      const scaleWidth = canvas.width * prevScale;
-      const scaleHeight = canvas.height * prevScale;
-      const scaleOffSetX = (scaleWidth - canvas.width) / 2;
-      const scaleOffSetY = (scaleHeight - canvas.height) / 2;
-      
-      const worldX = (centerX + scaleOffSetX - panOffset.x * prevScale) / prevScale;
-      const worldY = (centerY + scaleOffSetY - panOffset.y * prevScale) / prevScale;
-      
-      // calculate new offsets after scaling
-      const newScaleWidth = canvas.width * newScale;
-      const newScaleHeight = canvas.height * newScale;
-      const newScaleOffSetX = (newScaleWidth - canvas.width) / 2;
-      const newScaleOffSetY = (newScaleHeight - canvas.height) / 2;
-      
-      // adjust pan offset to keep the world point under the mouse
-      const newPanX = (centerX + newScaleOffSetX - worldX * newScale) / newScale;
-      const newPanY = (centerY + newScaleOffSetY - worldY * newScale) / newScale;
-      
-      setPanOffset({ x: newPanX, y: newPanY });
-      
-      return newScale;
-    });
-  };
+    const handleWheel = (event: WheelEvent) => {
+      event.preventDefault();
+
+      const rect = canvas.getBoundingClientRect();
+      const centerX = event.clientX - rect.left;
+      const centerY = event.clientY - rect.top;
+
+      const zoomIntensity = 0.001;
+      const delta = event.deltaY * -zoomIntensity;
+
+      setScale((prevScale) => {
+        let newScale = prevScale + delta;
+        if (newScale < 0.2) newScale = 0.2;
+        if (newScale > 5) newScale = 5;
+
+        // calculate world coordinates under the mouse BEFORE scaling
+        const scaleWidth = canvas.width * prevScale;
+        const scaleHeight = canvas.height * prevScale;
+        const scaleOffSetX = (scaleWidth - canvas.width) / 2;
+        const scaleOffSetY = (scaleHeight - canvas.height) / 2;
+
+        const worldX = (centerX + scaleOffSetX - panOffset.x * prevScale) / prevScale;
+        const worldY = (centerY + scaleOffSetY - panOffset.y * prevScale) / prevScale;
+
+        // calculate new offsets after scaling
+        const newScaleWidth = canvas.width * newScale;
+        const newScaleHeight = canvas.height * newScale;
+        const newScaleOffSetX = (newScaleWidth - canvas.width) / 2;
+        const newScaleOffSetY = (newScaleHeight - canvas.height) / 2;
+
+        // adjust pan offset to keep the world point under the mouse
+        const newPanX = (centerX + newScaleOffSetX - worldX * newScale) / newScale;
+        const newPanY = (centerY + newScaleOffSetY - worldY * newScale) / newScale;
+
+        setPanOffset({ x: newPanX, y: newPanY });
+
+        return newScale;
+      });
+    };
 
     canvas.addEventListener("wheel", handleWheel, { passive: false });
     return () => canvas.removeEventListener("wheel", handleWheel);
@@ -223,14 +223,14 @@ export default function Canvas({children}: CanvasProp) {
 
   // set drag to false so the cursor gets change
   useEffect(() => {
-    if(!isPanning) setIsDragging(false)
-  }, [isPanning])
+    if (!isPanning) setIsDragging(false);
+  }, [isPanning]);
 
   // mouse drag panning
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsPanning(true);
     setIsDragging(false);
-    setLastMouse({ x: e.clientX, y: e.clientY});
+    setLastMouse({ x: e.clientX, y: e.clientY });
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -238,11 +238,11 @@ export default function Canvas({children}: CanvasProp) {
     const dx = e.clientX - lastMouse.x;
     const dy = e.clientY - lastMouse.y;
 
-    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) { 
+    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
       setIsDragging(true);
     }
 
-    setPanOffset(prev => ({
+    setPanOffset((prev) => ({
       x: prev.x + dx,
       y: prev.y + dy,
     }));
@@ -260,42 +260,42 @@ export default function Canvas({children}: CanvasProp) {
 
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
-    
-    setScale(prevScale => {
+
+    setScale((prevScale) => {
       let newScale = prevScale + zoomDelta;
       if (newScale < 0.2) newScale = 0.2;
       if (newScale > 5) newScale = 5;
-      
+
       const scaleWidth = canvas.width * prevScale;
       const scaleHeight = canvas.height * prevScale;
       const scaleOffSetX = (scaleWidth - canvas.width) / 2;
       const scaleOffSetY = (scaleHeight - canvas.height) / 2;
-      
+
       const worldX = (centerX + scaleOffSetX - panOffset.x * prevScale) / prevScale;
       const worldY = (centerY + scaleOffSetY - panOffset.y * prevScale) / prevScale;
-      
+
       const newScaleWidth = canvas.width * newScale;
       const newScaleHeight = canvas.height * newScale;
       const newScaleOffSetX = (newScaleWidth - canvas.width) / 2;
       const newScaleOffSetY = (newScaleHeight - canvas.height) / 2;
-      
+
       const newPanX = (centerX + newScaleOffSetX - worldX * newScale) / newScale;
       const newPanY = (centerY + newScaleOffSetY - worldY * newScale) / newScale;
-      
+
       setPanOffset({ x: newPanX, y: newPanY });
-      
+
       return newScale;
     });
   };
 
   const paintBtn = () => {
-    setIsOpen(prev => !prev)
-    isOpen ? sounds.playPnlExpand() : sounds.playPnlCollapse()
-  }
+    setIsOpen((prev) => !prev);
+    isOpen ? sounds.playPnlExpand() : sounds.playPnlCollapse();
+  };
 
   return (
     <div>
-      <div className="absolute flex flex-col gap-2 m-2 right-0">
+      <div className="absolute flex flex-col gap-2 m-4 right-0">
         {children}
         <div className="flex flex-col gap-2 items-end">
           {/* <IconButton>
@@ -305,44 +305,41 @@ export default function Canvas({children}: CanvasProp) {
             <BarChart className="w-5 h-5 text-gray-600" />
           </IconButton>
 
-          <IconButton
-            onClick={() => zoomToCenter(-0.1)}
-          >
-            <ZoomOutIcon className="text-gray-500" />
+          <IconButton onClick={() => zoomToCenter(0.1)}>
+            <ZoomInIcon className="text-gray-500" />
           </IconButton>
 
-          <IconButton
-            onClick={() => zoomToCenter(0.1)}
-          >
-            <ZoomInIcon className="text-gray-500" />
+          <IconButton onClick={() => zoomToCenter(-0.1)}>
+            <ZoomOutIcon className="text-gray-500" />
           </IconButton>
         </div>
       </div>
 
       <div className="absolute flex flex-col items-center justify-center w-full bottom-0">
-        <ColorPalette 
+        <ColorPalette
           countdown={countdown}
           totalPaints={totalPaints}
-          selected={selected} 
-          setSelected={setSelected} 
+          selected={selected}
+          setSelected={setSelected}
           isOpen={isOpen}
           paintBtn={paintBtn}
         />
-        {!isOpen && <PrimaryButton 
-          className="text-2xl py-4 px-7 flex max-w-fit bottom-0 mb-4 items-center gap-2"
-          onClick={paintBtn}
-        >
-          <Brush size={20} fill="white"/>
-          <div className="flex items-center gap-1">
-            Paint <span>{totalPaints}</span>/50 
-            {totalPaints < 50 && <span className="text-sm">{`(00:${countdown})`}</span>}
-          </div>
-        </PrimaryButton>
-        }
+        {!isOpen && (
+          <PrimaryButton
+            className="text-2xl py-4 px-7 flex max-w-fit bottom-0 mb-4 items-center gap-2"
+            onClick={paintBtn}
+          >
+            <Brush size={20} fill="white" />
+            <div className="flex items-center gap-1">
+              Paint <span>{totalPaints}</span>/50
+              {totalPaints < 50 && <span className="text-sm">{`(00:${countdown})`}</span>}
+            </div>
+          </PrimaryButton>
+        )}
       </div>
-      <canvas 
-        ref={canvasRef} 
-        className={`bg-[#F5F2EE] border w-full h-screen square-cursor ${isDragging ? "dragging" : ""}`} 
+      <canvas
+        ref={canvasRef}
+        className={`bg-[#F5F2EE] border w-full h-screen square-cursor ${isDragging ? "dragging" : ""}`}
         onMouseMove={handleMouseMove}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}

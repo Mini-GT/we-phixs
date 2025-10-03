@@ -1,32 +1,28 @@
-"use client"
+"use client";
 
 import { ContextProviderProps } from "@/types/context";
 import { ComponentStateValue } from "@repo/types";
 import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
 
 type ComponentContextType = {
-  component: ComponentStateValue
-  setComponent: Dispatch<SetStateAction<ComponentStateValue>>
-}
+  component: ComponentStateValue;
+  setComponent: Dispatch<SetStateAction<ComponentStateValue>>;
+};
 
-export const ComponentContext = createContext<ComponentContextType | undefined>(undefined)
+export const ComponentContext = createContext<ComponentContextType | undefined>(undefined);
 
 export function ComponentProvider({ children }: ContextProviderProps) {
-  const [component, setComponent] = useState<ComponentStateValue>(null)
-  
-  return (
-    <ComponentContext value={{ component, setComponent }}>
-      {children}
-    </ComponentContext>
-  );
+  const [component, setComponent] = useState<ComponentStateValue>("loginForm");
+
+  return <ComponentContext value={{ component, setComponent }}>{children}</ComponentContext>;
 }
 
 export function useComponent() {
   const context = useContext(ComponentContext);
 
   if (context === undefined) {
-    throw new Error('useComponent must be used within CurrentItemsProvider');
+    throw new Error("useComponent must be used within CurrentItemsProvider");
   }
-  
+
   return context;
 }

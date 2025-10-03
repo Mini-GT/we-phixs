@@ -6,7 +6,7 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { LoginRegisterFormProps } from "./loginForm";
-import { registerUser } from "api/auth";
+import { registerUser } from "api/auth.service";
 import CardModal from "../cardModal";
 
 export default function RegisterForm({ setComponent }: LoginRegisterFormProps) {
