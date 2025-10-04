@@ -6,6 +6,7 @@ import { BarChart, Brush, ZoomInIcon, ZoomOutIcon } from "lucide-react";
 import { Cell } from "@repo/types";
 import { useAppSounds } from "@/hooks/useSounds";
 import ColorPalette from "./colorPalette";
+import { useWindowSize } from "@react-hook/window-size";
 
 type CanvasProp = {
   children: React.ReactNode;
@@ -25,6 +26,7 @@ export default function Canvas({ children }: CanvasProp) {
   const [shouldCountDown, setShouldCountDown] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const sounds = useAppSounds();
+  const [width, height] = useWindowSize();
 
   const cellSize = 10;
   const gridSize = 300;
@@ -36,8 +38,8 @@ export default function Canvas({ children }: CanvasProp) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -76,7 +78,7 @@ export default function Canvas({ children }: CanvasProp) {
     });
 
     ctx.restore();
-  }, [panOffset, scale, filledCells]);
+  }, [panOffset, scale, filledCells, width, height]);
 
   // handle clicks -> add cell
   useEffect(() => {
@@ -315,7 +317,7 @@ export default function Canvas({ children }: CanvasProp) {
         </div>
       </div>
 
-      <div className="absolute flex flex-col items-center justify-center w-full bottom-0">
+      <div className="absolute flex flex-col left-1/2 right-1/2 items-center justify-center bottom-0">
         <ColorPalette
           countdown={countdown}
           totalPaints={totalPaints}
