@@ -1,21 +1,24 @@
 "use client";
 
 import { useToggle } from "@/hooks/useToggle";
-import { DiscordUser, queryKeysType } from "@repo/types";
+import { DiscordUser, queryKeysType, User } from "@repo/types";
 import { useQuery } from "@tanstack/react-query";
-import { logoutUser } from "api/auth.service";
 import { getMe } from "api/user.service";
 import { Paintbrush } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useRef } from "react";
 import IconButton from "./ui/iconButton";
+import LogoutBtn from "./logoutBtn";
+import { useSelectedContent } from "@/context/selectedContent.context";
+import { useUser } from "@/context/user.context";
 
 type AvatarProps = {
   userId: string | null;
 };
 
 export default function Avatar({ userId }: AvatarProps) {
+  const { setUser } = useUser();
+  const { setSelectedContent } = useSelectedContent();
   const { isOpen, toggle, close } = useToggle();
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -43,6 +46,10 @@ export default function Avatar({ userId }: AvatarProps) {
 
   const { avatar, discordId, global_name, username, email, pixes_painted } =
     data.user as DiscordUser;
+
+  useEffect(() => {
+    setUser(data.user);
+  }, [data.user]);
 
   return (
     <div ref={menuRef}>
@@ -135,11 +142,15 @@ export default function Avatar({ userId }: AvatarProps) {
           <IconButton className="w-full hover:scale-97">
             <div
               className="text-left px-4 py-2 rounded-full w-full font-semibold hover:bg-gray-700 text-red-400 cursor-pointer "
-              onClick={logoutUser}
+              onClick={() => {
+                setSelectedContent("profileForm");
+                close();
+              }}
             >
-              Logout
+              Profile
             </div>
           </IconButton>
+          <LogoutBtn />
         </div>
       </div>
     </div>
