@@ -5,6 +5,7 @@ type User = {
   status: Status;
   role: Role;
   pixes_painted: number;
+  profileImage: string;
 };
 
 type Role = "USER" | "ADMIN" | "MODERATOR" | "DEMO";
