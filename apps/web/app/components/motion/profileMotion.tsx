@@ -4,8 +4,9 @@ import { UserRound, X } from "lucide-react";
 import IconButton from "../ui/iconButton";
 import ProfileForm from "../form/profileForm";
 import { useSelectedContent } from "@/context/selectedContent.context";
+import { type RefObject } from "react";
 
-export default function ProfileMotion() {
+export default function ProfileMotion({ cardRef }: { cardRef: RefObject<HTMLDivElement | null> }) {
   const { setSelectedContent } = useSelectedContent();
 
   return (
@@ -16,7 +17,7 @@ export default function ProfileMotion() {
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.3 }}
     >
-      <Card className={`relative w-full max-w-3xl p-6 bg-white rounded-4xl gap-2`}>
+      <Card ref={cardRef} className={`relative w-full max-w-3xl p-6 bg-white rounded-4xl gap-2`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <div className="text-xl sm:text-2xl font-bold text-gray-800 flex items-center">
