@@ -2,21 +2,38 @@
 
 import LoginForm from "@/components/form/loginForm";
 import RegisterForm from "@/components/form/registerForm";
+import PixelLoadingScreen from "@/components/pixelLoadingScreen";
 import { useComponent } from "@/context/component.context";
 import { redirect } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function Page() {
   const { component, setComponent } = useComponent();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    const login = document.cookie
+    const loginToken = document.cookie
       .split("; ")
       .find((row) => row.startsWith("hasLoginToken="))
       ?.split("=")[1];
 
-    if (login) redirect("/");
+    let timer: NodeJS.Timeout | undefined;
+
+    if (loginToken) {
+      setIsLoading(true);
+      timer = setTimeout(() => {
+        redirect("/");
+      }, 3000);
+    }
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
   }, []);
+
+  if (isLoading) {
+    return <PixelLoadingScreen />;
+  }
 
   return (
     <>
