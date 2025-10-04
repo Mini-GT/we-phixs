@@ -12,7 +12,7 @@ export default function Page() {
   useEffect(() => {
     const login = document.cookie
       .split("; ")
-      .find((row) => row.startsWith("isLogin="))
+      .find((row) => row.startsWith("hasLoginToken="))
       ?.split("=")[1];
 
     if (login) redirect("/");

@@ -10,8 +10,7 @@ import Avatar from "./avatar";
 const jwtsecret = process.env.jwtsecretKey;
 
 export default async function User() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+  const token = (await cookies()).get("loginToken")?.value;
   const queryClient = getQueryClient();
   let userId: string | null = null;
 

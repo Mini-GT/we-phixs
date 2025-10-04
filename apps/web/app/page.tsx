@@ -2,13 +2,15 @@ import { cookies } from "next/headers";
 import Canvas from "./components/canvas";
 import Login from "./components/loginBtn";
 import User from "./components/user";
+import CardContent from "./components/cardContent";
 
 export default async function Home() {
-  const token = (await cookies()).get("token")?.value;
+  const hasLoginToken = (await cookies()).get("hasLoginToken")?.value;
 
   return (
     <div className="flex flex-col items-center border-black w-full">
-      <Canvas>{!token ? <Login /> : <User />}</Canvas>
+      <Canvas>{!hasLoginToken ? <Login /> : <User />}</Canvas>
+      <CardContent />
     </div>
   );
 }

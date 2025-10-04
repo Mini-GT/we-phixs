@@ -28,8 +28,8 @@ export async function registerUser(data: RegisterFormType) {
 
 export async function logoutUser() {
   try {
-    (await cookies()).delete("token");
-    (await cookies()).delete("isLogin");
+    (await cookies()).delete("loginToken");
+    (await cookies()).delete("hasLoginToken");
   } catch (err: any) {
     return { error: err.message };
   }
