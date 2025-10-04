@@ -3,6 +3,9 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { ComponentProvider } from "./context/component.context";
 import TanstackProvider from "./components/providers/tanstackProvider";
+import { Suspense } from "react";
+import { SelectedContentProvider } from "./context/selectedContent.context";
+import { UserProvider } from "./context/user.context";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -18,7 +21,6 @@ export const metadata: Metadata = {
   description: "A collaborative pixel art that turns your imagination into pixels",
 };
 
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -27,11 +29,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <TanstackProvider>
-          <ComponentProvider>
-            {children}
-          </ComponentProvider>
-        </TanstackProvider>
+        <Suspense fallback={<div className="w-screen h-screen bg-amber-300">loading...</div>}>
+          <TanstackProvider>
+            <ComponentProvider>
+              <UserProvider>
+                <SelectedContentProvider>{children}</SelectedContentProvider>
+              </UserProvider>
+            </ComponentProvider>
+          </TanstackProvider>
+        </Suspense>
       </body>
     </html>
   );
