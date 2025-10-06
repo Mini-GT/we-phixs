@@ -4,7 +4,7 @@ import { useToggle } from "@/hooks/useToggle";
 import { DiscordUser, queryKeysType, User } from "@repo/types";
 import { useQuery } from "@tanstack/react-query";
 import { getMe } from "api/user.service";
-import { Paintbrush } from "lucide-react";
+import { Paintbrush, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef } from "react";
 import IconButton from "./ui/iconButton";
@@ -38,7 +38,7 @@ export default function Avatar({ userId }: AvatarProps) {
     };
   }, [isOpen]);
 
-  const { data } = useQuery({
+  const { data, error } = useQuery({
     queryKey: queryKeysType.me(userId!),
     queryFn: () => getMe(userId!),
     enabled: !!userId,
@@ -72,17 +72,26 @@ export default function Avatar({ userId }: AvatarProps) {
       </div>
 
       <div
-        className={`absolute right-0 mt-1 w-sm bg-white rounded-xl shadow-lg p-4 z-50 transition-all duration-300 ${
+        className={`absolute right-0 mt-1 w-sm bg-white border border-cyan-300 rounded-xl shadow-lg p-4 z-50 transition-all duration-300 ${
           isOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
         }`}
       >
-        <div className="flex items-start gap-2">
+        <div className="relative flex items-start gap-2">
+          <div className="absolute right-0">
+            <IconButton
+              className="top-2 right-2 border-none shadow-none text-gray-600 hover:text-gray-900"
+              aria-label="Close form"
+              onClick={() => close()}
+            >
+              <X size={20} />
+            </IconButton>
+          </div>
           <Image
             width={1024}
             height={1024}
             src={`https://cdn.discordapp.com/avatars/${discordId}/${avatar}?size=1024`}
             alt="User Avatar"
-            className="w-20 mt-1 h-auto rounded-full object-cover border-1 border-gray-600"
+            className="w-20 mt-1 h-auto rounded-full object-cover border border-cyan-700"
             loading="lazy"
           />
           <div className="flex flex-col items-start mb-4">
@@ -139,9 +148,9 @@ export default function Avatar({ userId }: AvatarProps) {
           >
             Settings
           </Link> */}
-          <IconButton className="w-full hover:scale-97">
+          <IconButton className="w-full border-none hover:scale-97 ">
             <div
-              className="text-left px-4 py-2 rounded-full w-full font-semibold hover:bg-gray-700 text-red-400 cursor-pointer "
+              className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-2 px-4 rounded-full transition-all shadow-lg hover:shadow-blue-500/30 cursor-pointer"
               onClick={() => {
                 setSelectedContent("profileForm");
                 close();
