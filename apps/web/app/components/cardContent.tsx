@@ -4,6 +4,7 @@ import { useSelectedContent } from "@/context/selectedContent.context";
 import { AnimatePresence } from "framer-motion";
 import ProfileMotion from "./motion/profileMotion";
 import { useEffect, useRef } from "react";
+import LeaderboardMotion from "./motion/leaderboardMotion";
 
 export default function CardContent() {
   const { selectedContent, setSelectedContent } = useSelectedContent();
@@ -29,6 +30,7 @@ export default function CardContent() {
   return (
     <AnimatePresence>
       {selectedContent === "profileForm" && <ProfileMotion cardRef={cardRef} />}
+      {selectedContent === "leaderboard" && <LeaderboardMotion cardRef={cardRef} />}
     </AnimatePresence>
   );
 }

@@ -7,6 +7,8 @@ import { Cell } from "@repo/types";
 import { useAppSounds } from "@/hooks/useSounds";
 import ColorPalette from "./colorPalette";
 import { useWindowSize } from "@react-hook/window-size";
+import { useSelectedContent } from "@/context/selectedContent.context";
+import Image from "next/image";
 
 type CanvasProp = {
   children: React.ReactNode;
@@ -27,6 +29,7 @@ export default function Canvas({ children }: CanvasProp) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const sounds = useAppSounds();
   const [width, height] = useWindowSize();
+  const { setSelectedContent } = useSelectedContent();
 
   const cellSize = 10;
   const gridSize = 300;
@@ -303,8 +306,8 @@ export default function Canvas({ children }: CanvasProp) {
           {/* <IconButton>
             <Search className="w-5 h-5 text-gray-600" />
           </IconButton> */}
-          <IconButton>
-            <BarChart className="w-5 h-5 text-gray-600" />
+          <IconButton onClick={() => setSelectedContent("leaderboard")}>
+            <Image width={24} height={24} src="/leaderboard.svg" alt="Leaderboard" />
           </IconButton>
 
           <IconButton onClick={() => zoomToCenter(0.1)}>
