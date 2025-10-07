@@ -1,7 +1,7 @@
 "use client";
 
 import { useToggle } from "@/hooks/useToggle";
-import { DiscordUser, queryKeysType, User } from "@repo/types";
+import { DiscordFields, queryKeysType, User } from "@repo/types";
 import { useQuery } from "@tanstack/react-query";
 import { getMe } from "api/user.service";
 import { Paintbrush, X } from "lucide-react";
@@ -38,18 +38,19 @@ export default function Avatar({ userId }: AvatarProps) {
     };
   }, [isOpen]);
 
-  const { data, error } = useQuery({
+  const { data } = useQuery({
     queryKey: queryKeysType.me(userId!),
     queryFn: () => getMe(userId!),
     enabled: !!userId,
   });
 
-  const { avatar, discordId, global_name, username, email, pixes_painted } =
-    data.user as DiscordUser;
+  const { avatar, discordId, global_name, username } = data.discord as DiscordFields;
+
+  const { email, totalPixelsPlaced } = data as User;
 
   useEffect(() => {
-    setUser(data.user);
-  }, [data.user]);
+    setUser(data);
+  }, [data]);
 
   return (
     <div ref={menuRef}>
@@ -106,7 +107,7 @@ export default function Avatar({ userId }: AvatarProps) {
             <Paintbrush />
             <div className="text-gray-800 text-md font-semibold flex gap-1">
               Pixels painted:
-              <span className="text-blue-500 font-bold">{pixes_painted ?? 0}</span>
+              <span className="text-blue-500 font-bold">{totalPixelsPlaced ?? 0}</span>
             </div>
           </div>
           {/* <ProtectedRoute requiredRoles={["ADMIN", "MODERATOR"]} requiredPermission={PERMISSIONS.VIEW_USERS} >

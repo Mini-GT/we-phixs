@@ -1,18 +1,18 @@
 "use client";
 
 import { ContextProviderProps } from "@/types/context";
-import { DiscordUser } from "@repo/types";
+import { User } from "@repo/types";
 import { createContext, useContext, useState, type Dispatch, type SetStateAction } from "react";
 
 type UserContextType = {
-  user: DiscordUser | null;
-  setUser: Dispatch<SetStateAction<DiscordUser | null>>;
+  user: User | null;
+  setUser: Dispatch<SetStateAction<User | null>>;
 };
 
 export const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: ContextProviderProps) {
-  const [user, setUser] = useState<DiscordUser | null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   return <UserContext value={{ user, setUser }}>{children}</UserContext>;
 }

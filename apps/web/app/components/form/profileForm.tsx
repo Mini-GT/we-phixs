@@ -4,7 +4,7 @@ import { AlertTriangle, Check, Edit2, Lock, UserCheck, UserRound, X } from "luci
 import { AnimatePresence, motion } from "framer-motion";
 import { FormField } from "./formField";
 import { ChangeEvent, useState } from "react";
-import { FieldErrorTypes } from "@repo/types";
+import { FieldErrorTypes, User } from "@repo/types";
 import { useUser } from "@/context/user.context";
 import { toReadableDate } from "@/utils/formatDate";
 import Image from "next/image";
@@ -25,8 +25,8 @@ export default function ProfileForm() {
   if (!user) return <div>Couldn't load user data</div>;
 
   const [formData, setFormData] = useState({
-    name: user.global_name,
-    oldName: user.global_name,
+    name: user.name ?? user.discord?.global_name,
+    oldName: user.name ?? user.discord?.global_name,
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
@@ -43,8 +43,8 @@ export default function ProfileForm() {
 
   const profileImage = () => {
     if (user.profileImage) return user.profileImage;
-    if (user.avatar && user.discordId)
-      return `https://cdn.discordapp.com/avatars/${user.discordId}/${user.avatar}?size=1024`;
+    if (user.discord?.avatar && user.discord?.discordId)
+      return `https://cdn.discordapp.com/avatars/${user.discord?.discordId}/${user.discord?.avatar}?size=1024`;
     return "/userIcon.svg";
   };
 
@@ -76,14 +76,14 @@ export default function ProfileForm() {
         <FormField
           label="YOUR NAME"
           name="name"
-          value={user.global_name}
+          value={user.discord?.global_name}
           onChangeEvent={handleChange}
           labelStyle="block text-slate-600 text-xs font-bold mb-2 uppercase tracking-wide"
           inputStyle={`w-full bg-slate-50 rounded-lg px-4 py-3 text-slate-800 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white ${fieldError.nameError ? "border-2 border-red-400 shake" : "border-slate-200"}`}
         />
 
         {/* Warning */}
-        {!user.discordId ? (
+        {!user.discord?.discordId ? (
           <div className="bg-amber-50 border-l-4 border-amber-500 rounded-lg p-4 flex items-start gap-3">
             <AlertTriangle className="text-amber-600 flex-shrink-0 mt-0.5" size={20} />
             <div className="text-sm">
@@ -114,7 +114,7 @@ export default function ProfileForm() {
           <FormField
             label="DISCORD USERNAME"
             name="discordUsername"
-            value={user.username}
+            value={user.discord?.username}
             onChangeEvent={handleChange}
             labelStyle="block text-slate-600 text-xs font-bold mb-2 uppercase tracking-wide"
             inputStyle={`w-full bg-slate-50 rounded-lg px-4 py-3 text-slate-800 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white ${fieldError.nameError ? "border-2 border-red-400 shake" : "border-slate-200"}`}
