@@ -11,6 +11,7 @@ import IconButton from "./ui/iconButton";
 import LogoutBtn from "./logoutBtn";
 import { useSelectedContent } from "@/context/selectedContent.context";
 import { useUser } from "@/context/user.context";
+import { toast } from "react-toastify";
 
 type AvatarProps = {
   userId: string | null;
@@ -38,17 +39,28 @@ export default function Avatar({ userId }: AvatarProps) {
     };
   }, [isOpen]);
 
-  const { data } = useQuery({
+  const { data } = useQuery<User>({
     queryKey: queryKeysType.me(userId!),
     queryFn: () => getMe(userId!),
     enabled: !!userId,
   });
 
-  const { avatar, discordId, global_name, username } = data.discord as DiscordFields;
+  const { avatar, discordId, global_name, username } = data?.discord as DiscordFields;
 
   const { email, totalPixelsPlaced } = data as User;
 
   useEffect(() => {
+    if (!data) return;
+
+    // say welcome message if first login
+    const loginTimes = Number(localStorage.getItem("loginTimes"));
+
+    if (loginTimes < 2) {
+      toast.success(`Successfully logged in as ${data?.name || data?.discord?.global_name}`);
+      const current = Number(localStorage.getItem("loginTimes")) || 0;
+      localStorage.setItem("loginTimes", String(current + 1));
+    }
+
     setUser(data);
   }, [data]);
 

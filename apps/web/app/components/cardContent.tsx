@@ -31,6 +31,18 @@ export default function CardContent() {
     };
   }, [selectedContent]);
 
+  useEffect(() => {
+    // remove loginTimes to receive fresh login message when user logged in
+    const loginToken = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("hasLoginToken="))
+      ?.split("=")[1];
+
+    if (!loginToken) {
+      localStorage.removeItem("loginTimes");
+    }
+  });
+
   return (
     <AnimatePresence>
       {selectedContent === "profileForm" && <ProfileMotion cardRef={cardRef} />}
