@@ -1,4 +1,10 @@
-type ComponentStateValue = "loginForm" | "registerForm" | null;
-type SelectedContentValue = "profileForm" | "leaderboard" | null;
+import { ReactNode } from "react";
 
-export type { ComponentStateValue, SelectedContentValue };
+type ComponentStateValue = "loginForm" | "registerForm" | null;
+type SelectedContentValue = "profileForm" | "leaderboard" | "adminPanel" | null;
+
+type ChildrenProps = {
+  children: ReactNode;
+};
+
+export type { ComponentStateValue, SelectedContentValue, ChildrenProps };

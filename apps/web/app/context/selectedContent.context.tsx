@@ -1,7 +1,6 @@
 "use client";
 
-import { ContextProviderProps } from "@/types/context";
-import { SelectedContentValue } from "@repo/types";
+import { ChildrenProps, SelectedContentValue } from "@repo/types";
 import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
 
 type SelectedContentContextType = {
@@ -13,7 +12,7 @@ export const SelectedContentContext = createContext<SelectedContentContextType |
   undefined
 );
 
-export function SelectedContentProvider({ children }: ContextProviderProps) {
+export function SelectedContentProvider({ children }: ChildrenProps) {
   const [selectedContent, setSelectedContent] = useState<SelectedContentValue>(null);
 
   return (

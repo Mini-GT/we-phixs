@@ -1,7 +1,6 @@
 "use client";
 
-import { ContextProviderProps } from "@/types/context";
-import { User } from "@repo/types";
+import { ChildrenProps, User } from "@repo/types";
 import { createContext, useContext, useState, type Dispatch, type SetStateAction } from "react";
 
 type UserContextType = {
@@ -11,7 +10,7 @@ type UserContextType = {
 
 export const UserContext = createContext<UserContextType | undefined>(undefined);
 
-export function UserProvider({ children }: ContextProviderProps) {
+export function UserProvider({ children }: ChildrenProps) {
   const [user, setUser] = useState<User | null>(null);
 
   return <UserContext value={{ user, setUser }}>{children}</UserContext>;
