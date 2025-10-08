@@ -1,22 +1,16 @@
-import { motion } from "framer-motion";
 import { Card } from "../ui/card";
 import { UserRound, X } from "lucide-react";
 import IconButton from "../ui/iconButton";
 import ProfileForm from "../form/profileForm";
 import { useSelectedContent } from "@/context/selectedContent.context";
 import { type RefObject } from "react";
+import MotionComponent from "./motion";
 
 export default function ProfileMotion({ cardRef }: { cardRef: RefObject<HTMLDivElement | null> }) {
   const { setSelectedContent } = useSelectedContent();
 
   return (
-    <motion.div
-      className="absolute z-50 flex -inset-2 items-center justify-center backdrop-blur-xs shadow-lg bg-black/5"
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.3 }}
-    >
+    <MotionComponent>
       <Card
         ref={cardRef}
         className={`relative w-[600px] max-w-2xl overflow-y-auto scrollbar-custom p-6 bg-white border-cyan-300 rounded-4xl`}
@@ -39,6 +33,6 @@ export default function ProfileMotion({ cardRef }: { cardRef: RefObject<HTMLDivE
 
         <ProfileForm />
       </Card>
-    </motion.div>
+    </MotionComponent>
   );
 }
