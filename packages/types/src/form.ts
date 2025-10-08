@@ -14,4 +14,6 @@ type FormFieldProps = {
   inputStyle?: string;
 };
 
-export type { FormFieldProps };
+type CreateCanvasFormPath = "name" | "gridSize";
+
+export type { FormFieldProps, CreateCanvasFormPath };

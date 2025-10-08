@@ -5,8 +5,12 @@ import { AnimatePresence } from "framer-motion";
 import ProfileMotion from "./motion/profileMotion";
 import { useEffect, useRef } from "react";
 import LeaderboardMotion from "./motion/leaderboardMotion";
+import AdminPanelMotion from "./motion/adminPanelMotion";
+import { useUser } from "@/context/user.context";
+import CreateCanvasMotion from "./motion/createCanvasMotion";
 
 export default function CardContent() {
+  const { user } = useUser();
   const { selectedContent, setSelectedContent } = useSelectedContent();
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -31,6 +35,12 @@ export default function CardContent() {
     <AnimatePresence>
       {selectedContent === "profileForm" && <ProfileMotion cardRef={cardRef} />}
       {selectedContent === "leaderboard" && <LeaderboardMotion cardRef={cardRef} />}
+      {selectedContent === "adminPanel" && user?.role === "ADMIN" && (
+        <AdminPanelMotion cardRef={cardRef} />
+      )}
+      {selectedContent === "createCanvas" && user?.role === "ADMIN" && (
+        <CreateCanvasMotion cardRef={cardRef} />
+      )}
     </AnimatePresence>
   );
 }
