@@ -2,13 +2,17 @@
 import { useRef, useEffect, useState } from "react";
 import PrimaryButton from "./ui/primaryButton";
 import IconButton from "./ui/iconButton";
-import { BarChart, Brush, ZoomInIcon, ZoomOutIcon } from "lucide-react";
-import { Cell } from "@repo/types";
+import { Brush, FileLock, ZoomInIcon, ZoomOutIcon } from "lucide-react";
+import { CanvasType, Cell, queryKeysType } from "@repo/types";
 import { useAppSounds } from "@/hooks/useSounds";
 import ColorPalette from "./colorPalette";
 import { useWindowSize } from "@react-hook/window-size";
 import { useSelectedContent } from "@/context/selectedContent.context";
 import Image from "next/image";
+import { useUser } from "@/context/user.context";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { getCanvasById, updateCanvasPixel } from "api/canvas.service";
+import { getQueryClient } from "@/getQueryClient";
 
 type CanvasProp = {
   children: React.ReactNode;
@@ -22,7 +26,7 @@ export default function Canvas({ children }: CanvasProp) {
   const [scale, setScale] = useState<number>(1);
   const [filledCells, setFilledCells] = useState<Cell[]>([]);
   const [isDragging, setIsDragging] = useState(false);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [totalPaints, setTotalPaints] = useState<number>(50);
   const [countdown, setCountdown] = useState<number>(30);
   const [shouldCountDown, setShouldCountDown] = useState<boolean>(false);
@@ -30,6 +34,53 @@ export default function Canvas({ children }: CanvasProp) {
   const sounds = useAppSounds();
   const [width, height] = useWindowSize();
   const { setSelectedContent } = useSelectedContent();
+  const { user } = useUser();
+
+  const queryClient = getQueryClient();
+
+  // Optimistic update
+  const mutation = useMutation({
+    mutationFn: updateCanvasPixel,
+    onMutate: async (newPixel) => {
+      // invalidate query
+      await queryClient.cancelQueries({ queryKey: ["canvas", canvasData.id] });
+
+      const prevData = queryClient.getQueryData<any>(["canvas", canvasData.id]);
+      console.log(prevData);
+      queryClient.setQueryData(["canvas", canvasData.id], (old: any) => {
+        if (!old) return old;
+
+        const updatedPixels = old.pixels.some((p: any) => p.x === newPixel.x && p.y === newPixel.y)
+          ? old.pixels.map((p: any) =>
+              p.x === newPixel.x && p.y === newPixel.y
+                ? { ...p, color: newPixel.color, userId: newPixel.userId }
+                : p
+            )
+          : [...old.pixels, newPixel];
+
+        return { ...old, pixels: updatedPixels };
+      });
+
+      return { prevData };
+    },
+
+    // rollback on error: If API fails, cache is restored.
+    onError: (_err, _newPixel, context) => {
+      if (context?.prevData) {
+        queryClient.setQueryData(["canvas", canvasData.id], context.prevData);
+      }
+    },
+
+    // refetch on settle
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["canvas", canvasData.id] });
+    },
+  });
+
+  const { data: canvasData } = useSuspenseQuery<CanvasType>({
+    queryKey: queryKeysType.canvas(1),
+    queryFn: () => getCanvasById(1),
+  });
 
   const cellSize = 10;
   const gridSize = 300;
@@ -75,13 +126,13 @@ export default function Canvas({ children }: CanvasProp) {
     // }
 
     // draw filled cells
-    filledCells.forEach((cell) => {
+    canvasData.pixels.forEach((cell) => {
       ctx.fillStyle = cell.color || "";
       ctx.fillRect(cell.x * cellSize, cell.y * cellSize, cellSize, cellSize);
     });
 
     ctx.restore();
-  }, [panOffset, scale, filledCells, width, height]);
+  }, [panOffset, scale, width, height, canvasData.pixels]);
 
   // handle clicks -> add cell
   useEffect(() => {
@@ -89,7 +140,7 @@ export default function Canvas({ children }: CanvasProp) {
     if (!canvas) return;
 
     const handleClick = (e: MouseEvent) => {
-      if (isDragging || !totalPaints || !selected) return;
+      if (isDragging || !totalPaints || !selectedColor) return;
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
@@ -105,35 +156,46 @@ export default function Canvas({ children }: CanvasProp) {
 
       const cellX = Math.floor(adjustedX / cellSize);
       const cellY = Math.floor(adjustedY / cellSize);
-      // console.log(`Clicked cell: (${cellX}, ${cellY})`);
-
+      console.log(`Clicked cell: (${cellX}, ${cellY})`);
       // check bounds
       if (cellX < 0 || cellY < 0 || cellX >= gridSize || cellY >= gridSize) return;
 
-      // store in state
-      setFilledCells((prev) => {
-        // overwrite if its filled with color instead of placing it on top
-        const existingIndex = prev.findIndex((c) => c.x === cellX && c.y === cellY);
-
-        if (existingIndex !== -1) {
-          const updated = [...prev];
-          const existingCell = updated[existingIndex]!; // non-null assertion, safe because of the check
-          updated[existingIndex] = {
-            x: existingCell.x,
-            y: existingCell.y,
-            color: selected,
-          };
-          return updated;
-        }
-
-        return [...prev, { x: cellX, y: cellY, color: selected }];
+      // API call to update the canvas
+      // updateCanvasPixel({canvasData.id, cellX, cellY, selectedColor, user?.id});
+      mutation.mutate({
+        canvasId: canvasData.id,
+        x: cellX,
+        y: cellY,
+        color: selectedColor,
+        userId: user?.id,
       });
+
+      // store in state
+      // ---- commented as we are using the mutation for optimistic ui instead of using state ----
+      // setFilledCells((prev) => {
+      //   // overwrite if its filled with color instead of placing it on top
+      //   const existingIndex = prev.findIndex((c) => c.x === cellX && c.y === cellY);
+
+      //   if (existingIndex !== -1) {
+      //     const updated = [...prev];
+      //     const existingCell = updated[existingIndex]!; // non-null assertion, safe because of the check
+      //     updated[existingIndex] = {
+      //       x: existingCell.x,
+      //       y: existingCell.y,
+      //       color: selectedColor,
+      //     };
+      //     return updated;
+      //   }
+
+      //   return [...prev, { x: cellX, y: cellY, color: selectedColor }];
+      // });
+
       setTotalPaints((prev) => prev - 1);
     };
 
     canvas.addEventListener("click", handleClick);
     return () => canvas.removeEventListener("click", handleClick);
-  }, [panOffset, scale, isDragging, selected, totalPaints]);
+  }, [panOffset, scale, isDragging, selectedColor, totalPaints]);
 
   // start countdown (we are separating this to stop the countdown from freezing the timer whenever user clicks)
   useEffect(() => {
@@ -310,6 +372,12 @@ export default function Canvas({ children }: CanvasProp) {
             <Image width={24} height={24} src="/leaderboard.svg" alt="Leaderboard" />
           </IconButton>
 
+          {user && user.role === "ADMIN" && (
+            <IconButton onClick={() => setSelectedContent("adminPanel")}>
+              <FileLock />
+            </IconButton>
+          )}
+
           <IconButton onClick={() => zoomToCenter(0.1)}>
             <ZoomInIcon className="text-gray-500" />
           </IconButton>
@@ -324,8 +392,8 @@ export default function Canvas({ children }: CanvasProp) {
         <ColorPalette
           countdown={countdown}
           totalPaints={totalPaints}
-          selected={selected}
-          setSelected={setSelected}
+          selectedColor={selectedColor}
+          setSelectedColor={setSelectedColor}
           isOpen={isOpen}
           paintBtn={paintBtn}
         />

@@ -56,16 +56,16 @@ const colors = [
 
 type ColorPaletteProps = {
   countdown: number;
-  selected: string | null;
-  setSelected: (color: string) => void;
+  selectedColor: string | null;
+  setSelectedColor: (color: string) => void;
   totalPaints: number;
   isOpen: boolean;
   paintBtn: () => void;
 };
 
 export default function ColorPalette({
-  selected,
-  setSelected,
+  selectedColor,
+  setSelectedColor,
   totalPaints,
   countdown,
   isOpen,
@@ -78,10 +78,10 @@ export default function ColorPalette({
       className={`absolute bottom-0 p-4 w-screen bg-white rounded-t-4xl border-2 border-gray-300 transform transition-all duration-300 ease-out ${isOpen ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"}`}
     >
       <div className="flex items-center justify-between">
-        {selected && (
+        {selectedColor && (
           <div className="flex items-center gap-2">
             <span className="text-gray-600 font-bold">Selected: </span>
-            <span className="w-6 h-6 rounded border" style={{ backgroundColor: selected }} />
+            <span className="w-6 h-6 rounded border" style={{ backgroundColor: selectedColor }} />
             {/* <span className="text-sm">{selected}</span> */}
           </div>
         )}
@@ -94,12 +94,12 @@ export default function ColorPalette({
           <button
             key={i}
             onClick={() => {
-              setSelected(color);
+              setSelectedColor(color);
               playBtnSoft();
             }}
             className={`
               w-full h-8 rounded-md border cursor-pointer 
-              ${selected === color ? "border-blue-500 border-3" : "border-gray-300"}
+              ${selectedColor === color ? "border-blue-500 border-3" : "border-gray-300"}
             `}
             style={{ backgroundColor: color }}
           />
