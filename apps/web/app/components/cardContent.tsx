@@ -8,17 +8,23 @@ import LeaderboardMotion from "./motion/leaderboardMotion";
 import AdminPanelMotion from "./motion/adminPanelMotion";
 import { useUser } from "@/context/user.context";
 import CreateCanvasMotion from "./motion/createCanvasMotion";
+import { useTab } from "@/context/tab.context";
 
 export default function CardContent() {
   const { user } = useUser();
   const { selectedContent, setSelectedContent } = useSelectedContent();
+  const { setTab } = useTab();
   const cardRef = useRef<HTMLDivElement>(null);
 
   // close card if user clicks outside the card content
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (cardRef.current && !cardRef.current.contains(event.target as Node)) {
-        setSelectedContent(null);
+        if (selectedContent === "createCanvas") {
+          setSelectedContent("adminPanel");
+        } else {
+          setSelectedContent(null);
+        }
       }
     }
 

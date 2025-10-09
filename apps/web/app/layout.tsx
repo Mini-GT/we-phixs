@@ -6,6 +6,8 @@ import TanstackProvider from "./components/providers/tanstackProvider";
 import { Suspense } from "react";
 import { SelectedContentProvider } from "./context/selectedContent.context";
 import { UserProvider } from "./context/user.context";
+import PixelLoadingScreen from "./components/pixelLoadingScreen";
+import { TabProvider } from "./context/tab.context";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -29,11 +31,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <Suspense fallback={<div className="w-screen h-screen bg-amber-300">loading...</div>}>
+        <Suspense fallback={<>...</>}>
           <TanstackProvider>
             <ComponentProvider>
               <UserProvider>
-                <SelectedContentProvider>{children}</SelectedContentProvider>
+                <TabProvider>
+                  <SelectedContentProvider>{children}</SelectedContentProvider>
+                </TabProvider>
               </UserProvider>
             </ComponentProvider>
           </TanstackProvider>

@@ -4,12 +4,13 @@ import { Presentation, UsersRound } from "lucide-react";
 import { useState } from "react";
 import IconButton from "../ui/iconButton";
 import { useSelectedContent } from "@/context/selectedContent.context";
+import { useTab } from "@/context/tab.context";
+import { TabValue } from "@repo/types";
 
 export default function AdminPanel() {
   const { setSelectedContent } = useSelectedContent();
-  const [tab, setTab] = useState("Users");
-
-  const tabs = ["Users", "Canvas"];
+  const { tab, setTab } = useTab();
+  const tabs: TabValue[] = ["Users", "Canvas"];
 
   return (
     <div className="flex flex-col gap-auto max-w-full h-[70vh] bg-white rounded-2xl">
