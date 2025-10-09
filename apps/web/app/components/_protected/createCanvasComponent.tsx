@@ -8,10 +8,9 @@ import IconButton from "../ui/iconButton";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { useSelectedContent } from "@/context/selectedContent.context";
-import axios from "axios";
 import { validateError } from "@/utils/validate";
 
-export default function CreateCanvasComponent() {
+export default function CreateCanvasField() {
   const { setSelectedContent } = useSelectedContent();
   const [newCanvas, setNewCanvas] = useState<CreateCanvas>({
     name: "",
@@ -32,7 +31,6 @@ export default function CreateCanvasComponent() {
       setSelectedContent(null);
     },
     onError: (err) => {
-      console.error(err);
       validateError(err);
     },
   });
@@ -71,6 +69,7 @@ export default function CreateCanvasComponent() {
       <div className="w-full flex justify-center">
         <IconButton
           type="submit"
+          disabled={mutation.isPending}
           className="w-full text-center max-w-1/2 border-none hover:scale-95 text-white px-3 py-5 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500  cursor-pointer"
         >
           {mutation.isPending ? "Submitting..." : "Submit"}

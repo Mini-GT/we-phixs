@@ -4,7 +4,7 @@ import IconButton from "../ui/iconButton";
 import { useSelectedContent } from "@/context/selectedContent.context";
 import { type RefObject } from "react";
 import MotionComponent from "./motion";
-import CreateCanvasComponent from "../_protected/createCanvasComponent";
+import CreateCanvasField from "../_protected/createCanvasComponent";
 
 export default function CreateCanvasMotion({
   cardRef,
@@ -35,7 +35,7 @@ export default function CreateCanvasMotion({
           </IconButton>
         </div>
 
-        <CreateCanvasComponent />
+        <CreateCanvasField />
       </Card>
     </MotionComponent>
   );
