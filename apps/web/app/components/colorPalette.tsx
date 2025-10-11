@@ -2,6 +2,7 @@ import { Brush, X } from "lucide-react";
 import IconButton from "./ui/iconButton";
 import PrimaryButton from "./ui/primaryButton";
 import { useAppSounds } from "../hooks/useSounds";
+import { maxPaintCharges } from "./canvas";
 
 const colors = [
   "#000000",
@@ -55,19 +56,19 @@ const colors = [
 ];
 
 type ColorPaletteProps = {
-  countdown: number;
+  cooldown: number;
+  paintCharges: number;
   selectedColor: string | null;
   setSelectedColor: (color: string) => void;
-  totalPaints: number;
   isOpen: boolean;
   paintBtn: () => void;
 };
 
 export default function ColorPalette({
+  cooldown,
+  paintCharges,
   selectedColor,
   setSelectedColor,
-  totalPaints,
-  countdown,
   isOpen,
   paintBtn,
 }: ColorPaletteProps) {
@@ -111,8 +112,8 @@ export default function ColorPalette({
       >
         <Brush size={20} fill="white" />
         <div className="flex items-center gap-2">
-          Paint <span>{totalPaints}</span>/50
-          {totalPaints < 50 && <span className="text-sm">{`(00:${countdown})`}</span>}
+          Paint <span>{paintCharges}</span>/30
+          {paintCharges < maxPaintCharges && <span className="text-sm">{`(00:${cooldown})`}</span>}
         </div>
       </PrimaryButton>
     </div>

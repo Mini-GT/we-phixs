@@ -3,7 +3,7 @@ import { useRef, useEffect, useState } from "react";
 import PrimaryButton from "./ui/primaryButton";
 import IconButton from "./ui/iconButton";
 import { Brush, FileLock, ZoomInIcon, ZoomOutIcon } from "lucide-react";
-import { CanvasType, Cell, queryKeysType } from "@repo/types";
+import { CanvasType, Cell, queryKeysType, UpdateCanvasPixelProps, User } from "@repo/types";
 import { useAppSounds } from "@/hooks/useSounds";
 import ColorPalette from "./colorPalette";
 import { useWindowSize } from "@react-hook/window-size";
@@ -13,12 +13,20 @@ import { useUser } from "@/context/user.context";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { getCanvasById, updateCanvasPixel } from "api/canvas.service";
 import { getQueryClient } from "@/getQueryClient";
+import { toast } from "react-toastify";
+import usePaintCharges from "@/hooks/usePaintCharges";
 
 type CanvasProp = {
   children: React.ReactNode;
 };
 
+export const maxPaintCharges = 30;
+export const rechargeTime_sec = 30;
+
 export default function Canvas({ children }: CanvasProp) {
+  const queryClient = getQueryClient();
+
+  const { user } = useUser();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState<boolean>(false);
@@ -27,31 +35,29 @@ export default function Canvas({ children }: CanvasProp) {
   const [filledCells, setFilledCells] = useState<Cell[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
-  const [totalPaints, setTotalPaints] = useState<number>(50);
-  const [countdown, setCountdown] = useState<number>(30);
-  const [shouldCountDown, setShouldCountDown] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const sounds = useAppSounds();
   const [width, height] = useWindowSize();
   const { setSelectedContent } = useSelectedContent();
-  const { user } = useUser();
-
-  const queryClient = getQueryClient();
+  const { paintCharges, setPaintCharges, cooldown } = usePaintCharges();
 
   // Optimistic update
   const mutation = useMutation({
     mutationFn: updateCanvasPixel,
-    onMutate: async (newPixel) => {
-      // invalidate query
+    onMutate: async (newPixel: UpdateCanvasPixelProps) => {
+      // cancel any outgoing refetches for this canvas invalidate query
       await queryClient.cancelQueries({ queryKey: ["canvas", canvasData.id] });
 
-      const prevData = queryClient.getQueryData<any>(["canvas", canvasData.id]);
-      console.log(prevData);
-      queryClient.setQueryData(["canvas", canvasData.id], (old: any) => {
+      // get prev cache data
+      const prevData: CanvasType = queryClient.getQueryData<any>(["canvas", canvasData.id]);
+
+      // set a new cache data for optimistic ui
+      queryClient.setQueryData(["canvas", canvasData.id], (old: CanvasType) => {
         if (!old) return old;
 
-        const updatedPixels = old.pixels.some((p: any) => p.x === newPixel.x && p.y === newPixel.y)
-          ? old.pixels.map((p: any) =>
+        // if we have old pixels in cache data, update the pixel location
+        const updatedPixels = old.pixels.some((p) => p.x === newPixel.x && p.y === newPixel.y)
+          ? old.pixels.map((p) =>
               p.x === newPixel.x && p.y === newPixel.y
                 ? { ...p, color: newPixel.color, userId: newPixel.userId }
                 : p
@@ -61,17 +67,20 @@ export default function Canvas({ children }: CanvasProp) {
         return { ...old, pixels: updatedPixels };
       });
 
+      // return snapshot in case we need rollback
       return { prevData };
     },
 
-    // rollback on error: If API fails, cache is restored.
+    // rollback on error if API fails, cache is restored.
     onError: (_err, _newPixel, context) => {
+      toast.error("No charges left!");
+      console.log(_err);
       if (context?.prevData) {
         queryClient.setQueryData(["canvas", canvasData.id], context.prevData);
       }
     },
 
-    // refetch on settle
+    // refetch on settle (success or failure), always invalidate.
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["canvas", canvasData.id] });
     },
@@ -140,7 +149,11 @@ export default function Canvas({ children }: CanvasProp) {
     if (!canvas) return;
 
     const handleClick = (e: MouseEvent) => {
-      if (isDragging || !totalPaints || !selectedColor) return;
+      if (isDragging || !selectedColor) return;
+      if (!paintCharges) {
+        toast.error("No charges left");
+      }
+
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
@@ -190,36 +203,12 @@ export default function Canvas({ children }: CanvasProp) {
       //   return [...prev, { x: cellX, y: cellY, color: selectedColor }];
       // });
 
-      setTotalPaints((prev) => prev - 1);
+      setPaintCharges((prev) => (prev ? prev - 1 : prev));
     };
 
     canvas.addEventListener("click", handleClick);
     return () => canvas.removeEventListener("click", handleClick);
-  }, [panOffset, scale, isDragging, selectedColor, totalPaints]);
-
-  // start countdown (we are separating this to stop the countdown from freezing the timer whenever user clicks)
-  useEffect(() => {
-    totalPaints < 50 ? setShouldCountDown(true) : setShouldCountDown(false);
-  }, [totalPaints]);
-
-  // refill paints if its less than 50 every 30 secs
-  useEffect(() => {
-    if (!shouldCountDown) return;
-
-    let timer: NodeJS.Timeout;
-    timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          setTotalPaints((current) => (current < 50 ? current + 1 : current));
-          sounds.playSuccess();
-          return 30; // reset countdown
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [shouldCountDown]);
+  }, [panOffset, scale, isDragging, selectedColor, paintCharges]);
 
   // wheel pan/zoom
   useEffect(() => {
@@ -269,24 +258,6 @@ export default function Canvas({ children }: CanvasProp) {
     canvas.addEventListener("wheel", handleWheel, { passive: false });
     return () => canvas.removeEventListener("wheel", handleWheel);
   }, [panOffset]);
-
-  // useEffect(() => {
-  //   const handleWheel = (event: WheelEvent) => {
-  //     event.preventDefault();
-  //     const zoomIntensity = 0.001; // smoother zoom
-  //     const delta = event.deltaY * -zoomIntensity;
-
-  //     setScale(prev => {
-  //       let newScale = prev + delta;
-  //       if (newScale < 0.2) newScale = 0.2; // prevent zoom too small
-  //       if (newScale > 5) newScale = 5;     // prevent infinite zoom
-  //       return newScale;
-  //     });
-  //   };
-
-  //   window.addEventListener("wheel", handleWheel, { passive: false });
-  //   return () => window.removeEventListener("wheel", handleWheel);
-  // }, []);
 
   // set drag to false so the cursor gets change
   useEffect(() => {
@@ -390,8 +361,8 @@ export default function Canvas({ children }: CanvasProp) {
 
       <div className="absolute flex flex-col left-1/2 right-1/2 items-center justify-center bottom-0">
         <ColorPalette
-          countdown={countdown}
-          totalPaints={totalPaints}
+          cooldown={cooldown}
+          paintCharges={paintCharges}
           selectedColor={selectedColor}
           setSelectedColor={setSelectedColor}
           isOpen={isOpen}
@@ -404,8 +375,8 @@ export default function Canvas({ children }: CanvasProp) {
           >
             <Brush size={20} fill="white" />
             <div className="flex items-center gap-1">
-              Paint <span>{totalPaints}</span>/50
-              {totalPaints < 50 && <span className="text-sm">{`(00:${countdown})`}</span>}
+              Paint <span>{paintCharges}</span>/30
+              {paintCharges < 30 && <span className="text-sm">{`(00:${cooldown})`}</span>}
             </div>
           </PrimaryButton>
         )}
