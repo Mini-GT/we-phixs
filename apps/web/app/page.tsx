@@ -3,17 +3,36 @@ import Canvas from "./components/canvas";
 import Login from "./components/loginBtn";
 import User from "./components/user";
 import CardContent from "./components/cardContent";
-import { ToastContainer } from "react-toastify";
+import { Slide, toast, ToastContainer } from "react-toastify";
 import { getCanvasById } from "api/canvas.service";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { queryKeysType } from "@repo/types";
 import { getQueryClient } from "./getQueryClient";
+import { getPaintCharges } from "api/user.service";
+import { isTokenExpired, verifyJwt } from "./utils/jwt";
+import { logoutUser } from "api/auth.service";
 
 export const jwtsecret = process.env.jwtsecretKey;
 
 export default async function Home() {
   const queryClient = getQueryClient();
+
   const hasLoginToken = (await cookies()).get("hasLoginToken")?.value;
+  const loginToken = (await cookies()).get("loginToken")?.value;
+
+  if (loginToken && jwtsecret) {
+    const { id, exp } = verifyJwt(loginToken, jwtsecret) as { id: string; exp: number };
+    const isExpired = isTokenExpired(exp);
+
+    if (isExpired) {
+      await logoutUser();
+    } else {
+      await queryClient.prefetchQuery({
+        queryKey: queryKeysType.paintCharges,
+        queryFn: () => getPaintCharges(id),
+      });
+    }
+  }
 
   await queryClient.prefetchQuery({
     queryKey: queryKeysType.canvas(1),
@@ -22,7 +41,13 @@ export default async function Home() {
 
   return (
     <div className="flex flex-col items-center border-black w-full">
-      <ToastContainer autoClose={3000} pauseOnHover={false} />
+      <ToastContainer
+        autoClose={3000}
+        pauseOnHover={false}
+        position="top-left"
+        transition={Slide}
+        stacked
+      />
       <HydrationBoundary state={dehydrate(queryClient)}>
         <Canvas>{!hasLoginToken ? <Login /> : <User />}</Canvas>
       </HydrationBoundary>
