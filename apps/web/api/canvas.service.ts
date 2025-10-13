@@ -1,4 +1,4 @@
-import { CanvasType, CreateCanvas, UpdateCanvasPixelProps } from "@repo/types";
+import { CreateCanvas, UpdateCanvasPixelProps } from "@repo/types";
 import axios from "axios";
 
 const isServer = typeof window === "undefined";
@@ -8,6 +8,7 @@ const baseURL = isServer
 
 const api = axios.create({
   baseURL,
+  withCredentials: true,
 });
 
 export async function updateCanvasPixel({ canvasId, x, y, color, userId }: UpdateCanvasPixelProps) {
