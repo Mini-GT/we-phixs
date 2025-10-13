@@ -15,15 +15,17 @@ import { getCanvasById, updateCanvasPixel } from "api/canvas.service";
 import { getQueryClient } from "@/getQueryClient";
 import { toast } from "react-toastify";
 import usePaintCharges from "@/hooks/usePaintCharges";
+import { useSound } from "react-sounds";
 
 type CanvasProp = {
   children: React.ReactNode;
+  hasLoginToken: string | undefined;
 };
 
 export const maxPaintCharges = 30;
 export const rechargeTime_sec = 30;
 
-export default function Canvas({ children }: CanvasProp) {
+export default function Canvas({ children, hasLoginToken }: CanvasProp) {
   const queryClient = getQueryClient();
 
   const { user } = useUser();
@@ -36,10 +38,12 @@ export default function Canvas({ children }: CanvasProp) {
   const [isDragging, setIsDragging] = useState(false);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const sounds = useAppSounds();
+  // const sounds = useAppSounds();
   const [width, height] = useWindowSize();
   const { setSelectedContent } = useSelectedContent();
-  const { paintCharges, setPaintCharges, cooldown } = usePaintCharges();
+  const { paintCharges, setPaintCharges, cooldown } = usePaintCharges(hasLoginToken);
+  const { play: playPnlExpand } = useSound("/sounds/panel_expand.mp3");
+  const { play: playPnlCollapse } = useSound("/sounds/panel_collapse.mp3");
 
   // Optimistic update
   const mutation = useMutation({
@@ -328,7 +332,7 @@ export default function Canvas({ children }: CanvasProp) {
 
   const paintBtn = () => {
     setIsOpen((prev) => !prev);
-    isOpen ? sounds.playPnlExpand() : sounds.playPnlCollapse();
+    isOpen ? playPnlExpand() : playPnlCollapse();
   };
 
   return (
@@ -360,15 +364,17 @@ export default function Canvas({ children }: CanvasProp) {
       </div>
 
       <div className="absolute flex flex-col left-1/2 right-1/2 items-center justify-center bottom-0">
-        <ColorPalette
-          cooldown={cooldown}
-          paintCharges={paintCharges}
-          selectedColor={selectedColor}
-          setSelectedColor={setSelectedColor}
-          isOpen={isOpen}
-          paintBtn={paintBtn}
-        />
-        {!isOpen && (
+        {user && (
+          <ColorPalette
+            cooldown={cooldown}
+            paintCharges={paintCharges}
+            selectedColor={selectedColor}
+            setSelectedColor={setSelectedColor}
+            isOpen={isOpen}
+            paintBtn={paintBtn}
+          />
+        )}
+        {!isOpen && user && (
           <PrimaryButton
             className="text-2xl py-4 px-7 flex max-w-fit bottom-0 mb-4 items-center gap-2"
             onClick={paintBtn}
