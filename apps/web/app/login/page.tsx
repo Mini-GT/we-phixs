@@ -4,8 +4,10 @@ import LoginForm from "@/components/form/loginForm";
 import RegisterForm from "@/components/form/registerForm";
 import PixelLoadingScreen from "@/components/pixelLoadingScreen";
 import { useComponent } from "@/context/component.context";
+import { getQueryClient } from "@/getQueryClient";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Slide, ToastContainer } from "react-toastify";
 
 export default function Page() {
   const { component, setComponent } = useComponent();
@@ -18,7 +20,6 @@ export default function Page() {
       ?.split("=")[1];
 
     let timer: NodeJS.Timeout | undefined;
-
     if (loginToken) {
       setIsLoading(true);
       timer = setTimeout(() => {
@@ -37,6 +38,13 @@ export default function Page() {
 
   return (
     <>
+      <ToastContainer
+        autoClose={3000}
+        pauseOnHover={false}
+        position="top-left"
+        transition={Slide}
+        stacked
+      />
       {component === "loginForm" && <LoginForm setComponent={setComponent} />}
       {component === "registerForm" && <RegisterForm setComponent={setComponent} />}
     </>

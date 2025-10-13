@@ -1,15 +1,20 @@
-import { logoutUser } from "api/auth.service";
+import { logoutUser } from "api/logout.service";
 import IconButton from "./ui/iconButton";
 import { toast } from "react-toastify";
 
 export default function LogoutBtn() {
   const handleLogout = async () => {
-    const res = await logoutUser();
+    try {
+      const res = await logoutUser();
 
-    if (typeof res === "string") {
-      toast.info(res);
-    } else if (!res) {
-      toast.error("Couldn't logout");
+      if (res) {
+        toast.info("Logged out");
+      } else if (!res) {
+        toast.error("Couldn't logout");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong, couldn't log out");
     }
   };
 
