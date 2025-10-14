@@ -12,13 +12,14 @@ import LogoutBtn from "./logoutBtn";
 import { useSelectedContent } from "@/context/selectedContent.context";
 import { useUser } from "@/context/user.context";
 import { toast } from "react-toastify";
+import { getProfileImage } from "@/utils/images";
 
 type AvatarProps = {
   userId: string | null;
 };
 
 export default function Avatar({ userId }: AvatarProps) {
-  const { setUser } = useUser();
+  const { user, setUser } = useUser();
   const { setSelectedContent } = useSelectedContent();
   const { isOpen, toggle, close } = useToggle();
   const menuRef = useRef<HTMLDivElement>(null);
@@ -43,9 +44,16 @@ export default function Avatar({ userId }: AvatarProps) {
     queryKey: queryKeysType.me(userId!),
     queryFn: () => getMe(userId!),
     enabled: !!userId,
+    refetchOnWindowFocus: true,
   });
 
-  const { avatar, discordId, global_name, username } = data?.discord as DiscordFields;
+  let discordData: DiscordFields | null;
+
+  if (data?.discord) {
+    discordData = data.discord;
+  } else {
+    discordData = null;
+  }
 
   const { email, totalPixelsPlaced } = data as User;
 
@@ -55,7 +63,7 @@ export default function Avatar({ userId }: AvatarProps) {
     // say welcome message if first login
     const loginTimes = Number(localStorage.getItem("loginTimes"));
 
-    if (loginTimes < 2) {
+    if (loginTimes < 1) {
       toast.success(`Successfully logged in as ${data?.name || data?.discord?.global_name}`);
       const current = Number(localStorage.getItem("loginTimes")) || 0;
       localStorage.setItem("loginTimes", String(current + 1));
@@ -74,12 +82,12 @@ export default function Avatar({ userId }: AvatarProps) {
           aria-haspopup="true"
         >
           <Image
-            width={30}
-            height={30}
-            src={`https://cdn.discordapp.com/avatars/${discordId}/${avatar}`}
+            width={1024}
+            height={1024}
+            src={getProfileImage(user)}
             alt="User Avatar"
             className="w-full h-full rounded-full object-cover border-1 border-gray-600"
-            loading="lazy"
+            priority
           />
         </button>
       </div>
@@ -102,14 +110,16 @@ export default function Avatar({ userId }: AvatarProps) {
           <Image
             width={1024}
             height={1024}
-            src={`https://cdn.discordapp.com/avatars/${discordId}/${avatar}?size=1024`}
+            src={getProfileImage(user)}
             alt="User Avatar"
             className="w-20 mt-1 h-auto rounded-full object-cover border border-cyan-700"
-            loading="lazy"
+            priority
           />
           <div className="flex flex-col items-start mb-4">
-            <p className="text-gray-800 font-bold text-2xl">{global_name}</p>
-            <p className="text-gray-400 font-semibold text-md">{username}</p>
+            <p className="text-gray-800 font-bold text-2xl">
+              {user?.name || discordData?.global_name}
+            </p>
+            <p className="text-gray-400 font-semibold text-md">{discordData?.username}</p>
             <p className="text-gray-400 font-semibold text-md">{email}</p>
           </div>
         </div>
