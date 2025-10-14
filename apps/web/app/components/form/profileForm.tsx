@@ -1,14 +1,15 @@
 "use client";
 
-import { AlertTriangle, Check, Edit2, Lock, UserCheck, UserRound, X } from "lucide-react";
+import { AlertTriangle, Check, Edit2, Lock } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { FormField } from "./formField";
 import { ChangeEvent, useState } from "react";
-import { FieldErrorTypes, User } from "@repo/types";
+import { FieldErrorTypes } from "@repo/types";
 import { useUser } from "@/context/user.context";
 import { toReadableDate } from "@/utils/formatDate";
 import Image from "next/image";
 import Link from "next/link";
+import { getProfileImage } from "@/utils/images";
 
 const defaultFieldErrors = {
   nameError: "",
@@ -41,15 +42,8 @@ export default function ProfileForm() {
     });
   };
 
-  const profileImage = () => {
-    if (user.profileImage) return user.profileImage;
-    if (user.discord?.avatar && user.discord?.discordId)
-      return `https://cdn.discordapp.com/avatars/${user.discord?.discordId}/${user.discord?.avatar}?size=1024`;
-    return "/userIcon.svg";
-  };
-
   return (
-    <div className="h-[650px]">
+    <div>
       {/* Avatar */}
       <div className="flex justify-center mb-6">
         <div className="relative">
@@ -58,9 +52,11 @@ export default function ProfileForm() {
               <Image
                 width={1024}
                 height={1024}
-                src={profileImage()}
+                src={getProfileImage(user)}
                 alt="Avatar"
                 className="w-full h-full"
+                loading="lazy"
+                priority={false}
               />
             </div>
           </div>
@@ -76,7 +72,7 @@ export default function ProfileForm() {
         <FormField
           label="YOUR NAME"
           name="name"
-          value={user.discord?.global_name}
+          value={user.name || user.discord?.global_name}
           onChangeEvent={handleChange}
           labelStyle="block text-slate-600 text-xs font-bold mb-2 uppercase tracking-wide"
           inputStyle={`w-full bg-slate-50 rounded-lg px-4 py-3 text-slate-800 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white ${fieldError.nameError ? "border-2 border-red-400 shake" : "border-slate-200"}`}
@@ -111,14 +107,16 @@ export default function ProfileForm() {
         )}
 
         <div className="mb-6 space-y-2 px-1">
-          <FormField
-            label="DISCORD USERNAME"
-            name="discordUsername"
-            value={user.discord?.username}
-            onChangeEvent={handleChange}
-            labelStyle="block text-slate-600 text-xs font-bold mb-2 uppercase tracking-wide"
-            inputStyle={`w-full bg-slate-50 rounded-lg px-4 py-3 text-slate-800 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white ${fieldError.nameError ? "border-2 border-red-400 shake" : "border-slate-200"}`}
-          />
+          {user.discord?.username && (
+            <FormField
+              label="DISCORD USERNAME"
+              name="discordUsername"
+              value={user.discord?.username}
+              onChangeEvent={handleChange}
+              labelStyle="block text-slate-600 text-xs font-bold mb-2 uppercase tracking-wide"
+              inputStyle={`w-full bg-slate-50 rounded-lg px-4 py-3 text-slate-800 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white ${fieldError.nameError ? "border-2 border-red-400 shake" : "border-slate-200"}`}
+            />
+          )}
           {/* Email */}
           <div className="mb-4 px-1">
             <FormField
@@ -217,7 +215,7 @@ export default function ProfileForm() {
 
         {/* Save Button */}
         <button
-          className={`w-full h-12 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-3 px-4 rounded-lg transition-all shadow-lg hover:shadow-blue-500/30 cursor-pointer ${showPasswordFields && "mb-6"}`}
+          className={`w-full h-12 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-3 px-4 rounded-lg transition-all shadow-lg hover:shadow-blue-500/30 cursor-pointer`}
         >
           Save
         </button>

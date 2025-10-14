@@ -5,15 +5,17 @@ import ProfileForm from "../form/profileForm";
 import { useSelectedContent } from "@/context/selectedContent.context";
 import { type RefObject } from "react";
 import MotionComponent from "./motion";
+import { useUser } from "@/context/user.context";
 
 export default function ProfileMotion({ cardRef }: { cardRef: RefObject<HTMLDivElement | null> }) {
+  const { user } = useUser();
   const { setSelectedContent } = useSelectedContent();
 
   return (
     <MotionComponent>
       <Card
         ref={cardRef}
-        className={`relative w-[600px] max-w-2xl overflow-y-auto scrollbar-custom p-6 bg-white border-cyan-300 rounded-4xl`}
+        className={`relative w-[600px] ${user?.discord?.username ? "max-h-[785px]" : "max-h-[700px]"} overflow-y-auto max-w-2xl scrollbar-custom p-6 bg-white border-cyan-300 rounded-4xl`}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center">
