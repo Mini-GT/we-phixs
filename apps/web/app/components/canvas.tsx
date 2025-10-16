@@ -3,14 +3,14 @@ import { useRef, useEffect, useState } from "react";
 import PrimaryButton from "./ui/primaryButton";
 import IconButton from "./ui/iconButton";
 import { Brush, FileLock, ZoomInIcon, ZoomOutIcon } from "lucide-react";
-import { CanvasType, queryKeysType, UpdateCanvasPixelProps } from "@repo/types";
+import { CanvasType, queryKeysType, ToolType, UpdateCanvasPixelProps } from "@repo/types";
 import ColorPalette from "./colorPalette";
 import { useWindowSize } from "@react-hook/window-size";
 import { useSelectedContent } from "@/context/selectedContent.context";
 import Image from "next/image";
 import { useUser } from "@/context/user.context";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import { getCanvasById, updateCanvasPixel } from "api/canvas.service";
+import { getCanvasById, inspectCanvasCell, updateCanvasPixel } from "api/canvas.service";
 import { getQueryClient } from "@/getQueryClient";
 import { toast } from "react-toastify";
 import usePaintCharges from "@/hooks/usePaintCharges";
@@ -47,6 +47,7 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
   const { paintCharges, setPaintCharges, cooldown } = usePaintCharges(hasLoginToken);
   const { play: playPnlExpand } = useSound("/sounds/panel_expand.mp3");
   const { play: playPnlCollapse } = useSound("/sounds/panel_collapse.mp3");
+  const [tool, setTool] = useState<ToolType["tool"]>("inspect");
   const cellSize = 10;
   const gridSize = 300;
 
@@ -100,6 +101,21 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
     },
   });
 
+  const inspectMutation = useMutation({
+    mutationFn: inspectCanvasCell,
+    onSuccess: (data) => {
+      console.log(data);
+    },
+    onError: (_err) => {
+      console.log(_err);
+      if (axios.isAxiosError(_err)) {
+        const apiError = _err.response?.data.message;
+        console.log(apiError);
+        return;
+      }
+    },
+  });
+
   const { data: canvasData } = useSuspenseQuery<CanvasType>({
     queryKey: queryKeysType.canvas(1),
     queryFn: () => getCanvasById(1),
@@ -132,23 +148,8 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
     ctx.translate(panOffset.x * scale - scaleOffSetX, panOffset.y * scale - scaleOffSetY);
     ctx.scale(scale, scale);
 
-    // draw grid
-    // ctx.strokeStyle = "white";
-    // ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, gridSize * cellSize, gridSize * cellSize);
-    // for (let x = 0; x <= gridSize; x++) {
-    //   ctx.beginPath();
-    //   ctx.moveTo(x * cellSize, 0);
-    //   ctx.lineTo(x * cellSize, gridSize * cellSize);
-    //   ctx.stroke();
-    // }
-    // for (let y = 0; y <= gridSize; y++) {
-    //   ctx.beginPath();
-    //   ctx.moveTo(0, y * cellSize);
-    //   ctx.lineTo(gridSize * cellSize, y * cellSize);
-    //   ctx.stroke();
-    // }
 
     // draw socket filled cells
     filledCells.forEach((cell) => {
@@ -165,13 +166,13 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
     ctx.restore();
   }, [panOffset, scale, width, height, filledCells]);
 
-  // handle clicks -> add cell
+  // handle clicks -> add cell / inspect cell
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const handleClick = (e: MouseEvent) => {
-      if (isDragging || !selectedColor) return;
+      if (isDragging) return;
       if (!paintCharges) {
         toast.error("No charges left");
       }
@@ -195,22 +196,33 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
       // check bounds
       if (cellX < 0 || cellY < 0 || cellX >= gridSize || cellY >= gridSize) return;
 
-      // API call to update the canvas
-      // updateCanvasPixel({canvasData.id, cellX, cellY, selectedColor, user?.id});
-      mutation.mutate({
-        canvasId: canvasData.id,
-        x: cellX,
-        y: cellY,
-        color: selectedColor,
-        userId: user?.id,
-      });
+      // update canvas cell when user clicks
+      if (tool === "paint" && selectedColor) {
+        // API call to update the canvas
+        mutation.mutate({
+          canvasId: canvasData.id,
+          x: cellX,
+          y: cellY,
+          color: selectedColor,
+          userId: user?.id,
+        });
 
-      setPaintCharges((prev) => (prev ? prev - 1 : prev));
+        setPaintCharges((prev) => (prev ? prev - 1 : prev));
+      }
+
+      // inspect a cell
+      if (tool === "inspect") {
+        inspectMutation.mutate({
+          canvasId: 1,
+          x: cellX,
+          y: cellY,
+        });
+      }
     };
 
     canvas.addEventListener("click", handleClick);
     return () => canvas.removeEventListener("click", handleClick);
-  }, [panOffset, scale, isDragging, selectedColor, paintCharges]);
+  }, [panOffset, scale, isDragging, selectedColor, paintCharges, tool]);
 
   // wheel pan/zoom
   useEffect(() => {
@@ -328,9 +340,9 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
     });
   };
 
-  const paintBtn = () => {
-    setIsOpen((prev) => !prev);
-    isOpen ? playPnlExpand() : playPnlCollapse();
+  const paintBtn = (tool: ToolType["tool"]) => {
+    setTool(tool);
+    tool === "paint" ? playPnlExpand() : playPnlCollapse();
   };
 
   return (
@@ -368,19 +380,22 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
             paintCharges={paintCharges}
             selectedColor={selectedColor}
             setSelectedColor={setSelectedColor}
-            isOpen={isOpen}
             paintBtn={paintBtn}
+            tool={tool}
           />
         )}
-        {!isOpen && user && (
+
+        {user && tool === "inspect" && (
           <PrimaryButton
             className="text-2xl py-4 px-7 flex max-w-fit bottom-0 mb-4 items-center gap-2"
-            onClick={paintBtn}
+            onClick={() => paintBtn("paint")}
           >
             <Brush size={20} fill="white" />
             <div className="flex items-center gap-1">
               Paint <span>{paintCharges}</span>/30
-              {paintCharges < 30 && <span className="text-sm">{`(00:${cooldown})`}</span>}
+              {paintCharges < maxPaintCharges && (
+                <span className="text-sm">{`(00:${cooldown})`}</span>
+              )}
             </div>
           </PrimaryButton>
         )}

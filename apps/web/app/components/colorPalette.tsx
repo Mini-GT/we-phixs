@@ -3,6 +3,7 @@ import IconButton from "./ui/iconButton";
 import PrimaryButton from "./ui/primaryButton";
 import { useAppSounds } from "../hooks/useSounds";
 import { maxPaintCharges } from "./canvas";
+import { ToolType } from "@repo/types";
 
 const colors = [
   "#000000",
@@ -60,8 +61,8 @@ type ColorPaletteProps = {
   paintCharges: number;
   selectedColor: string | null;
   setSelectedColor: (color: string) => void;
-  isOpen: boolean;
-  paintBtn: () => void;
+  paintBtn: (tool: ToolType["tool"]) => void;
+  tool: ToolType["tool"];
 };
 
 export default function ColorPalette({
@@ -69,14 +70,14 @@ export default function ColorPalette({
   paintCharges,
   selectedColor,
   setSelectedColor,
-  isOpen,
   paintBtn,
+  tool,
 }: ColorPaletteProps) {
   const { playBtnSoft } = useAppSounds();
 
   return (
     <div
-      className={`absolute bottom-0 p-4 w-screen bg-white rounded-t-4xl border-2 border-gray-300 transform transition-all duration-300 ease-out ${isOpen ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"}`}
+      className={`absolute bottom-0 p-4 w-screen bg-white rounded-t-4xl border-2 border-gray-300 transform transition-all duration-300 ease-out ${tool === "paint" ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"}`}
     >
       <div className="flex items-center justify-between">
         {selectedColor && (
@@ -87,7 +88,7 @@ export default function ColorPalette({
           </div>
         )}
         <IconButton className="text-gray-600 w-1 h-1 ml-auto border border-gray-300">
-          <X className="w-full h-full p-2" onClick={paintBtn} />
+          <X className="w-full h-full p-2" onClick={() => paintBtn("inspect")} />
         </IconButton>
       </div>
       <div className="grid grid-cols-30 mt-3 mb-4 gap-1">
@@ -107,7 +108,7 @@ export default function ColorPalette({
         ))}
       </div>
       <PrimaryButton
-        onClick={paintBtn}
+        onClick={() => paintBtn("inspect")}
         className="text-2xl m-auto py-4 px-7 flex items-center gap-2"
       >
         <Brush size={20} fill="white" />

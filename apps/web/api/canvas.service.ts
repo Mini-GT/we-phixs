@@ -1,4 +1,4 @@
-import { CreateCanvas, UpdateCanvasPixelProps } from "@repo/types";
+import { CreateCanvas, InspectCanvas, UpdateCanvasPixelProps } from "@repo/types";
 import axios from "axios";
 
 const isServer = typeof window === "undefined";
@@ -30,5 +30,13 @@ export async function createCanvas(canvasData: CreateCanvas | undefined) {
 
 export async function getCanvasById(canvasId: number): Promise<any> {
   const res = await api.get(`/${canvasId}`);
+  return res.data;
+}
+
+export async function inspectCanvasCell({ canvasId = 1, x, y }: InspectCanvas) {
+  const res = await api.post(`/inspect/${canvasId}`, {
+    x,
+    y,
+  });
   return res.data;
 }
