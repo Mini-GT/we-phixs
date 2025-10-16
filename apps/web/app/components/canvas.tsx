@@ -3,8 +3,7 @@ import { useRef, useEffect, useState } from "react";
 import PrimaryButton from "./ui/primaryButton";
 import IconButton from "./ui/iconButton";
 import { Brush, FileLock, ZoomInIcon, ZoomOutIcon } from "lucide-react";
-import { CanvasType, Cell, queryKeysType, UpdateCanvasPixelProps, User } from "@repo/types";
-import { useAppSounds } from "@/hooks/useSounds";
+import { CanvasType, queryKeysType, UpdateCanvasPixelProps } from "@repo/types";
 import ColorPalette from "./colorPalette";
 import { useWindowSize } from "@react-hook/window-size";
 import { useSelectedContent } from "@/context/selectedContent.context";
@@ -16,6 +15,8 @@ import { getQueryClient } from "@/getQueryClient";
 import { toast } from "react-toastify";
 import usePaintCharges from "@/hooks/usePaintCharges";
 import { useSound } from "react-sounds";
+import useSocket from "@/hooks/useSocket";
+import axios from "axios";
 
 type CanvasProp = {
   children: React.ReactNode;
@@ -26,6 +27,9 @@ export const maxPaintCharges = 30;
 export const rechargeTime_sec = 30;
 
 export default function Canvas({ children, hasLoginToken }: CanvasProp) {
+  // initialize socket
+  const { filledCells, setFilledCells } = useSocket(hasLoginToken);
+
   const queryClient = getQueryClient();
 
   const { user } = useUser();
@@ -34,16 +38,17 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
   const [isPanning, setIsPanning] = useState<boolean>(false);
   const [lastMouse, setLastMouse] = useState({ x: 0, y: 0 });
   const [scale, setScale] = useState<number>(1);
-  const [filledCells, setFilledCells] = useState<Cell[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  // const sounds = useAppSounds();
+  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const [width, height] = useWindowSize();
   const { setSelectedContent } = useSelectedContent();
   const { paintCharges, setPaintCharges, cooldown } = usePaintCharges(hasLoginToken);
   const { play: playPnlExpand } = useSound("/sounds/panel_expand.mp3");
   const { play: playPnlCollapse } = useSound("/sounds/panel_collapse.mp3");
+  const cellSize = 10;
+  const gridSize = 300;
 
   // Optimistic update
   const mutation = useMutation({
@@ -77,8 +82,13 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
 
     // rollback on error if API fails, cache is restored.
     onError: (_err, _newPixel, context) => {
+      console.error(_err);
+      if (axios.isAxiosError(_err)) {
+        const apiError = _err.response?.data.message;
+        toast.error(apiError ?? "No charges left!");
+        return;
+      }
       toast.error("No charges left!");
-      console.log(_err);
       if (context?.prevData) {
         queryClient.setQueryData(["canvas", canvasData.id], context.prevData);
       }
@@ -95,8 +105,9 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
     queryFn: () => getCanvasById(1),
   });
 
-  const cellSize = 10;
-  const gridSize = 300;
+  useEffect(() => {
+    setFilledCells(canvasData.pixels);
+  }, [canvasData]);
 
   // draw everything
   useEffect(() => {
@@ -105,6 +116,7 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    ctxRef.current = ctx;
     canvas.width = width;
     canvas.height = height;
 
@@ -138,14 +150,20 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
     //   ctx.stroke();
     // }
 
-    // draw filled cells
-    canvasData.pixels.forEach((cell) => {
+    // draw socket filled cells
+    filledCells.forEach((cell) => {
       ctx.fillStyle = cell.color || "";
       ctx.fillRect(cell.x * cellSize, cell.y * cellSize, cellSize, cellSize);
     });
 
+    // draw fetched filled cells
+    // canvasData.pixels.forEach((cell) => {
+    //   ctx.fillStyle = cell.color || "";
+    //   ctx.fillRect(cell.x * cellSize, cell.y * cellSize, cellSize, cellSize);
+    // });
+
     ctx.restore();
-  }, [panOffset, scale, width, height, canvasData.pixels]);
+  }, [panOffset, scale, width, height, filledCells]);
 
   // handle clicks -> add cell
   useEffect(() => {
@@ -186,26 +204,6 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
         color: selectedColor,
         userId: user?.id,
       });
-
-      // store in state
-      // ---- commented as we are using the mutation for optimistic ui instead of using state ----
-      // setFilledCells((prev) => {
-      //   // overwrite if its filled with color instead of placing it on top
-      //   const existingIndex = prev.findIndex((c) => c.x === cellX && c.y === cellY);
-
-      //   if (existingIndex !== -1) {
-      //     const updated = [...prev];
-      //     const existingCell = updated[existingIndex]!; // non-null assertion, safe because of the check
-      //     updated[existingIndex] = {
-      //       x: existingCell.x,
-      //       y: existingCell.y,
-      //       color: selectedColor,
-      //     };
-      //     return updated;
-      //   }
-
-      //   return [...prev, { x: cellX, y: cellY, color: selectedColor }];
-      // });
 
       setPaintCharges((prev) => (prev ? prev - 1 : prev));
     };
