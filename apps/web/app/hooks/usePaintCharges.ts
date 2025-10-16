@@ -4,7 +4,6 @@ import { maxPaintCharges, rechargeTime_sec } from "@/components/canvas";
 import { useUser } from "@/context/user.context";
 import { getCooldownRemaining } from "@/utils/cooldownRemaining";
 import { useEffect, useState } from "react";
-import { useAppSounds } from "./useSounds";
 import { queryKeysType } from "@repo/types";
 import { useQuery } from "@tanstack/react-query";
 import { getPaintCharges } from "api/user.service";
@@ -15,7 +14,7 @@ export default function usePaintCharges(hasLoginToken: string | undefined) {
   const { user } = useUser();
   const queryClient = getQueryClient();
   const [paintCharges, setPaintCharges] = useState<number>(0);
-  const [cooldown, setCooldown] = useState<number>(0);
+  const [cooldown, setCooldown] = useState<number>(30);
   const [shouldCountDown, setShouldCountDown] = useState<boolean>(false);
   const { play: playSuccess, stop } = useSound("/sounds/success.mp3");
 
@@ -24,8 +23,17 @@ export default function usePaintCharges(hasLoginToken: string | undefined) {
     queryFn: () => getPaintCharges(user?.id),
     staleTime: Infinity,
     enabled: !!user?.id,
-    refetchOnWindowFocus: true,
   });
+
+  // refetch when user reopens browser
+  useEffect(() => {
+    const handleFocus = () => {
+      queryClient.invalidateQueries({ queryKey: queryKeysType.paintCharges });
+    };
+
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [queryClient]);
 
   // start countdown (we are separating this to stop the countdown from freezing the timer whenever user clicks)
   useEffect(() => {
@@ -73,7 +81,7 @@ export default function usePaintCharges(hasLoginToken: string | undefined) {
       clearInterval(timer);
       stop();
     };
-  }, [shouldCountDown, hasLoginToken]);
+  }, [shouldCountDown]);
 
   return { paintCharges, setPaintCharges, cooldown, setCooldown };
 }
