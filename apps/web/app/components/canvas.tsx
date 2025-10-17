@@ -17,6 +17,9 @@ import usePaintCharges from "@/hooks/usePaintCharges";
 import { useSound } from "react-sounds";
 import useSocket from "@/hooks/useSocket";
 import axios from "axios";
+import useInspect from "@/hooks/useInspect";
+import drawCross from "@/utils/drawcross";
+import InspectCard from "./inspectCard";
 
 type CanvasProp = {
   children: React.ReactNode;
@@ -40,80 +43,79 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
   const [scale, setScale] = useState<number>(1);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
-  const [isOpen, setIsOpen] = useState<boolean>(false);
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const [width, height] = useWindowSize();
   const { setSelectedContent } = useSelectedContent();
   const { paintCharges, setPaintCharges, cooldown } = usePaintCharges(hasLoginToken);
   const { play: playPnlExpand } = useSound("/sounds/panel_expand.mp3");
   const { play: playPnlCollapse } = useSound("/sounds/panel_collapse.mp3");
+  const { play: playPop } = useSound("/sounds/pop.mp3", {
+    volume: 0.3,
+  });
   const [tool, setTool] = useState<ToolType["tool"]>("inspect");
+  const { inspectMutation, inspectedCellData, setInspectedCellData } = useInspect();
   const cellSize = 10;
   const gridSize = 300;
 
   // Optimistic update
   const mutation = useMutation({
     mutationFn: updateCanvasPixel,
-    onMutate: async (newPixel: UpdateCanvasPixelProps) => {
-      // cancel any outgoing refetches for this canvas invalidate query
-      await queryClient.cancelQueries({ queryKey: ["canvas", canvasData.id] });
+    // -------- commented optimistic ui cause we are relying the updated canvas cell to the api (might uncomment this in the future... we'll see) --------
+    // onMutate: async (newPixel: UpdateCanvasPixelProps) => {
+    //   // cancel any outgoing refetches for this canvas invalidate query
+    //   await queryClient.cancelQueries({ queryKey: ["canvas", canvasData.id] });
 
-      // get prev cache data
-      const prevData: CanvasType = queryClient.getQueryData<any>(["canvas", canvasData.id]);
+    //   // get prev cache data
+    //   const prevData: CanvasType = queryClient.getQueryData<any>(["canvas", canvasData.id]);
 
-      // set a new cache data for optimistic ui
-      queryClient.setQueryData(["canvas", canvasData.id], (old: CanvasType) => {
-        if (!old) return old;
+    //   // set a new cache data for optimistic ui
+    //   queryClient.setQueryData(["canvas", canvasData.id], (old: CanvasType) => {
+    //     if (!old) return old;
 
-        // if we have old pixels in cache data, update the pixel location
-        const updatedPixels = old.pixels.some((p) => p.x === newPixel.x && p.y === newPixel.y)
-          ? old.pixels.map((p) =>
-              p.x === newPixel.x && p.y === newPixel.y
-                ? { ...p, color: newPixel.color, userId: newPixel.userId }
-                : p
-            )
-          : [...old.pixels, newPixel];
+    //     // if we have old pixels in cache data, update the pixel location
+    //     const updatedPixels = old.pixels.some((p) => p.x === newPixel.x && p.y === newPixel.y)
+    //       ? old.pixels.map((p) =>
+    //           p.x === newPixel.x && p.y === newPixel.y
+    //             ? { ...p, color: newPixel.color, userId: newPixel.userId }
+    //             : p
+    //         )
+    //       : [...old.pixels, newPixel];
 
-        return { ...old, pixels: updatedPixels };
-      });
+    //     return { ...old, pixels: updatedPixels };
+    //   });
 
-      // return snapshot in case we need rollback
-      return { prevData };
-    },
+    //   // return snapshot in case we need rollback
+    //   return { prevData };
+    // },
 
     // rollback on error if API fails, cache is restored.
     onError: (_err, _newPixel, context) => {
       console.error(_err);
+
+      // invalidate query whenever there is an error
+      queryClient.invalidateQueries({ queryKey: ["canvas", canvasData.id] });
+
       if (axios.isAxiosError(_err)) {
         const apiError = _err.response?.data.message;
-        toast.error(apiError ?? "No charges left!");
+        toast.error(apiError ?? "Something went wrong");
         return;
       }
-      toast.error("No charges left!");
-      if (context?.prevData) {
-        queryClient.setQueryData(["canvas", canvasData.id], context.prevData);
-      }
+      toast.error("Something went wrong");
+
+      // for optimistic ui
+      // if (context?.prevData) {
+      //   queryClient.setQueryData(["canvas", canvasData.id], context.prevData);
+      // }
+    },
+    onSuccess: () => {
+      setPaintCharges((prev) => (prev ? prev - 1 : prev));
+      playPop();
     },
 
     // refetch on settle (success or failure), always invalidate.
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["canvas", canvasData.id] });
-    },
-  });
-
-  const inspectMutation = useMutation({
-    mutationFn: inspectCanvasCell,
-    onSuccess: (data) => {
-      console.log(data);
-    },
-    onError: (_err) => {
-      console.log(_err);
-      if (axios.isAxiosError(_err)) {
-        const apiError = _err.response?.data.message;
-        console.log(apiError);
-        return;
-      }
-    },
+    // onSettled: () => {
+    //   queryClient.invalidateQueries({ queryKey: ["canvas", canvasData.id] });
+    // },
   });
 
   const { data: canvasData } = useSuspenseQuery<CanvasType>({
@@ -164,7 +166,25 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
     // });
 
     ctx.restore();
-  }, [panOffset, scale, width, height, filledCells]);
+
+    if (inspectedCellData && tool === "inspect") {
+      const { x, y } = inspectedCellData;
+      const cellCenterX =
+        x * cellSize * scale +
+        panOffset.x * scale -
+        (canvas.width * (scale - 1)) / 2 +
+        (cellSize * scale) / 2;
+
+      const cellCenterY =
+        y * cellSize * scale +
+        panOffset.y * scale -
+        (canvas.height * (scale - 1)) / 2 +
+        (cellSize * scale) / 2;
+
+      const crossSize = (cellSize * scale) / 1.2;
+      drawCross(ctx, cellCenterX, cellCenterY, crossSize, "white");
+    }
+  }, [panOffset, scale, width, height, filledCells, inspectedCellData, tool]);
 
   // handle clicks -> add cell / inspect cell
   useEffect(() => {
@@ -192,7 +212,8 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
 
       const cellX = Math.floor(adjustedX / cellSize);
       const cellY = Math.floor(adjustedY / cellSize);
-      console.log(`Clicked cell: (${cellX}, ${cellY})`);
+      // console.log(`Clicked cell: (${cellX}, ${cellY})`);
+
       // check bounds
       if (cellX < 0 || cellY < 0 || cellX >= gridSize || cellY >= gridSize) return;
 
@@ -206,8 +227,6 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
           color: selectedColor,
           userId: user?.id,
         });
-
-        setPaintCharges((prev) => (prev ? prev - 1 : prev));
       }
 
       // inspect a cell
@@ -346,7 +365,7 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
   };
 
   return (
-    <div>
+    <div className="w-full">
       <div className="absolute flex flex-col gap-2 m-4 right-0">
         {children}
         <div className="flex flex-col gap-2 items-end">
@@ -373,7 +392,7 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
         </div>
       </div>
 
-      <div className="absolute flex flex-col left-1/2 right-1/2 items-center justify-center bottom-0">
+      <div className="absolute flex flex-col left-1/2 right-1/2 items-center justify-center bottom-4">
         {user && (
           <ColorPalette
             cooldown={cooldown}
@@ -385,9 +404,9 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
           />
         )}
 
-        {user && tool === "inspect" && (
+        {user && tool === "inspect" && !inspectedCellData && (
           <PrimaryButton
-            className="text-2xl py-4 px-7 flex max-w-fit bottom-0 mb-4 items-center gap-2"
+            className="text-2xl py-4 px-7 flex max-w-fit items-center gap-2"
             onClick={() => paintBtn("paint")}
           >
             <Brush size={20} fill="white" />
@@ -399,6 +418,13 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
             </div>
           </PrimaryButton>
         )}
+      </div>
+
+      <div className="flex items-center justify-center bottom-4">
+        <InspectCard
+          inspectedCellData={inspectedCellData}
+          setInspectedCellData={setInspectedCellData}
+        />
       </div>
       <canvas
         ref={canvasRef}
