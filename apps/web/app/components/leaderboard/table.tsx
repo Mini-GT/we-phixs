@@ -1,4 +1,6 @@
 import { PlayersProps } from "@repo/types";
+import Image from "next/image";
+import DiscordTooltip from "./discordTooltip";
 
 export default function TableComponent({ users }: PlayersProps) {
   return (
@@ -18,8 +20,13 @@ export default function TableComponent({ users }: PlayersProps) {
               users.map((row, i) => (
                 <tr key={row.id} className="text-lg border-t border-slate-100 hover:bg-slate-50">
                   <td className="py-2 px-2">{i + 1}</td>
-                  <td className="py-2 px-2">
+                  <td className="flex gap-1 items-center py-2 px-2">
                     <span className="mr-2">{row.name}</span>
+                    {!row.discord?.username ? null : (
+                      <div>
+                        <DiscordTooltip username={row.discord.username} />
+                      </div>
+                    )}
                   </td>
                   <td className="py-2 px-2 text-right font-medium">
                     {row.totalPixelsPlaced.toLocaleString()}

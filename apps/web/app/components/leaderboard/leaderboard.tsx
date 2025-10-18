@@ -1,6 +1,6 @@
 "use client";
 import { LeaderboardPeriods, queryKeysType } from "@repo/types";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { getAllLeaderboard } from "api/leaderboard.service";
 import { UserRound, UsersRound } from "lucide-react";
 import { useState } from "react";
