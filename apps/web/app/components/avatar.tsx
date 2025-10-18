@@ -59,7 +59,6 @@ export default function Avatar({ userId }: AvatarProps) {
 
   useEffect(() => {
     if (!data) return;
-
     // say welcome message if first login
     const loginTimes = Number(localStorage.getItem("loginTimes"));
 

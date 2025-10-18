@@ -3,7 +3,7 @@ import { useRef, useEffect, useState } from "react";
 import PrimaryButton from "./ui/primaryButton";
 import IconButton from "./ui/iconButton";
 import { Brush, FileLock, ZoomInIcon, ZoomOutIcon } from "lucide-react";
-import { CanvasType, queryKeysType, ToolType, UpdateCanvasPixelProps } from "@repo/types";
+import { CanvasType, queryKeysType, ToolType } from "@repo/types";
 import ColorPalette from "./colorPalette";
 import { useWindowSize } from "@react-hook/window-size";
 import { useSelectedContent } from "@/context/selectedContent.context";
@@ -169,6 +169,8 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
 
     if (inspectedCellData && tool === "inspect") {
       const { x, y } = inspectedCellData;
+
+      // calculate cell's center x and y
       const cellCenterX =
         x * cellSize * scale +
         panOffset.x * scale -
@@ -181,7 +183,8 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
         (canvas.height * (scale - 1)) / 2 +
         (cellSize * scale) / 2;
 
-      const crossSize = (cellSize * scale) / 1.2;
+      // draw cross when inspecting a cell
+      const crossSize = (cellSize * scale) / 1.25;
       drawCross(ctx, cellCenterX, cellCenterY, crossSize, "white");
     }
   }, [panOffset, scale, width, height, filledCells, inspectedCellData, tool]);
