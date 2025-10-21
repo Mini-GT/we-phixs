@@ -13,12 +13,14 @@ import { useSelectedContent } from "@/context/selectedContent.context";
 import { useUser } from "@/context/user.context";
 import { toast } from "react-toastify";
 import { getProfileImage } from "@/utils/images";
+import { getQueryClient } from "@/getQueryClient";
 
 type AvatarProps = {
   userId: string | null;
 };
 
 export default function Avatar({ userId }: AvatarProps) {
+  const queryClient = getQueryClient();
   const { user, setUser } = useUser();
   const { setSelectedContent } = useSelectedContent();
   const { isOpen, toggle, close } = useToggle();
@@ -64,6 +66,10 @@ export default function Avatar({ userId }: AvatarProps) {
 
     if (loginTimes < 1) {
       toast.success(`Successfully logged in as ${data?.name || data?.discord?.global_name}`);
+
+      // invalidate user data to get a fresh user's cooldown and charges
+      queryClient.invalidateQueries({ queryKey: queryKeysType.me(user?.id) });
+
       const current = Number(localStorage.getItem("loginTimes")) || 0;
       localStorage.setItem("loginTimes", String(current + 1));
     }
