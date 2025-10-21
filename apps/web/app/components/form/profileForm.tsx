@@ -1,15 +1,19 @@
 "use client";
 
-import { AlertTriangle, Check, Edit2, Lock } from "lucide-react";
+import { Check, Edit2, Lock } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { FormField } from "./formField";
 import { ChangeEvent, useState } from "react";
-import { FieldErrorTypes } from "@repo/types";
+import { FieldErrorTypes, queryKeysType, UpdateProfie } from "@repo/types";
 import { useUser } from "@/context/user.context";
 import { toReadableDate } from "@/utils/formatDate";
 import Image from "next/image";
-import Link from "next/link";
 import { getProfileImage } from "@/utils/images";
+import { useMutation } from "@tanstack/react-query";
+import { updateProfile } from "api/user.service";
+import { getQueryClient } from "@/getQueryClient";
+import { displayError } from "@/utils/displayError";
+import { toast } from "react-toastify";
 
 const defaultFieldErrors = {
   nameError: "",
@@ -22,24 +26,50 @@ export default function ProfileForm() {
   const { user } = useUser();
   const [fieldError, setFieldError] = useState<Partial<FieldErrorTypes>>(defaultFieldErrors);
   const [showPasswordFields, setShowPasswordFields] = useState<boolean>(false);
+  const queryClient = getQueryClient();
 
   if (!user) return <div>Couldn't load user data</div>;
 
-  const [formData, setFormData] = useState({
-    name: user.name ?? user.discord?.global_name,
-    oldName: user.name ?? user.discord?.global_name,
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-    profileImage: user?.profileImage ?? "/userIcon.svg",
-    oldProfileImage: user?.profileImage,
+  const [formData, setFormData] = useState<UpdateProfie>({
+    currentName: user.name ?? user.discord?.global_name,
+    newName: null,
+    currentPassword: null,
+    newPassword: null,
+    confirmPassword: null,
+    currentProfileImage: getProfileImage(user),
+    newProfileImage: null,
   });
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
+    const { name, value } = e.target;
+
+    setFormData((prev) => {
+      switch (name) {
+        case "currentName":
+          // user is editing the current name input
+          return { ...prev, newName: value };
+        // user is editing the current profile image input
+        case "currentProfileImage":
+          return { ...prev, newProfileImage: value };
+        default:
+          return { ...prev, [name]: value };
+      }
     });
+  };
+
+  const mutation = useMutation({
+    mutationFn: updateProfile,
+    onError: (err) => {
+      displayError(err);
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: queryKeysType.me(user.id) });
+      toast.success(data);
+    },
+  });
+
+  const handleSave = () => {
+    mutation.mutate({ id: user.id, ...formData });
   };
 
   return (
@@ -71,28 +101,15 @@ export default function ProfileForm() {
         {/* Name */}
         <FormField
           label="YOUR NAME"
-          name="name"
-          value={user.name || user.discord?.global_name}
+          name="currentName"
+          value={formData.newName ?? formData.currentName}
           onChangeEvent={handleChange}
           labelStyle="block text-slate-600 text-xs font-bold mb-2 uppercase tracking-wide"
           inputStyle={`w-full bg-slate-50 rounded-lg px-4 py-3 text-slate-800 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white ${fieldError.nameError ? "border-2 border-red-400 shake" : "border-slate-200"}`}
         />
 
         {/* Warning */}
-        {!user.discord?.discordId ? (
-          <div className="bg-amber-50 border-l-4 border-amber-500 rounded-lg p-4 flex items-start gap-3">
-            <AlertTriangle className="text-amber-600 flex-shrink-0 mt-0.5" size={20} />
-            <div className="text-sm">
-              <span className="text-slate-700">Your account is not connected to Discord.</span>
-              <Link href={`${process.env.NEXT_PUBLIC_discordRedirect}`}>
-                <span className="text-blue-600 hover:text-blue-700 ml-1 font-medium transition-colors hover:underline hover:cursor-pointer">
-                  Click here
-                </span>
-              </Link>
-              <span className="text-slate-700"> to connect Discord.</span>
-            </div>
-          </div>
-        ) : (
+        {!user.discord?.discordId ? null : ( // ) //   </div> //     </div> //       <span className="text-slate-700"> to connect Discord.</span> //       </Link> //         </span> //           Click here //         <span className="text-blue-600 hover:text-blue-700 ml-1 font-medium transition-colors hover:underline hover:cursor-pointer"> //       <Link href={`${process.env.NEXT_PUBLIC_discordRedirect}`}> //       <span className="text-slate-700">Your account is not connected to Discord.</span> //     <div className="text-sm"> //     <AlertTriangle className="text-amber-600 flex-shrink-0 mt-0.5" size={20} /> //   <div className="bg-amber-50 border-l-4 border-amber-500 rounded-lg p-4 flex items-start gap-3"> //  (
           <div className="inline-flex items-center gap-2 bg-[#EBEDFB] border border-[#7983F5] text-[#5865F2] px-4 py-2 rounded-full text-md font-medium">
             <Check size={24} className="w-5" />
             <Image
@@ -142,82 +159,88 @@ export default function ProfileForm() {
           />
         </div>
 
-        <div className="mb-6">
-          <button
-            className="text-slate-600 text-lg flex items-center hover:text-blue-600 cursor-pointer mb-6 transition-colors"
-            onClick={() => setShowPasswordFields(!showPasswordFields)}
-          >
-            <Lock className="h-4 w-4 mr-2" />
-            Change password
-          </button>
+        {!user.discord?.discordId && (
+          <div className="mb-6">
+            <button
+              className="text-slate-600 text-lg flex items-center hover:text-blue-600 cursor-pointer mb-6 transition-colors"
+              onClick={() => setShowPasswordFields(!showPasswordFields)}
+            >
+              <Lock className="h-4 w-4 mr-2" />
+              Change password
+            </button>
 
-          <AnimatePresence initial={false}>
-            {showPasswordFields && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="overflow-hidden mt-4"
-              >
-                <div className="space-y-3 px-1 mt-4">
-                  <div className="mb-4 h-20">
-                    <FormField
-                      label="CURRENT PASSWORD"
-                      name="currentPassword"
-                      type="password"
-                      value={formData.currentPassword}
-                      onChangeEvent={handleChange}
-                      labelStyle="block text-slate-600 text-xs font-bold mb-2 uppercase tracking-wide"
-                      inputStyle={`w-full bg-slate-50 rounded-lg px-4 py-3 text-slate-800 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white ${fieldError.currentPasswordError ? "border-2 border-red-400 shake" : "border-slate-200"}`}
-                    />
-                    {fieldError.currentPasswordError ? (
-                      <div className="text-red-500 text-sm mt-1">
-                        {fieldError.currentPasswordError}
-                      </div>
-                    ) : null}
+            <AnimatePresence initial={false}>
+              {showPasswordFields && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden mt-4"
+                >
+                  <div className="space-y-3 px-1 mt-4">
+                    <div className="mb-4 h-20">
+                      <FormField
+                        label="CURRENT PASSWORD"
+                        name="currentPassword"
+                        type="password"
+                        value={formData.currentPassword}
+                        onChangeEvent={handleChange}
+                        labelStyle="block text-slate-600 text-xs font-bold mb-2 uppercase tracking-wide"
+                        inputStyle={`w-full bg-slate-50 rounded-lg px-4 py-3 text-slate-800 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white ${fieldError.currentPasswordError ? "border-2 border-red-400 shake" : "border-slate-200"}`}
+                      />
+                      {fieldError.currentPasswordError ? (
+                        <div className="text-red-500 text-sm mt-1">
+                          {fieldError.currentPasswordError}
+                        </div>
+                      ) : null}
+                    </div>
+                    <div className="mb-4 h-20">
+                      <FormField
+                        label="NEW PASSWORD"
+                        name="newPassword"
+                        type="password"
+                        value={formData.newPassword}
+                        onChangeEvent={handleChange}
+                        labelStyle="block text-slate-600 text-xs font-bold mb-2 uppercase tracking-wide"
+                        inputStyle={`w-full bg-slate-50 rounded-lg px-4 py-3 text-slate-800 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white ${fieldError.newPasswordError ? "border-2 border-red-400 shake" : "border-slate-200"}`}
+                      />
+                      {fieldError.newPasswordError ? (
+                        <div className="text-red-500 text-sm mt-1">
+                          {fieldError.newPasswordError}
+                        </div>
+                      ) : null}
+                    </div>
+                    <div className="h-20">
+                      <FormField
+                        label="CONFIRM PASSWORD"
+                        name="confirmPassword"
+                        type="password"
+                        value={formData.confirmPassword}
+                        onChangeEvent={handleChange}
+                        labelStyle="block text-slate-600 text-xs font-bold mb-2 uppercase tracking-wide"
+                        inputStyle={`w-full bg-slate-50 rounded-lg px-4 py-3 text-slate-800 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white ${fieldError.confirmPasswordError ? "border-2 border-red-400 shake" : "border-slate-200"}`}
+                      />
+                      {fieldError.confirmPasswordError ? (
+                        <div className="text-red-500 text-sm mt-1">
+                          {fieldError.confirmPasswordError}
+                        </div>
+                      ) : null}
+                    </div>
                   </div>
-                  <div className="mb-4 h-20">
-                    <FormField
-                      label="NEW PASSWORD"
-                      name="newPassword"
-                      type="password"
-                      value={formData.newPassword}
-                      onChangeEvent={handleChange}
-                      labelStyle="block text-slate-600 text-xs font-bold mb-2 uppercase tracking-wide"
-                      inputStyle={`w-full bg-slate-50 rounded-lg px-4 py-3 text-slate-800 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white ${fieldError.newPasswordError ? "border-2 border-red-400 shake" : "border-slate-200"}`}
-                    />
-                    {fieldError.newPasswordError ? (
-                      <div className="text-red-500 text-sm mt-1">{fieldError.newPasswordError}</div>
-                    ) : null}
-                  </div>
-                  <div className="h-20">
-                    <FormField
-                      label="CONFIRM PASSWORD"
-                      name="confirmPassword"
-                      type="password"
-                      value={formData.confirmPassword}
-                      onChangeEvent={handleChange}
-                      labelStyle="block text-slate-600 text-xs font-bold mb-2 uppercase tracking-wide"
-                      inputStyle={`w-full bg-slate-50 rounded-lg px-4 py-3 text-slate-800 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white ${fieldError.confirmPasswordError ? "border-2 border-red-400 shake" : "border-slate-200"}`}
-                    />
-                    {fieldError.confirmPasswordError ? (
-                      <div className="text-red-500 text-sm mt-1">
-                        {fieldError.confirmPasswordError}
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
 
         {/* Save Button */}
         <button
           className={`w-full h-12 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-3 px-4 rounded-lg transition-all shadow-lg hover:shadow-blue-500/30 cursor-pointer`}
+          onClick={handleSave}
+          disabled={mutation.isPending}
         >
-          Save
+          {mutation.isPending ? "Saving..." : "Save"}
         </button>
       </div>
     </div>

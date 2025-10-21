@@ -1,3 +1,4 @@
+import { UpdateProfie } from "@repo/types";
 import axios from "axios";
 
 const isServer = typeof window === "undefined";
@@ -17,5 +18,12 @@ export async function getMe(id: string) {
 
 export async function getPaintCharges(id: string | undefined) {
   const res = await api.get(`/paint-charges/${id}`);
+  return res.data;
+}
+
+export async function updateProfile({ id, ...args }: UpdateProfie & { id: string }) {
+  const res = await api.patch(`/profile/update/${id}`, {
+    ...args,
+  });
   return res.data;
 }
