@@ -10,16 +10,16 @@ import { useSelectedContent } from "@/context/selectedContent.context";
 import Image from "next/image";
 import { useUser } from "@/context/user.context";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import { getCanvasById, inspectCanvasCell, updateCanvasPixel } from "api/canvas.service";
+import { getCanvasById, updateCanvasPixel } from "api/canvas.service";
 import { getQueryClient } from "@/getQueryClient";
 import { toast } from "react-toastify";
 import usePaintCharges from "@/hooks/usePaintCharges";
 import { useSound } from "react-sounds";
 import useSocket from "@/hooks/useSocket";
-import axios from "axios";
 import useInspect from "@/hooks/useInspect";
 import drawCross from "@/utils/drawcross";
 import InspectCard from "./inspectCard";
+import { displayError } from "@/utils/displayError";
 
 type CanvasProp = {
   children: React.ReactNode;
@@ -89,18 +89,13 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
     // },
 
     // rollback on error if API fails, cache is restored.
-    onError: (_err, _newPixel, context) => {
-      console.error(_err);
+    onError: (err, _newPixel, context) => {
+      console.error(err);
 
       // invalidate query whenever there is an error
       queryClient.invalidateQueries({ queryKey: ["canvas", canvasData.id] });
 
-      if (axios.isAxiosError(_err)) {
-        const apiError = _err.response?.data.message;
-        toast.error(apiError ?? "Something went wrong");
-        return;
-      }
-      toast.error("Something went wrong");
+      displayError(err);
 
       // for optimistic ui
       // if (context?.prevData) {
@@ -205,7 +200,7 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
       const y = e.clientY - rect.top;
 
       // calculate scaled zoom out/in offset
-      const scaleWidth = canvas.width * scale + 10; // fix: x offset when placing a cell (not long term as it only fixes the center of the screen and not the sides)
+      const scaleWidth = canvas.width * scale;
       const scaleHeight = canvas.height * scale;
       const scaleOffSetX = (scaleWidth - canvas.width) / 2;
       const scaleOffSetY = (scaleHeight - canvas.height) / 2;

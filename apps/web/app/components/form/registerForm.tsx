@@ -10,8 +10,8 @@ import CardModal from "../cardModal";
 import { toast } from "react-toastify";
 import { RegisterFormType } from "@repo/types";
 import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
 import { registerUser } from "api/auth.service";
+import { displayError } from "@/utils/displayError";
 
 export default function RegisterForm({ setComponent }: LoginRegisterFormProps) {
   const [registerFormData, setRegisterFormData] = useState<RegisterFormType>({
@@ -34,11 +34,7 @@ export default function RegisterForm({ setComponent }: LoginRegisterFormProps) {
     },
     onError: (err) => {
       console.error(err);
-      if (axios.isAxiosError(err)) {
-        toast.error(err.response?.data.message[0] ?? "Please try again");
-      } else {
-        toast.error("Something went wrong");
-      }
+      displayError(err);
     },
   });
 

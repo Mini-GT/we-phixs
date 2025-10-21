@@ -1,9 +1,9 @@
 "use client";
 
+import { displayError } from "@/utils/displayError";
 import { PixelType } from "@repo/types";
 import { useMutation } from "@tanstack/react-query";
 import { inspectCanvasCell } from "api/canvas.service";
-import axios from "axios";
 import { useState } from "react";
 import { useSound } from "react-sounds";
 
@@ -16,13 +16,9 @@ export default function useInspect() {
       playInspectPop();
       setInspectedCellData(data);
     },
-    onError: (_err) => {
-      console.log(_err);
-      if (axios.isAxiosError(_err)) {
-        const apiError = _err.response?.data.message;
-        console.log(apiError);
-        return;
-      }
+    onError: (err) => {
+      console.log(err);
+      displayError(err);
     },
   });
 

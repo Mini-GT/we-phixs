@@ -10,8 +10,7 @@ import { pixelify_sans } from "@/fonts/fonts";
 import { ComponentStateValue } from "@repo/types";
 import { useMutation } from "@tanstack/react-query";
 import { loginUser } from "api/auth.service";
-import { toast } from "react-toastify";
-import axios from "axios";
+import { displayError } from "@/utils/displayError";
 
 export type LoginRegisterFormProps = {
   setComponent: Dispatch<SetStateAction<ComponentStateValue>>;
@@ -43,12 +42,7 @@ export default function LoginForm({ setComponent }: LoginRegisterFormProps) {
     },
     onError: (err) => {
       console.error(err);
-      if (axios.isAxiosError(err)) {
-        console.log(err.response?.data.message);
-        toast.error(err.response?.data.message[0] ?? "Please try again");
-      } else {
-        toast.error("Something went wrong");
-      }
+      displayError(err);
     },
   });
 
