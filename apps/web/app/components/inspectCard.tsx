@@ -1,7 +1,8 @@
-import { MapPin, Paintbrush, Share, Star, X } from "lucide-react";
+import { MapPin, X } from "lucide-react";
 import IconButton from "./ui/iconButton";
 import { InspectCardProps } from "@repo/types";
 import { useSound } from "react-sounds";
+import { convertToTimeAgo } from "@/utils/formatDate";
 
 export default function InspectCard({ inspectedCellData, setInspectedCellData }: InspectCardProps) {
   const { play } = useSound("/sounds/close_inspect_pop.mp3");
@@ -13,11 +14,16 @@ export default function InspectCard({ inspectedCellData, setInspectedCellData }:
       <div className="flex">
         <div className="flex items-center gap-1 text-sm">
           <MapPin size={24} className="w-5 text-blue-600" />
-          <span className="text-lg font-medium">
+          <span className="font-medium text-lg">
             Pixel: {inspectedCellData?.x}, {inspectedCellData?.y}
           </span>
+          <span>
+            {inspectedCellData?.placedAt
+              ? `(${convertToTimeAgo(inspectedCellData.placedAt)})`
+              : null}
+          </span>
         </div>
-        <IconButton className="text-gray-600 w-1 h-1 ml-auto border border-gray-300">
+        <IconButton className="text-gray-600 w-1 h-1 ml-auto border-none shadow-none">
           <X
             className="w-full h-full p-2"
             onClick={() => {
@@ -30,7 +36,7 @@ export default function InspectCard({ inspectedCellData, setInspectedCellData }:
 
       {/* Left section */}
       <div className="flex flex-col">
-        <span className="text-md font-bold text-gray-500 mt-0.5">
+        <span className="text-md font-semibold text-gray-500 mt-0.5">
           {inspectedCellData?.user.name ? (
             <span> Painted by: {inspectedCellData.user.name} </span>
           ) : (
@@ -38,7 +44,6 @@ export default function InspectCard({ inspectedCellData, setInspectedCellData }:
           )}
         </span>
 
-        {/* Buttons */}
         <div className="mt-2 flex items-center gap-2"></div>
       </div>
     </div>
