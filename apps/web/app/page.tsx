@@ -53,6 +53,7 @@ export default async function Home() {
           pauseOnHover={false}
           position="top-left"
           transition={Slide}
+          closeButton={false}
           stacked
         />
         <Canvas hasLoginToken={hasLoginToken}>{!hasLoginToken ? <Login /> : <User />}</Canvas>

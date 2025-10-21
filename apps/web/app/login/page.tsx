@@ -4,7 +4,6 @@ import LoginForm from "@/components/form/loginForm";
 import RegisterForm from "@/components/form/registerForm";
 import PixelLoadingScreen from "@/components/pixelLoadingScreen";
 import { useComponent } from "@/context/component.context";
-import { getQueryClient } from "@/getQueryClient";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Slide, ToastContainer } from "react-toastify";
@@ -43,6 +42,7 @@ export default function Page() {
         pauseOnHover={false}
         position="top-left"
         transition={Slide}
+        closeButton={false}
         stacked
       />
       {component === "loginForm" && <LoginForm setComponent={setComponent} />}
