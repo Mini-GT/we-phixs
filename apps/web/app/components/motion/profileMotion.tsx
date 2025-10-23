@@ -15,7 +15,7 @@ export default function ProfileMotion({ cardRef }: { cardRef: RefObject<HTMLDivE
     <MotionComponent>
       <Card
         ref={cardRef}
-        className={`relative w-[600px] ${user?.discord?.username ? "max-h-[785px]" : "max-h-[700px]"} overflow-y-auto max-w-2xl scrollbar-custom p-6 bg-white border-cyan-300 rounded-4xl`}
+        className={`relative w-[600px] ${user?.discord?.username ? "max-h-[785px]" : "max-h-[640px]"} overflow-y-auto max-w-2xl scrollbar-custom p-6 bg-white border-cyan-300 rounded-4xl`}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center">

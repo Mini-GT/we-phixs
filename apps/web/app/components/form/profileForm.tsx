@@ -35,7 +35,7 @@ export default function ProfileForm() {
     newName: null,
     currentPassword: null,
     newPassword: null,
-    confirmPassword: null,
+    confirmNewPassword: null,
     currentProfileImage: getProfileImage(user),
     newProfileImage: null,
   });
@@ -63,6 +63,12 @@ export default function ProfileForm() {
       displayError(err);
     },
     onSuccess: (data) => {
+      setFormData((prev) => ({
+        ...prev,
+        currentPassword: null,
+        newPassword: null,
+        confirmNewPassword: null,
+      }));
       queryClient.invalidateQueries({ queryKey: queryKeysType.me(user.id) });
       toast.success(data);
     },
@@ -213,10 +219,10 @@ export default function ProfileForm() {
                     </div>
                     <div className="h-20">
                       <FormField
-                        label="CONFIRM PASSWORD"
-                        name="confirmPassword"
+                        label="CONFIRM NEW PASSWORD"
+                        name="confirmNewPassword"
                         type="password"
-                        value={formData.confirmPassword}
+                        value={formData.confirmNewPassword}
                         onChangeEvent={handleChange}
                         labelStyle="block text-slate-600 text-xs font-bold mb-2 uppercase tracking-wide"
                         inputStyle={`w-full bg-slate-50 rounded-lg px-4 py-3 text-slate-800 border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white ${fieldError.confirmPasswordError ? "border-2 border-red-400 shake" : "border-slate-200"}`}
