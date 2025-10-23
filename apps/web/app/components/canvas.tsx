@@ -3,7 +3,7 @@ import { useRef, useEffect, useState } from "react";
 import PrimaryButton from "./ui/primaryButton";
 import IconButton from "./ui/iconButton";
 import { Brush, FileLock, ZoomInIcon, ZoomOutIcon } from "lucide-react";
-import { CanvasType, queryKeysType, ToolType } from "@repo/types";
+import { CanvasType, Coordinantes, queryKeysType, ToolType } from "@repo/types";
 import ColorPalette from "./colorPalette";
 import { useWindowSize } from "@react-hook/window-size";
 import { useSelectedContent } from "@/context/selectedContent.context";
@@ -20,6 +20,7 @@ import useInspect from "@/hooks/useInspect";
 import drawCross from "@/utils/drawcross";
 import InspectCard from "./inspectCard";
 import { displayError } from "@/utils/displayError";
+import getNewScale from "@/hooks/useScale";
 
 type CanvasProp = {
   children: React.ReactNode;
@@ -37,9 +38,9 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
 
   const { user } = useUser();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [panOffset, setPanOffset] = useState<Coordinantes>({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState<boolean>(false);
-  const [lastMouse, setLastMouse] = useState({ x: 0, y: 0 });
+  const [lastMouse, setLastMouse] = useState<Coordinantes>({ x: 0, y: 0 });
   const [scale, setScale] = useState<number>(1);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
@@ -56,6 +57,9 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
   const { inspectMutation, inspectedCellData, setInspectedCellData } = useInspect();
   const cellSize = 10;
   const gridSize = 300;
+
+  const [lastTouchDistance, setLastTouchDistance] = useState<number | null>(null);
+  const [lastTouchCenter, setLastTouchCenter] = useState<{ x: number; y: number } | null>(null);
 
   // Optimistic update
   const mutation = useMutation({
@@ -254,36 +258,9 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
       const centerY = event.clientY - rect.top;
 
       const zoomIntensity = 0.001;
-      const delta = event.deltaY * -zoomIntensity;
+      const zoomDelta = event.deltaY * -zoomIntensity;
 
-      setScale((prevScale) => {
-        let newScale = prevScale + delta;
-        if (newScale < 0.2) newScale = 0.2;
-        if (newScale > 5) newScale = 5;
-
-        // calculate world coordinates under the mouse BEFORE scaling
-        const scaleWidth = canvas.width * prevScale;
-        const scaleHeight = canvas.height * prevScale;
-        const scaleOffSetX = (scaleWidth - canvas.width) / 2;
-        const scaleOffSetY = (scaleHeight - canvas.height) / 2;
-
-        const worldX = (centerX + scaleOffSetX - panOffset.x * prevScale) / prevScale;
-        const worldY = (centerY + scaleOffSetY - panOffset.y * prevScale) / prevScale;
-
-        // calculate new offsets after scaling
-        const newScaleWidth = canvas.width * newScale;
-        const newScaleHeight = canvas.height * newScale;
-        const newScaleOffSetX = (newScaleWidth - canvas.width) / 2;
-        const newScaleOffSetY = (newScaleHeight - canvas.height) / 2;
-
-        // adjust pan offset to keep the world point under the mouse
-        const newPanX = (centerX + newScaleOffSetX - worldX * newScale) / newScale;
-        const newPanY = (centerY + newScaleOffSetY - worldY * newScale) / newScale;
-
-        setPanOffset({ x: newPanX, y: newPanY });
-
-        return newScale;
-      });
+      getNewScale({ canvas, zoomDelta, panOffset, setPanOffset, setScale, centerX, centerY });
     };
 
     canvas.addEventListener("wheel", handleWheel, { passive: false });
@@ -295,7 +272,7 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
     if (!isPanning) setIsDragging(false);
   }, [isPanning]);
 
-  // mouse drag panning
+  // ---------- desktop mouse pan/zoom ----------
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsPanning(true);
     setIsDragging(false);
@@ -330,31 +307,110 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
 
-    setScale((prevScale) => {
-      let newScale = prevScale + zoomDelta;
-      if (newScale < 0.2) newScale = 0.2;
-      if (newScale > 5) newScale = 5;
+    getNewScale({ canvas, zoomDelta, panOffset, setPanOffset, setScale, centerX, centerY });
+  };
 
-      const scaleWidth = canvas.width * prevScale;
-      const scaleHeight = canvas.height * prevScale;
-      const scaleOffSetX = (scaleWidth - canvas.width) / 2;
-      const scaleOffSetY = (scaleHeight - canvas.height) / 2;
+  // ---------- mobile touch pan/zoom ----------
+  const getTouchDistance = (touch1: React.Touch, touch2: React.Touch) => {
+    const dx = touch1.clientX - touch2.clientX;
+    const dy = touch1.clientY - touch2.clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
 
-      const worldX = (centerX + scaleOffSetX - panOffset.x * prevScale) / prevScale;
-      const worldY = (centerY + scaleOffSetY - panOffset.y * prevScale) / prevScale;
+  const getTouchCenter = (touch1: React.Touch, touch2: React.Touch) => {
+    return {
+      x: (touch1.clientX + touch2.clientX) / 2,
+      y: (touch1.clientY + touch2.clientY) / 2,
+    };
+  };
 
-      const newScaleWidth = canvas.width * newScale;
-      const newScaleHeight = canvas.height * newScale;
-      const newScaleOffSetX = (newScaleWidth - canvas.width) / 2;
-      const newScaleOffSetY = (newScaleHeight - canvas.height) / 2;
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!e.touches || e.touches.length === 0) return;
 
-      const newPanX = (centerX + newScaleOffSetX - worldX * newScale) / newScale;
-      const newPanY = (centerY + newScaleOffSetY - worldY * newScale) / newScale;
+    if (e.touches.length === 1) {
+      // if single finger touch, start panning
+      const touch = e.touches[0];
+      if (!touch) return;
+      setIsPanning(true);
+      setIsDragging(false);
+      setLastMouse({ x: touch.clientX, y: touch.clientY });
+    } else if (e.touches.length === 2) {
+      // if two finger touches, prepare for pinch zoom
+      const touch0 = e.touches[0];
+      const touch1 = e.touches[1];
+      if (!touch0 || !touch1) return;
+      e.preventDefault();
+      const distance = getTouchDistance(touch0, touch1);
+      const center = getTouchCenter(touch0, touch1);
+      setLastTouchDistance(distance);
+      setLastTouchCenter(center);
+      setIsPanning(false);
+    }
+  };
 
-      setPanOffset({ x: newPanX, y: newPanY });
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!e.touches || e.touches.length === 0) return;
 
-      return newScale;
-    });
+    if (e.touches.length === 1 && isPanning) {
+      // single finger touch pan
+      const touch = e.touches[0];
+      if (!touch) return;
+      const dx = touch.clientX - lastMouse.x;
+      const dy = touch.clientY - lastMouse.y;
+
+      if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+        setIsDragging(true);
+      }
+
+      setPanOffset((prev) => ({
+        x: prev.x + dx,
+        y: prev.y + dy,
+      }));
+
+      setLastMouse({ x: touch.clientX, y: touch.clientY });
+    } else if (e.touches.length === 2) {
+      // two finger touches pinch zoom
+      const touch0 = e.touches[0];
+      const touch1 = e.touches[1];
+      if (!touch0 || !touch1) return;
+      e.preventDefault();
+      const canvas = canvasRef.current;
+      if (!canvas || lastTouchDistance === null || lastTouchCenter === null) return;
+
+      const currentDistance = getTouchDistance(touch0, touch1);
+      const currentCenter = getTouchCenter(touch0, touch1);
+
+      // calculate zoom based on pinch distance change
+      const distanceRatio = currentDistance / lastTouchDistance;
+      const zoomDelta = (distanceRatio - 1) * scale * 0.5; // sensitivity
+
+      const rect = canvas.getBoundingClientRect();
+      const centerX = currentCenter.x - rect.left;
+      const centerY = currentCenter.y - rect.top;
+
+      getNewScale({ canvas, zoomDelta, panOffset, setPanOffset, setScale, centerX, centerY });
+
+      setLastTouchDistance(currentDistance);
+      setLastTouchCenter(currentCenter);
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!e.touches) return;
+
+    if (e.touches.length === 0) {
+      setIsPanning(false);
+      setLastTouchDistance(null);
+      setLastTouchCenter(null);
+    } else if (e.touches.length === 1) {
+      // if user switch from two finger touches to one finger touch, return to single touch tracking
+      const touch = e.touches[0];
+      if (!touch) return;
+      setLastTouchDistance(null);
+      setLastTouchCenter(null);
+      setIsPanning(true);
+      setLastMouse({ x: touch.clientX, y: touch.clientY });
+    }
   };
 
   const paintBtn = (tool: ToolType["tool"]) => {
@@ -431,6 +487,10 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{ touchAction: "none" }}
       />
     </div>
   );
