@@ -28,7 +28,7 @@ export default async function Home() {
     if (isExpired) {
       await logoutUser();
     } else {
-      await Promise.all([
+      await Promise.allSettled([
         await queryClient.prefetchQuery({
           queryKey: queryKeysType.canvas(1),
           queryFn: async () => await getCanvasById(1),
