@@ -1,9 +1,9 @@
 import { Brush, X } from "lucide-react";
 import IconButton from "./ui/iconButton";
 import PrimaryButton from "./ui/primaryButton";
-import { useAppSounds } from "../hooks/useSounds";
 import { maxPaintCharges } from "./canvas";
 import { ToolType } from "@repo/types";
+import { useSound } from "react-sounds";
 
 const colors = [
   "#000000",
@@ -73,11 +73,13 @@ export default function ColorPalette({
   paintBtn,
   tool,
 }: ColorPaletteProps) {
-  const { playBtnSoft } = useAppSounds();
+  const { play: playBtnSoft } = useSound("/sounds/button_soft_double.mp3", {
+    rate: 1.6,
+  });
 
   return (
     <div
-      className={`absolute bottom-0 p-4 w-screen bg-white rounded-t-4xl border-2 border-gray-300 transform transition-all duration-300 ease-out ${tool === "paint" ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"}`}
+      className={`absolute -bottom-4 p-4 w-screen bg-white rounded-t-4xl border-2 border-gray-300 transform transition-all duration-300 ease-out ${tool === "paint" ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"}`}
     >
       <div className="flex items-center justify-between">
         {selectedColor && (

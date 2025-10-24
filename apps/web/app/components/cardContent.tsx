@@ -8,12 +8,11 @@ import LeaderboardMotion from "./motion/leaderboardMotion";
 import AdminPanelMotion from "./motion/adminPanelMotion";
 import { useUser } from "@/context/user.context";
 import CreateCanvasMotion from "./motion/createCanvasMotion";
-import { useTab } from "@/context/tab.context";
+import { setSoundEnabled } from "react-sounds";
 
 export default function CardContent() {
-  const { user } = useUser();
+  const { user, setUser } = useUser();
   const { selectedContent, setSelectedContent } = useSelectedContent();
-  const { setTab } = useTab();
   const cardRef = useRef<HTMLDivElement>(null);
 
   // close card if user clicks outside the card content
@@ -46,6 +45,10 @@ export default function CardContent() {
 
     if (!loginToken) {
       localStorage.removeItem("loginTimes");
+      setSoundEnabled(false);
+      setUser(null);
+    } else {
+      setSoundEnabled(true);
     }
   });
 
