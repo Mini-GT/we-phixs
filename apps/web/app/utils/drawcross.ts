@@ -7,26 +7,6 @@ export default function drawCross(
   borderColor: string = "black",
   borderThickness: number = 2
 ) {
-  // ctx.save();
-
-  // ctx.fillStyle = color;
-
-  // const arm = size * 0.2;
-  // const half = size / 2;
-
-  // // Top arm
-  // ctx.fillRect(x - arm / 2, y - half, arm, half - arm / 2);
-
-  // // Bottom arm
-  // ctx.fillRect(x - arm / 2, y + arm / 2, arm, half - arm / 2);
-
-  // // Left arm
-  // ctx.fillRect(x - half, y - arm / 2, half - arm / 2, arm);
-
-  // // Right arm
-  // ctx.fillRect(x + arm / 2, y - arm / 2, half - arm / 2, arm);
-  // ctx.restore();
-
   ctx.save();
 
   const arm = size * 0.2;
@@ -69,10 +49,10 @@ export default function drawCross(
     );
   }
 
-  // Draw border first (slightly bigger)
+  // draw cross border
   drawArms(borderThickness, borderColor);
 
-  // Draw the actual cross (normal size)
+  // draw the actual cross
   drawArms(0, color);
 
   ctx.restore();

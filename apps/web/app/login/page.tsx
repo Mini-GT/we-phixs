@@ -2,7 +2,7 @@
 
 import LoginForm from "@/components/form/loginForm";
 import RegisterForm from "@/components/form/registerForm";
-import PixelLoadingScreen from "@/components/pixelLoadingScreen";
+import PixelLoadingScreen from "@/components/loading/pixelLoadingScreen";
 import { useComponent } from "@/context/component.context";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";

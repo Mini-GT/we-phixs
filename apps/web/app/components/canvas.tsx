@@ -12,7 +12,6 @@ import { useUser } from "@/context/user.context";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { getCanvasById, updateCanvasPixel } from "api/canvas.service";
 import { getQueryClient } from "@/getQueryClient";
-import { toast } from "react-toastify";
 import usePaintCharges from "@/hooks/usePaintCharges";
 import { useSound } from "react-sounds";
 import useSocket from "@/hooks/useSocket";
@@ -195,9 +194,6 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
 
     const handleClick = (e: MouseEvent) => {
       if (isDragging) return;
-      if (!paintCharges) {
-        toast.error("No charges left");
-      }
 
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
@@ -221,6 +217,10 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
 
       // update canvas cell when user clicks
       if (tool === "paint" && selectedColor) {
+        // if (!paintCharges) {
+        //   toast.error("No charges left");
+        //   return
+        // }
         // API call to update the canvas
         mutation.mutate({
           canvasId: canvasData.id,

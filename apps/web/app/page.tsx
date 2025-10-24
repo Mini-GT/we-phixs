@@ -10,7 +10,6 @@ import { queryKeysType } from "@repo/types";
 import { getQueryClient } from "./getQueryClient";
 import { getPaintCharges } from "api/user.service";
 import { isTokenExpired, verifyJwt } from "./utils/jwt";
-import { getAllLeaderboard } from "api/leaderboard.service";
 import { logoutUser } from "api/logout.service";
 
 export const jwtsecret = process.env.jwtsecretKey;

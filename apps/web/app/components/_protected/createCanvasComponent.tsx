@@ -3,7 +3,7 @@
 import { ChangeEvent, FormEvent, useState } from "react";
 import { FormField } from "../form/formField";
 import { CreateCanvas } from "@repo/types";
-import { createCanvas } from "api/canvas";
+import { createCanvas } from "api/canvas.service";
 import IconButton from "../ui/iconButton";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
