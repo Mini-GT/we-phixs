@@ -1,10 +1,14 @@
 import { PlayersProps } from "@repo/types";
-import Image from "next/image";
 import DiscordTooltip from "./discordTooltip";
+import FetchLoading from "../loading/fetchLoading";
 
-export default function TableComponent({ users }: PlayersProps) {
+export default function TableComponent({ users, isFetching }: PlayersProps) {
+  if (isFetching || !users) {
+    return <FetchLoading />;
+  }
+
   return (
-    <>
+    <div>
       {/* Table */}
       <div className="overflow-auto scrollbar-custom">
         <table className="w-full text-sm">
@@ -36,6 +40,6 @@ export default function TableComponent({ users }: PlayersProps) {
           </tbody>
         </table>
       </div>
-    </>
+    </div>
   );
 }

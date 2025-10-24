@@ -33,10 +33,11 @@ export default async function Home() {
           queryKey: queryKeysType.canvas(1),
           queryFn: async () => await getCanvasById(1),
         }),
-        await queryClient.prefetchQuery({
-          queryKey: queryKeysType.allLeaderboard,
-          queryFn: async () => await getAllLeaderboard(),
-        }),
+        // --- not prefetching cause i wanna flex the cool loading ui hehe ---
+        // await queryClient.prefetchQuery({
+        //   queryKey: queryKeysType.allLeaderboard,
+        //   queryFn: async () => await getAllLeaderboard(),
+        // }),
         await queryClient.prefetchQuery({
           queryKey: queryKeysType.paintCharges,
           queryFn: () => getPaintCharges(id),

@@ -14,13 +14,13 @@ export default function Leaderboard() {
   const [tab, setTab] = useState<"Players" | "Factions">("Players");
   const [period, setPeriod] = useState<Periods>("Today");
 
-  const { data: leaderboardData } = useSuspenseQuery<LeaderboardPeriods>({
+  const { data: leaderboardData, isFetching } = useQuery<LeaderboardPeriods>({
     queryKey: queryKeysType.allLeaderboard,
     queryFn: () => getAllLeaderboard(),
   });
 
   return (
-    <div className="max-w-full h-[70vh] bg-white rounded-2xl">
+    <div className="w-full bg-white rounded-2xl">
       {/* Tabs */}
       {/* <div className="flex justify-center w-full">
         <div className="flex items-center w-full max-w-1/2 bg-gray-100 rounded-full p-1 space-x-2 mb-4">
@@ -56,10 +56,20 @@ export default function Leaderboard() {
         ))}
       </div>
 
-      {period.toLowerCase() === "today" && <TableComponent users={leaderboardData.daily} />}
-      {period.toLowerCase() === "week" && <TableComponent users={leaderboardData.weekly} />}
-      {period.toLowerCase() === "month" && <TableComponent users={leaderboardData.monthly} />}
-      {period.toLowerCase() === "all time" && <TableComponent users={leaderboardData.allTime} />}
+      <div className="relative h-[70vh]">
+        {period.toLowerCase() === "today" && (
+          <TableComponent users={leaderboardData?.daily} isFetching={isFetching} />
+        )}
+        {period.toLowerCase() === "week" && (
+          <TableComponent users={leaderboardData?.weekly} isFetching={isFetching} />
+        )}
+        {period.toLowerCase() === "month" && (
+          <TableComponent users={leaderboardData?.monthly} isFetching={isFetching} />
+        )}
+        {period.toLowerCase() === "all time" && (
+          <TableComponent users={leaderboardData?.allTime} isFetching={isFetching} />
+        )}
+      </div>
     </div>
   );
 }
