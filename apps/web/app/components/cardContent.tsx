@@ -9,6 +9,8 @@ import AdminPanelMotion from "./motion/adminPanelMotion";
 import { useUser } from "@/context/user.context";
 import CreateCanvasMotion from "./motion/createCanvasMotion";
 import { setSoundEnabled } from "react-sounds";
+import CreateGuildMotion from "./motion/createGuildMotion";
+import GuildMotion from "./motion/guildMotion";
 
 export default function CardContent() {
   const { user, setUser } = useUser();
@@ -19,10 +21,15 @@ export default function CardContent() {
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (cardRef.current && !cardRef.current.contains(event.target as Node)) {
-        if (selectedContent === "createCanvas") {
-          setSelectedContent("adminPanel");
-        } else {
-          setSelectedContent(null);
+        switch (selectedContent) {
+          case "createCanvas":
+            setSelectedContent("adminPanel");
+            break;
+          case "createGuild":
+            setSelectedContent("guild");
+            break;
+          default:
+            setSelectedContent(null);
         }
       }
     }
@@ -56,6 +63,8 @@ export default function CardContent() {
     <AnimatePresence>
       {selectedContent === "profileForm" && <ProfileMotion cardRef={cardRef} />}
       {selectedContent === "leaderboard" && <LeaderboardMotion cardRef={cardRef} />}
+      {selectedContent === "guild" && <GuildMotion cardRef={cardRef} />}
+      {selectedContent === "createGuild" && <CreateGuildMotion cardRef={cardRef} />}
       {selectedContent === "adminPanel" && user?.role === "ADMIN" && (
         <AdminPanelMotion cardRef={cardRef} />
       )}
