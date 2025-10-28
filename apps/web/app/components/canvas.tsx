@@ -46,7 +46,8 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const [width, height] = useWindowSize();
   const { setSelectedContent } = useSelectedContent();
-  const { paintCharges, setPaintCharges, cooldown } = usePaintCharges(hasLoginToken);
+  const { paintCharges, setPaintCharges, cooldown, initializeAudio } =
+    usePaintCharges(hasLoginToken);
   const { play: playPnlExpand } = useSound("/sounds/panel_expand.mp3");
   const { play: playPnlCollapse } = useSound("/sounds/panel_collapse.mp3");
   const { play: playPop } = useSound("/sounds/pop.mp3", {
@@ -193,6 +194,7 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
     if (!canvas) return;
 
     const handleClick = (e: MouseEvent) => {
+      initializeAudio();
       if (isDragging) return;
 
       const rect = canvas.getBoundingClientRect();
@@ -429,7 +431,9 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
           <IconButton onClick={() => setSelectedContent("leaderboard")}>
             <Image width={24} height={24} src="/leaderboard.svg" alt="Leaderboard" />
           </IconButton>
-
+          <IconButton onClick={() => setSelectedContent("guild")}>
+            <Image src="/guild.svg" width={24} height={24} alt="Guild" />
+          </IconButton>
           {user && user.role === "ADMIN" && (
             <IconButton onClick={() => setSelectedContent("adminPanel")}>
               <FileLock />

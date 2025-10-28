@@ -17,6 +17,15 @@ export default function usePaintCharges(hasLoginToken: string | undefined) {
   const [cooldown, setCooldown] = useState<number>(30);
   const [shouldCountDown, setShouldCountDown] = useState<boolean>(false);
   const { play: playSuccess, stop } = useSound("/sounds/success.mp3");
+  const [audioInitialized, setAudioInitialized] = useState<boolean>(false);
+
+  // browser has policy that need users to have interaction in the app first in order to play sounds
+  // initialize audio
+  const initializeAudio = () => {
+    if (!audioInitialized) {
+      setAudioInitialized(true);
+    }
+  };
 
   const { data: paintChargesData, isSuccess } = useQuery<{ charges: number; cooldownUntil: Date }>({
     queryKey: queryKeysType.paintCharges,
@@ -66,7 +75,7 @@ export default function usePaintCharges(hasLoginToken: string | undefined) {
       setCooldown((prev) => {
         if (prev <= 1) {
           setPaintCharges((current) => (current < maxPaintCharges ? current + 1 : current));
-          if (hasLoginToken) {
+          if (hasLoginToken && audioInitialized) {
             playSuccess();
           } else {
             stop();
@@ -81,7 +90,7 @@ export default function usePaintCharges(hasLoginToken: string | undefined) {
       clearInterval(timer);
       stop();
     };
-  }, [shouldCountDown]);
+  }, [shouldCountDown, hasLoginToken, audioInitialized]);
 
-  return { paintCharges, setPaintCharges, cooldown, setCooldown };
+  return { paintCharges, setPaintCharges, cooldown, setCooldown, initializeAudio };
 }
