@@ -1,16 +1,18 @@
 import { useSelectedContent } from "@/context/selectedContent.context";
 import { useUser } from "@/context/user.context";
-import { validateError } from "@/utils/validate";
-import { CreateGuildType } from "@repo/types";
+import { CreateGuildType, GuildDataType } from "@repo/types";
 import { useMutation } from "@tanstack/react-query";
 import { createGuild } from "api/guild.service";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import DotsLoader from "../loading/dotsLoading";
+import { displayError } from "@/utils/displayError";
+import { useGuildData } from "@/context/guild.context";
 
 export default function CreateGuildForm() {
   const [guildName, setGuildName] = useState("");
   const { user } = useUser();
+  const { setGuildData } = useGuildData();
   const { setSelectedContent } = useSelectedContent();
 
   const mutation = useMutation({
@@ -18,13 +20,15 @@ export default function CreateGuildForm() {
       const res = createGuild(guildPayload);
       return res;
     },
-    onSuccess: (success) => {
-      toast.success(success || "Guild created successfully");
+    onSuccess: (data: GuildDataType) => {
+      console.log(data);
+      toast.success("Guild created successfully");
       setGuildName("");
-      // setSelectedContent("guild");
+      setGuildData(data);
+      setSelectedContent("guild");
     },
     onError: (err) => {
-      validateError(err);
+      displayError(err);
     },
   });
 
