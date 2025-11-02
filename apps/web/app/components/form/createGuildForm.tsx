@@ -1,6 +1,6 @@
 import { useSelectedContent } from "@/context/selectedContent.context";
 import { useUser } from "@/context/user.context";
-import { CreateGuildType, GuildDataType } from "@repo/types";
+import { CreateGuildType, GuildDataType, queryKeysType } from "@repo/types";
 import { useMutation } from "@tanstack/react-query";
 import { createGuild } from "api/guild.service";
 import { useState } from "react";
@@ -8,12 +8,14 @@ import { toast } from "react-toastify";
 import DotsLoader from "../loading/dotsLoading";
 import { displayError } from "@/utils/displayError";
 import { useGuildData } from "@/context/guild.context";
+import { getQueryClient } from "@/getQueryClient";
 
 export default function CreateGuildForm() {
   const [guildName, setGuildName] = useState("");
   const { user } = useUser();
-  const { setGuildData } = useGuildData();
+  // const { setGuildData } = useGuildData();
   const { setSelectedContent } = useSelectedContent();
+  const queryClient = getQueryClient();
 
   const mutation = useMutation({
     mutationFn: async (guildPayload: CreateGuildType) => {
@@ -24,8 +26,11 @@ export default function CreateGuildForm() {
       console.log(data);
       toast.success("Guild created successfully");
       setGuildName("");
-      setGuildData(data);
       setSelectedContent("guild");
+      // setGuildData(data);
+
+      // manually set the data instead of refetching
+      queryClient.setQueryData(queryKeysType.guildByUserId(user?.id), data);
     },
     onError: (err) => {
       displayError(err);

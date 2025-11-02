@@ -8,10 +8,21 @@ import { MoreVertical, UserPlus, X } from "lucide-react";
 import Guild from "../guild";
 import GuildContent from "../guildContent";
 import { useGuildData } from "@/context/guild.context";
+import { useQuery } from "@tanstack/react-query";
+import { queryKeysType } from "@repo/types";
+import { getGuildByUserId } from "api/guild.service";
+import { useUser } from "@/context/user.context";
 
 export default function GuildMotion({ cardRef }: { cardRef: RefObject<HTMLDivElement | null> }) {
+  const { user } = useUser();
   const { setSelectedContent } = useSelectedContent();
-  const { guildData, setGuildData } = useGuildData();
+  // const { guildData, setGuildData } = useGuildData();
+
+  const { data: guildData } = useQuery({
+    queryKey: queryKeysType.guildByUserId(user?.id),
+    queryFn: () => getGuildByUserId({ userId: user?.id }),
+    enabled: !!user?.id,
+  });
 
   return (
     <MotionComponent>
@@ -28,13 +39,18 @@ export default function GuildMotion({ cardRef }: { cardRef: RefObject<HTMLDivEle
               </h2>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <IconButton className="top-2 right-2 shadow-none border-none text-gray-600 hover:text-gray-900">
-              <MoreVertical className="w-5 h-5" />
-            </IconButton>
-            <IconButton className="top-2 right-2 shadow-none border-none text-gray-600 hover:text-gray-900">
-              <UserPlus className="w-5 h-5" />
-            </IconButton>
+          <div className="flex items-center">
+            {guildData ? (
+              <div className="flex">
+                <IconButton className="top-2 right-2 shadow-none border-none text-gray-600 hover:text-gray-900">
+                  <MoreVertical className="w-5 h-5" />
+                </IconButton>
+                <IconButton className="top-2 right-2 shadow-none border-none text-gray-600 hover:text-gray-900">
+                  <UserPlus className="w-5 h-5" />
+                </IconButton>
+              </div>
+            ) : null}
+
             <IconButton
               className="top-2 right-2 shadow-none border-none text-gray-600 hover:text-gray-900"
               aria-label="Close form"

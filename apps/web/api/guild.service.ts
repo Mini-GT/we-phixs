@@ -1,5 +1,5 @@
 import axios from "axios";
-import { CreateGuildType } from "@repo/types";
+import { CreateGuildType, GetGuildByUserId } from "@repo/types";
 
 const isServer = typeof window === "undefined";
 const baseURL = isServer
@@ -15,5 +15,10 @@ export async function createGuild({ guildName, userId }: CreateGuildType) {
   const res = await api.post(`/create/${userId}`, {
     guildName,
   });
+  return res.data;
+}
+
+export async function getGuildByUserId({ userId }: GetGuildByUserId) {
+  const res = await api.get(`/${userId}`);
   return res.data;
 }

@@ -11,6 +11,7 @@ import { getQueryClient } from "./getQueryClient";
 import { getPaintCharges } from "api/user.service";
 import { isTokenExpired, verifyJwt } from "./utils/jwt";
 import { logoutUser } from "api/logout.service";
+import { getGuildByUserId } from "api/guild.service";
 
 export const jwtsecret = process.env.jwtsecretKey;
 
@@ -40,6 +41,10 @@ export default async function Home() {
         await queryClient.prefetchQuery({
           queryKey: queryKeysType.paintCharges,
           queryFn: () => getPaintCharges(id),
+        }),
+        await queryClient.prefetchQuery({
+          queryKey: queryKeysType.guildByUserId(id),
+          queryFn: () => getGuildByUserId({ userId: id }),
         }),
       ]);
     }
