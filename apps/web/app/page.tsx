@@ -17,9 +17,11 @@ export const jwtsecret = process.env.jwtsecretKey;
 
 export default async function Home() {
   const queryClient = getQueryClient();
+  const cookieStore = await cookies();
 
-  const hasLoginToken = (await cookies()).get("hasLoginToken")?.value;
-  const loginToken = (await cookies()).get("loginToken")?.value;
+  const hasLoginToken = cookieStore.get("hasLoginToken")?.value;
+  const loginToken = cookieStore.get("loginToken")?.value;
+  const guildInvitationCode = cookieStore.get("guildInvite")?.value;
 
   if (loginToken && jwtsecret) {
     const { id, exp } = verifyJwt(loginToken, jwtsecret) as { id: string; exp: number };
@@ -62,7 +64,7 @@ export default async function Home() {
           stacked
         />
         <Canvas hasLoginToken={hasLoginToken}>{!hasLoginToken ? <Login /> : <User />}</Canvas>
-        <CardContent />
+        <CardContent guildInvitationCode={guildInvitationCode} />
       </div>
     </HydrationBoundary>
   );

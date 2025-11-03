@@ -11,11 +11,42 @@ import CreateCanvasMotion from "./motion/createCanvasMotion";
 import { setSoundEnabled } from "react-sounds";
 import CreateGuildMotion from "./motion/createGuildMotion";
 import GuildMotion from "./motion/guildMotion";
+import { useMutation } from "@tanstack/react-query";
+import { joinGuildByInvite } from "api/guild.service";
+import { getQueryClient } from "@/getQueryClient";
+import { toast } from "react-toastify";
+import { queryKeysType } from "@repo/types";
+import { removeGuildInvitationCookie } from "api/removeGuildInvitation.service";
 
-export default function CardContent() {
+export default function CardContent({
+  guildInvitationCode,
+}: {
+  guildInvitationCode: string | undefined;
+}) {
   const { user, setUser } = useUser();
   const { selectedContent, setSelectedContent } = useSelectedContent();
   const cardRef = useRef<HTMLDivElement>(null);
+  const queryClient = getQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: joinGuildByInvite,
+    onSuccess: (data) => {
+      toast.success("Joined guild successfully");
+      setSelectedContent("guild");
+      queryClient.setQueryData(queryKeysType.guildByUserId(user?.id), data);
+    },
+    onError: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeysType.guildByUserId(user?.id) });
+    },
+    onSettled: () => {
+      removeGuildInvitationCookie();
+    },
+  });
+
+  useEffect(() => {
+    if (!user?.id || !guildInvitationCode) return;
+    mutation.mutate({ userId: user.id, code: guildInvitationCode });
+  }, [user?.id, guildInvitationCode]);
 
   // close card if user clicks outside the card content
   useEffect(() => {
