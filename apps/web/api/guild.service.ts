@@ -1,5 +1,12 @@
 import axios from "axios";
-import { CreateGuildType, GetGuildByUserId, GetInviteCode, JoinGuildByInvite } from "@repo/types";
+import {
+  CreateGuildType,
+  GetGuildByUserId,
+  GetInviteCode,
+  JoinGuildByInvite,
+  KickGuildMember,
+  LeaveGuild,
+} from "@repo/types";
 
 const isServer = typeof window === "undefined";
 const baseURL = isServer
@@ -30,5 +37,26 @@ export async function getGuildInviteCode({ guildId }: GetInviteCode) {
 
 export async function joinGuildByInvite({ userId, code }: JoinGuildByInvite) {
   const res = await api.post(`/join/${userId}/${code}`);
+  return res.data;
+}
+
+export async function leaveGuild({ userId, guildId }: LeaveGuild) {
+  const res = await api.delete(`/leave/${userId}`, {
+    params: { guildId },
+  });
+  return res.data;
+}
+
+export async function kickGuildMember({ leaderId, memberId, guildId }: KickGuildMember) {
+  const res = await api.delete(`/kick`, {
+    params: { leaderId, memberId, guildId },
+  });
+  return res.data;
+}
+
+export async function transferLeadership({ userId, guildId }: LeaveGuild) {
+  const res = await api.delete(`/leave/${userId}`, {
+    params: { guildId },
+  });
   return res.data;
 }
