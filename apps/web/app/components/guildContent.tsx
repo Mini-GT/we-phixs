@@ -3,7 +3,7 @@ import { GuildContentProps, queryKeysType } from "@repo/types";
 import { useState } from "react";
 import { useUser } from "@/context/user.context";
 import { useMutation } from "@tanstack/react-query";
-import { kickGuildMember } from "api/guild.service";
+import { kickGuildMember, transferLeadership } from "api/guild.service";
 import { toast } from "react-toastify";
 import { displayError } from "@/utils/displayError";
 import { getQueryClient } from "@/getQueryClient";
@@ -26,6 +26,18 @@ export default function GuildContent({
     mutationFn: kickGuildMember,
     onSuccess: (data) => {
       toast.success("You have kicked a member");
+
+      queryClient.setQueryData(queryKeysType.guildByUserId(user?.id), data);
+    },
+    onError: (err) => {
+      displayError(err);
+    },
+  });
+
+  const transferLeadershipMutation = useMutation({
+    mutationFn: transferLeadership,
+    onSuccess: (data) => {
+      toast.success("Guild leadership transferred successfully.");
 
       queryClient.setQueryData(queryKeysType.guildByUserId(user?.id), data);
     },
@@ -103,7 +115,16 @@ export default function GuildContent({
                   >
                     Kick
                   </button>
-                  <button className="block border cursor-pointer w-full px-3 py-2 text-nowrap hover:bg-gray-100 text-left">
+                  <button
+                    onClick={() =>
+                      transferLeadershipMutation.mutate({
+                        leaderId: guildLeaderId,
+                        newLeaderId: member.id,
+                        guildId,
+                      })
+                    }
+                    className="block border cursor-pointer w-full px-3 py-2 text-nowrap hover:bg-gray-100 text-left"
+                  >
                     Transfer leadership
                   </button>
                 </div>
