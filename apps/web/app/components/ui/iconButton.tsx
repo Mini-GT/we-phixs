@@ -1,5 +1,6 @@
 import React from "react";
 import clsx from "clsx";
+import { twMerge } from "tailwind-merge";
 
 interface IconButtonProps {
   children: React.ReactNode;
@@ -24,7 +25,7 @@ export default function IconButton({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={clsx("w-10 h-10 rounded-full bg-white", baseStyles, className)}
+      className={twMerge(clsx("w-10 h-10 rounded-full bg-white", baseStyles, className))}
     >
       {children}
     </button>
