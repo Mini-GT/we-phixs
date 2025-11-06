@@ -17,6 +17,7 @@ import { getQueryClient } from "@/getQueryClient";
 import { toast } from "react-toastify";
 import { queryKeysType } from "@repo/types";
 import { removeGuildInvitationCookie } from "api/removeGuildInvitation.service";
+import { displayError } from "@/utils/displayError";
 
 export default function CardContent({
   guildInvitationCode,
@@ -35,7 +36,8 @@ export default function CardContent({
       setSelectedContent("guild");
       queryClient.setQueryData(queryKeysType.guildByUserId(user?.id), data);
     },
-    onError: () => {
+    onError: (err) => {
+      displayError(err);
       queryClient.invalidateQueries({ queryKey: queryKeysType.guildByUserId(user?.id) });
     },
     onSettled: () => {

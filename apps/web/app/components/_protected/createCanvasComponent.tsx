@@ -8,7 +8,7 @@ import IconButton from "../ui/iconButton";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { useSelectedContent } from "@/context/selectedContent.context";
-import { validateError } from "@/utils/validate";
+import { displayError } from "@/utils/displayError";
 
 export default function CreateCanvasField() {
   const { setSelectedContent } = useSelectedContent();
@@ -31,7 +31,7 @@ export default function CreateCanvasField() {
       setSelectedContent(null);
     },
     onError: (err) => {
-      validateError(err);
+      displayError(err);
     },
   });
 

@@ -8,18 +8,23 @@ import { MoreVertical, UserPlus, X } from "lucide-react";
 import Guild from "../guild";
 import GuildContent from "../guildContent";
 import { useGuildData } from "@/context/guild.context";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { GuildDataType, queryKeysType } from "@repo/types";
-import { getGuildByUserId, getGuildInviteCode } from "api/guild.service";
+import { getGuildByUserId, getGuildInviteCode, leaveGuild } from "api/guild.service";
 import { useUser } from "@/context/user.context";
 import { useToggle } from "@/hooks/useToggle";
 import InviteLinkCard from "../inviteLinkCard";
 import { AnimatePresence } from "framer-motion";
+import { toast } from "react-toastify";
+import { getQueryClient } from "@/getQueryClient";
+import { displayError } from "@/utils/displayError";
 
 export default function GuildMotion({ cardRef }: { cardRef: RefObject<HTMLDivElement | null> }) {
   const { user } = useUser();
   const { setSelectedContent } = useSelectedContent();
   const guildInvitationToggle = useToggle();
+  const dotMenu = useToggle();
+  const queryClient = getQueryClient();
   // const { guildData, setGuildData } = useGuildData();
 
   const { data: guildData } = useQuery<GuildDataType>({
@@ -37,6 +42,19 @@ export default function GuildMotion({ cardRef }: { cardRef: RefObject<HTMLDivEle
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
+  });
+
+  const mutation = useMutation({
+    mutationFn: leaveGuild,
+    onSuccess: (data) => {
+      toast.success(data);
+
+      // queryClient.invalidateQueries({ queryKey: queryKeysType.guildByUserId(user?.id) });
+      queryClient.setQueryData(queryKeysType.guildByUserId(user?.id), null);
+    },
+    onError: (err) => {
+      displayError(err);
+    },
   });
 
   return (
@@ -72,19 +90,34 @@ export default function GuildMotion({ cardRef }: { cardRef: RefObject<HTMLDivEle
             </div>
             <div className="flex items-center">
               {guildData ? (
-                <div className="flex">
-                  <IconButton className="top-2 right-2 shadow-none border-none text-gray-600 hover:text-gray-900">
-                    <MoreVertical className="w-5 h-5" />
-                  </IconButton>
+                <div className="relative flex">
                   <IconButton
-                    onClick={() => {
-                      guildInvitationToggle.toggle();
-                      query.refetch();
-                    }}
+                    onClick={() => dotMenu.toggle()}
                     className="top-2 right-2 shadow-none border-none text-gray-600 hover:text-gray-900"
                   >
-                    <UserPlus className="w-5 h-5" />
+                    <MoreVertical className="w-5 h-5" />
                   </IconButton>
+                  {guildData.guildLeaderId === user?.id && ( // disable invite btn as only guild leader can generate an invite link
+                    <IconButton
+                      onClick={() => {
+                        guildInvitationToggle.toggle();
+                        query.refetch();
+                      }}
+                      className="top-2 right-2 shadow-none border-none text-gray-600 hover:text-gray-900"
+                    >
+                      <UserPlus className="w-5 h-5" />
+                    </IconButton>
+                  )}
+                  {dotMenu.isOpen && (
+                    <div className="absolute top-[90%] right-[60%] bg-white border border-gray-200 rounded-md shadow-md text-gray-700 text-sm text-nowrap">
+                      <button
+                        className="w-full text-center px-3 py-2 hover:bg-gray-100 cursor-pointer text-red-500"
+                        onClick={() => mutation.mutate({ userId: user?.id, guildId: guildData.id })}
+                      >
+                        Leave guild
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : null}
 
@@ -104,6 +137,8 @@ export default function GuildMotion({ cardRef }: { cardRef: RefObject<HTMLDivEle
             <GuildContent
               guildTotalPixelsPlaced={guildData.totalPixelsPlaced}
               members={guildData.members}
+              guildLeaderId={guildData.guildLeaderId}
+              guildId={guildData.id}
             />
           )}
         </div>
