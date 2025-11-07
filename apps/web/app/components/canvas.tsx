@@ -12,7 +12,7 @@ import { useUser } from "@/context/user.context";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { getCanvasById, updateCanvasPixel } from "api/canvas.service";
 import { getQueryClient } from "@/getQueryClient";
-import usePaintCharges from "@/hooks/usePaintCharges";
+import usePaintCharges, { PaintChargesDataType } from "@/hooks/usePaintCharges";
 import { useSound } from "react-sounds";
 import useSocket from "@/hooks/useSocket";
 import useInspect from "@/hooks/useInspect";
@@ -25,9 +25,6 @@ type CanvasProp = {
   children: React.ReactNode;
   hasLoginToken: string | undefined;
 };
-
-export const maxPaintCharges = 30;
-export const rechargeTime_sec = 30;
 
 export default function Canvas({ children, hasLoginToken }: CanvasProp) {
   // initialize socket
@@ -46,8 +43,10 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const [width, height] = useWindowSize();
   const { setSelectedContent } = useSelectedContent();
-  const { paintCharges, setPaintCharges, cooldown, initializeAudio } =
-    usePaintCharges(hasLoginToken);
+  // const { paintCharges, setPaintCharges, cooldown, initializeAudio } = usePaintCharges(hasLoginToken);
+  const { paintCharges, setPaintCharges, setCooldownUntil, displaySeconds, initializeAudio } =
+    usePaintCharges(hasLoginToken || "");
+
   const { play: playPnlExpand } = useSound("/sounds/panel_expand.mp3");
   const { play: playPnlCollapse } = useSound("/sounds/panel_collapse.mp3");
   const { play: playPop } = useSound("/sounds/pop.mp3", {
@@ -57,7 +56,6 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
   const { inspectMutation, inspectedCellData, setInspectedCellData } = useInspect();
   const cellSize = 10;
   const gridSize = 300;
-
   const [lastTouchDistance, setLastTouchDistance] = useState<number | null>(null);
   const [lastTouchCenter, setLastTouchCenter] = useState<{ x: number; y: number } | null>(null);
 
@@ -106,8 +104,12 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
       //   queryClient.setQueryData(["canvas", canvasData.id], context.prevData);
       // }
     },
-    onSuccess: () => {
-      setPaintCharges((prev) => (prev ? prev - 1 : prev));
+    onSuccess: (data: PaintChargesDataType) => {
+      // updateCharges(data.charges, data.cooldownMs, data.lastCooldownUpdate);
+      // setPaintCharges((prev) => (prev ? prev - 1 : prev));
+
+      setPaintCharges(data.charges);
+      setCooldownUntil(data.cooldownUntil);
       playPop();
     },
 
@@ -245,7 +247,8 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
 
     canvas.addEventListener("click", handleClick);
     return () => canvas.removeEventListener("click", handleClick);
-  }, [panOffset, scale, isDragging, selectedColor, paintCharges, tool]);
+    // }, [panOffset, scale, isDragging, selectedColor, paintCharges, tool]);
+  }, [panOffset, scale, isDragging, selectedColor, tool]);
 
   // wheel pan/zoom
   useEffect(() => {
@@ -420,6 +423,17 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
     tool === "paint" ? playPnlExpand() : playPnlCollapse();
   };
 
+  const formatTime = (ms: number) => {
+    const totalSeconds = Math.ceil(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    if (minutes > 0) {
+      return `${minutes}m ${seconds}s`;
+    }
+    return `${seconds}s`;
+  };
+
   return (
     <div className="w-full">
       <div className="absolute flex flex-col gap-2 m-4 right-0">
@@ -453,8 +467,8 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
       <div className="absolute flex flex-col left-1/2 right-1/2 items-center justify-center bottom-4">
         {user && (
           <ColorPalette
-            cooldown={cooldown}
             paintCharges={paintCharges}
+            displaySeconds={displaySeconds}
             selectedColor={selectedColor}
             setSelectedColor={setSelectedColor}
             paintBtn={paintBtn}
@@ -464,14 +478,14 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
 
         {user && tool === "inspect" && !inspectedCellData && (
           <PrimaryButton
-            className="text-2xl py-4 px-7 flex max-w-fit items-center gap-2"
+            className={`text-2xl py-4 px-7 flex ${displaySeconds > 0 ? "w-65" : "w-55"} items-center justify-center gap-2`}
             onClick={() => paintBtn("paint")}
           >
             <Brush size={20} fill="white" />
             <div className="flex items-center gap-1">
               Paint <span>{paintCharges}</span>/30
-              {paintCharges < maxPaintCharges && (
-                <span className="text-sm">{`(00:${cooldown})`}</span>
+              {paintCharges < 30 && displaySeconds <= 30 && displaySeconds > 0 && (
+                <span className="text-sm">00:{displaySeconds}s</span>
               )}
             </div>
           </PrimaryButton>

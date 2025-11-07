@@ -1,7 +1,6 @@
 import { Brush, X } from "lucide-react";
 import IconButton from "./ui/iconButton";
 import PrimaryButton from "./ui/primaryButton";
-import { maxPaintCharges } from "./canvas";
 import { ToolType } from "@repo/types";
 import { useSound } from "react-sounds";
 
@@ -57,7 +56,7 @@ const colors = [
 ];
 
 type ColorPaletteProps = {
-  cooldown: number;
+  displaySeconds: number;
   paintCharges: number;
   selectedColor: string | null;
   setSelectedColor: (color: string) => void;
@@ -66,7 +65,7 @@ type ColorPaletteProps = {
 };
 
 export default function ColorPalette({
-  cooldown,
+  displaySeconds,
   paintCharges,
   selectedColor,
   setSelectedColor,
@@ -76,6 +75,17 @@ export default function ColorPalette({
   const { play: playBtnSoft } = useSound("/sounds/button_soft_double.mp3", {
     rate: 1.6,
   });
+
+  const formatTime = (ms: number) => {
+    const totalSeconds = Math.ceil(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    if (minutes > 0) {
+      return `${minutes}m ${seconds}s`;
+    }
+    return `${seconds}s`;
+  };
 
   return (
     <div
@@ -89,7 +99,7 @@ export default function ColorPalette({
             {/* <span className="text-sm">{selected}</span> */}
           </div>
         )}
-        <IconButton className="text-gray-600 w-1 h-1 ml-auto border border-gray-300">
+        <IconButton className="text-gray-600 ml-auto border border-gray-300 border-none shadow-none">
           <X className="w-full h-full p-2" onClick={() => paintBtn("inspect")} />
         </IconButton>
       </div>
@@ -111,12 +121,14 @@ export default function ColorPalette({
       </div>
       <PrimaryButton
         onClick={() => paintBtn("inspect")}
-        className="text-2xl m-auto py-4 px-7 flex items-center gap-2"
+        className={`text-2xl m-auto py-4 px-7 flex ${displaySeconds ? "w-65" : "w-55"} items-center justify-center gap-2`}
       >
         <Brush size={20} fill="white" />
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           Paint <span>{paintCharges}</span>/30
-          {paintCharges < maxPaintCharges && <span className="text-sm">{`(00:${cooldown})`}</span>}
+          {paintCharges < 30 && displaySeconds <= 30 && displaySeconds > 0 && (
+            <span className="text-sm">00:{displaySeconds}s</span>
+          )}
         </div>
       </PrimaryButton>
     </div>
