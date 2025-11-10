@@ -21,7 +21,7 @@ export default function usePaintCharges(hasLoginToken: string) {
   const [paintCharges, setPaintCharges] = useState(0);
   const [displaySeconds, setDisplaySeconds] = useState(0);
   const [cooldownUntil, setCooldownUntil] = useState<string | null>(null);
-  const { play: playSuccess, stop } = useSound("/sounds/success.mp3");
+  const { play: playSuccess } = useSound("/sounds/success.mp3");
   const [audioInitialized, setAudioInitialized] = useState<boolean>(false);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -45,7 +45,6 @@ export default function usePaintCharges(hasLoginToken: string) {
 
     setPaintCharges(data.charges);
     setCooldownUntil(data.cooldownUntil);
-
     // calculate initial display seconds
     if (data.cooldownUntil && data.charges < maxCharges) {
       const cooldownTime = new Date(data.cooldownUntil).getTime();
@@ -68,6 +67,9 @@ export default function usePaintCharges(hasLoginToken: string) {
       return;
     }
 
+    // track last charge time to prevent duplicate increments
+    let lastChargeIncrementTime = 0;
+
     timerRef.current = setInterval(() => {
       const now = Date.now();
       const cooldownTime = new Date(cooldownUntil).getTime();
@@ -77,6 +79,7 @@ export default function usePaintCharges(hasLoginToken: string) {
         //fully recharged
         setDisplaySeconds(0);
         setCooldownUntil(null);
+        setPaintCharges(maxCharges);
         if (timerRef.current) {
           clearInterval(timerRef.current);
           timerRef.current = null;
@@ -86,18 +89,24 @@ export default function usePaintCharges(hasLoginToken: string) {
 
       // calculate remaining time for *current* 30s cycle
       const remainingMsThisCharge = remainingTotalMs % rechargeTime;
-      // when remainingMsThisCharge is close to 0, add one charge
-      if (remainingMsThisCharge / 1000 < 0.1) {
-        if (hasLoginToken && audioInitialized) {
-          playSuccess();
-          setPaintCharges((prev) => Math.min(prev + 1, maxCharges));
-        } else {
-          stop();
-        }
+
+      // check if we just completed a charge cycle
+      // only increment if we haven't incremented in the last 500ms (debounce)
+      if (remainingMsThisCharge > rechargeTime - 100 && now - lastChargeIncrementTime > 500) {
+        lastChargeIncrementTime = now;
+        setPaintCharges((prev) => {
+          const newCharges = Math.min(prev + 1, maxCharges);
+          // play sound only on actual increment
+          if (newCharges > prev && hasLoginToken && audioInitialized) {
+            playSuccess();
+          }
+          return newCharges;
+        });
       }
 
-      const remainingSeconds = Math.ceil(remainingMsThisCharge / 1000);
-      setDisplaySeconds(remainingSeconds || 30);
+      // display seconds should never be 0 during cooldown
+      const remainingSeconds = Math.max(1, Math.ceil(remainingMsThisCharge / 1000));
+      setDisplaySeconds(remainingSeconds);
     }, 100);
 
     return () => {
