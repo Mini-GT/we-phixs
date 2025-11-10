@@ -8,7 +8,7 @@ export default function MotionComponent({ children, className }: ChildrenProps) 
     <motion.div
       className={twMerge(
         clsx(
-          "absolute z-50 flex -inset-2 items-center justify-center backdrop-blur-xs shadow-lg bg-black/5",
+          "absolute z-50 flex inset-0 items-center justify-center backdrop-blur-xs shadow-lg bg-black/5",
           className
         )
       )}

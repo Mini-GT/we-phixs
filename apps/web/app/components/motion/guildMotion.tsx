@@ -5,8 +5,6 @@ import { type RefObject } from "react";
 import MotionComponent from "./motion";
 import Image from "next/image";
 import { MoreVertical, UserPlus, X } from "lucide-react";
-import Guild from "../guild";
-import GuildContent from "../guildContent";
 import { useGuildData } from "@/context/guild.context";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { GuildDataType, queryKeysType } from "@repo/types";
@@ -18,6 +16,8 @@ import { AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
 import { getQueryClient } from "@/getQueryClient";
 import { displayError } from "@/utils/displayError";
+import Guild from "../guild/guild";
+import GuildContent from "../guild/guildContent";
 
 export default function GuildMotion({ cardRef }: { cardRef: RefObject<HTMLDivElement | null> }) {
   const { user } = useUser();
@@ -61,7 +61,7 @@ export default function GuildMotion({ cardRef }: { cardRef: RefObject<HTMLDivEle
     <MotionComponent>
       <Card
         ref={cardRef}
-        className={`relative w-[600px] max-w-2xl gap-4 scrollbar-custom p-6 bg-white border-cyan-300 rounded-4xl`}
+        className={`relative w-[95vw] max-w-[600px] gap-4 scrollbar-custom p-6 bg-white border-cyan-300 rounded-4xl`}
       >
         {/* Invitation Card */}
         <AnimatePresence>

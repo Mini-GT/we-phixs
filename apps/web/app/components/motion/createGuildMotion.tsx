@@ -12,7 +12,7 @@ export default function CreateGuildMotion({
     <MotionComponent>
       <Card
         ref={cardRef}
-        className={`relative w-[600px] max-w-md overflow-y-auto scrollbar-custom p-6 bg-white border-cyan-300 rounded-4xl`}
+        className={`relative w-[95vw] max-w-[400px] overflow-y-auto scrollbar-custom p-6 bg-white border-cyan-300 rounded-4xl`}
       >
         <CreateGuildForm />
       </Card>
