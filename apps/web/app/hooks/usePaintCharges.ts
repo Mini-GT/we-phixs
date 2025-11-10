@@ -117,11 +117,32 @@ export default function usePaintCharges(hasLoginToken: string) {
     };
   }, [cooldownUntil, paintCharges, hasLoginToken, audioInitialized]);
 
+  // set up audio context on first user interaction
+  useEffect(() => {
+    const handleFirstInteraction = () => {
+      setAudioInitialized(true);
+
+      // remove listeners after first interaction
+      document.removeEventListener("click", handleFirstInteraction);
+      document.removeEventListener("keydown", handleFirstInteraction);
+      document.removeEventListener("touchstart", handleFirstInteraction);
+    };
+
+    // listen for various interaction types
+    document.addEventListener("click", handleFirstInteraction);
+    document.addEventListener("keydown", handleFirstInteraction);
+    document.addEventListener("touchstart", handleFirstInteraction);
+
+    return () => {
+      document.removeEventListener("click", handleFirstInteraction);
+      document.removeEventListener("keydown", handleFirstInteraction);
+      document.removeEventListener("touchstart", handleFirstInteraction);
+    };
+  }, []);
   return {
     paintCharges,
     setPaintCharges,
     displaySeconds,
     setCooldownUntil,
-    initializeAudio,
   };
 }
