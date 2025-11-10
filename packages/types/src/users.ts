@@ -5,21 +5,31 @@ type User = {
   name: string;
   profileImage: string | null;
   status: string;
-  role: string;
+  role: Role;
   totalPixelsPlaced: number;
   discord: DiscordFields | null;
-  charges: number;
-  cooldownUntil: Date | null;
 };
 
-type Role = "USER" | "ADMIN" | "MODERATOR" | "DEMO";
+type Role = "USER" | "ADMIN" | "MODERATOR" | "DEMO" | "LEADER" | "MEMBER";
 
 type Status = "verified" | "unverified" | "banned" | "pending" | "suspended";
 
-type CalculateChargesType = {
-  charges: User["charges"];
-  cooldownUntil: User["cooldownUntil"];
+type CalculateChargesInput = {
+  charges: number;
+  cooldownMs: number;
+  lastCooldownUpdate: Date | null;
 };
+
+type CalculateChargesOutput = {
+  charges: number;
+  cooldownMs: number; // Just return total remaining cooldown
+  lastCooldownUpdate: Date;
+};
+
+// type CalculateChargesType = {
+//   charges: number;
+//   cooldownUntil: Date | null;
+// };
 
 type DiscordFields = {
   discordId: string;
@@ -28,4 +38,38 @@ type DiscordFields = {
   avatar: string;
 };
 
-export type { User, Role, Status, DiscordFields, CalculateChargesType };
+type LeaderboardPeriods = {
+  allTime: UsersLeaderboardType[];
+  daily: UsersLeaderboardType[];
+  weekly: UsersLeaderboardType[];
+  monthly: UsersLeaderboardType[];
+};
+
+type UsersLeaderboardType = {
+  id: User["id"];
+  name: User["name"];
+  totalPixelsPlaced: User["totalPixelsPlaced"];
+  discord?: Omit<DiscordFields, "discordId" | "avatar">;
+};
+
+type UpdateProfie = {
+  currentName: string;
+  newName: string | null;
+  currentPassword: string | null;
+  newPassword: string | null;
+  confirmNewPassword: string | null;
+  currentProfileImage: string;
+  newProfileImage: string | null;
+};
+
+export type {
+  User,
+  Role,
+  Status,
+  DiscordFields,
+  CalculateChargesInput,
+  CalculateChargesOutput,
+  UsersLeaderboardType,
+  LeaderboardPeriods,
+  UpdateProfie,
+};

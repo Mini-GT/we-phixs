@@ -2,7 +2,7 @@ import { ChangeEvent } from "react";
 
 type FormFieldProps = {
   label: string;
-  value: string | undefined;
+  value: string | undefined | null;
   required?: boolean;
   onChange?: (value: string) => void;
   onChangeEvent?: (e: ChangeEvent<HTMLInputElement>) => void;

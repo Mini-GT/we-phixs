@@ -1,30 +1,57 @@
+import { Dispatch, SetStateAction } from "react";
 import { User } from "./users";
 
-type CreateCanvas = {
+interface CreateCanvas {
   name: string;
   gridSize: string;
-};
+}
 
-type Pixel = {
+interface Pixel {
   color: string;
   user: User;
   x: number;
   y: number;
-};
+}
 
-type CanvasType = {
-  gridSize: number;
+interface CanvasType extends CreateCanvas {
   id: number;
-  name: string;
   pixels: Pixel[];
+}
+
+interface UpdateCanvasPixelProps extends Omit<Pixel, "user"> {
+  canvasId: number;
+  userId?: string;
+}
+
+interface InspectCanvas extends Omit<UpdateCanvasPixelProps, "user" | "color" | "userId"> {}
+
+type ToolType = {
+  tool: "inspect" | "paint";
+  setTool: Dispatch<SetStateAction<ToolType["tool"]>>;
 };
 
-type UpdateCanvasPixelProps = {
-  canvasId: number;
+type Coordinantes = {
   x: number;
   y: number;
-  color: string;
-  userId?: string;
 };
 
-export type { CreateCanvas, Pixel, CanvasType, UpdateCanvasPixelProps };
+type ScaleProps = {
+  canvas: HTMLCanvasElement;
+  zoomDelta: number;
+  panOffset: Coordinantes;
+  setPanOffset: Dispatch<SetStateAction<Coordinantes>>;
+  setScale: Dispatch<SetStateAction<number>>;
+  centerX: number;
+  centerY: number;
+};
+
+export type {
+  CreateCanvas,
+  Pixel,
+  CanvasType,
+  UpdateCanvasPixelProps,
+  ToolType,
+  InspectCanvas,
+  Coordinantes,
+  ScaleProps,
+};

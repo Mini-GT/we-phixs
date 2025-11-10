@@ -5,3 +5,5 @@ export * from "./src/componentProps";
 export * from "./src/queryKey";
 export * from "./src/error";
 export * from "./src/form";
+export * from "./src/canvas";
+export * from "./src/guild";
