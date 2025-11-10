@@ -14,6 +14,8 @@ import { updateProfile } from "api/user.service";
 import { getQueryClient } from "@/getQueryClient";
 import { displayError } from "@/utils/displayError";
 import { toast } from "react-toastify";
+import { useToggle } from "@/hooks/useToggle";
+import AvatarPicker from "../avatarPicker";
 
 const defaultFieldErrors = {
   nameError: "",
@@ -27,6 +29,7 @@ export default function ProfileForm() {
   const [fieldError, setFieldError] = useState<Partial<FieldErrorTypes>>(defaultFieldErrors);
   const [showPasswordFields, setShowPasswordFields] = useState<boolean>(false);
   const queryClient = getQueryClient();
+  const avatarPickToggle = useToggle();
 
   if (!user) return <div>Couldn't load user data</div>;
 
@@ -82,23 +85,32 @@ export default function ProfileForm() {
     <div>
       {/* Avatar */}
       <div className="flex justify-center mb-6">
-        <div className="relative">
-          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 via-cyan-500 to-blue-600 p-1">
-            <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
-              <Image
-                width={1024}
-                height={1024}
-                src={getProfileImage(user)}
-                alt="Avatar"
-                className="w-full h-full"
-                loading="lazy"
-                priority={false}
-              />
+        <div className="flex items-center justify-center relative w-full">
+          <div className="w-24 h-24 rounded-full ">
+            <div className="relative w-full h-full rounded-full bg-white flex items-center justify-center">
+              <div className="bg-gradient-to-br from-blue-500 via-cyan-500 to-blue-600 p-1 rounded-full">
+                <Image
+                  width={1024}
+                  height={1024}
+                  src={getProfileImage(user)}
+                  alt="Avatar"
+                  className="w-full h-full rounded-full"
+                  loading="lazy"
+                  priority={false}
+                />
+              </div>
+              <button
+                className="absolute bottom-0 right-0 w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center hover:from-blue-600 hover:to-cyan-600 transition-all shadow-lg cursor-pointer"
+                onClick={avatarPickToggle.toggle}
+              >
+                <Edit2 size={16} className="text-white" />
+              </button>
             </div>
           </div>
-          <button className="absolute bottom-0 right-0 w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center hover:from-blue-600 hover:to-cyan-600 transition-all shadow-lg">
-            <Edit2 size={16} className="text-white" />
-          </button>
+
+          {avatarPickToggle.isOpen && (
+            <AvatarPicker setFormData={setFormData} onClose={avatarPickToggle.close} />
+          )}
         </div>
       </div>
 
@@ -115,7 +127,8 @@ export default function ProfileForm() {
         />
 
         {/* Warning */}
-        {!user.discord?.discordId ? null : ( // ) //   </div> //     </div> //       <span className="text-slate-700"> to connect Discord.</span> //       </Link> //         </span> //           Click here //         <span className="text-blue-600 hover:text-blue-700 ml-1 font-medium transition-colors hover:underline hover:cursor-pointer"> //       <Link href={`${process.env.NEXT_PUBLIC_discordRedirect}`}> //       <span className="text-slate-700">Your account is not connected to Discord.</span> //     <div className="text-sm"> //     <AlertTriangle className="text-amber-600 flex-shrink-0 mt-0.5" size={20} /> //   <div className="bg-amber-50 border-l-4 border-amber-500 rounded-lg p-4 flex items-start gap-3"> //  (
+        {!user.discord?.discordId ? null : (
+          // </div> //     </div> //       <span className="text-slate-700"> to connect Discord.</span> //       </Link> //         </span> //           Click here //         <span className="text-blue-600 hover:text-blue-700 ml-1 font-medium transition-colors hover:underline hover:cursor-pointer"> //       <Link href={`${process.env.NEXT_PUBLIC_discordRedirect}`}> //       <span className="text-slate-700">Your account is not connected to Discord.</span> //     <div className="text-sm"> //     <AlertTriangle className="text-amber-600 flex-shrink-0 mt-0.5" size={20} /> //   <div className="bg-amber-50 border-l-4 border-amber-500 rounded-lg p-4 flex items-start gap-3"> :
           <div className="inline-flex items-center gap-2 bg-[#EBEDFB] border border-[#7983F5] text-[#5865F2] px-4 py-2 rounded-full text-md font-medium">
             <Check size={24} className="w-5" />
             <Image
