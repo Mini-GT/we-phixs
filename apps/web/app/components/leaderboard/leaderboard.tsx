@@ -1,14 +1,12 @@
 "use client";
-import { LeaderboardPeriods, queryKeysType } from "@repo/types";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { LeaderboardPeriods, Periods, queryKeysType } from "@repo/types";
+import { useQuery } from "@tanstack/react-query";
 import { getAllLeaderboard } from "api/leaderboard.service";
-import { UserRound, UsersRound } from "lucide-react";
 import { useState } from "react";
 import TableComponent from "./table";
 
 const periods: Periods[] = ["Today", "Week", "Month", "All time"];
-const tabs = ["Players"] as const;
-type Periods = "Today" | "Week" | "Month" | "All time";
+// const tabs = ["Players"] as const;
 
 export default function Leaderboard() {
   const [tab, setTab] = useState<"Players" | "Factions">("Players");
@@ -58,16 +56,24 @@ export default function Leaderboard() {
 
       <div className="relative h-[70vh]">
         {period.toLowerCase() === "today" && (
-          <TableComponent users={leaderboardData?.daily} isFetching={isFetching} />
+          <TableComponent users={leaderboardData?.daily} period={period} isFetching={isFetching} />
         )}
         {period.toLowerCase() === "week" && (
-          <TableComponent users={leaderboardData?.weekly} isFetching={isFetching} />
+          <TableComponent users={leaderboardData?.weekly} period={period} isFetching={isFetching} />
         )}
         {period.toLowerCase() === "month" && (
-          <TableComponent users={leaderboardData?.monthly} isFetching={isFetching} />
+          <TableComponent
+            users={leaderboardData?.monthly}
+            period={period}
+            isFetching={isFetching}
+          />
         )}
         {period.toLowerCase() === "all time" && (
-          <TableComponent users={leaderboardData?.allTime} isFetching={isFetching} />
+          <TableComponent
+            users={leaderboardData?.allTime}
+            period={period}
+            isFetching={isFetching}
+          />
         )}
       </div>
     </div>

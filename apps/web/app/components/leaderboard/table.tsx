@@ -2,7 +2,7 @@ import { PlayersProps } from "@repo/types";
 import DiscordTooltip from "./discordTooltip";
 import FetchLoading from "../loading/fetchLoading";
 
-export default function TableComponent({ users, isFetching }: PlayersProps) {
+export default function TableComponent({ users, isFetching, period }: PlayersProps) {
   if (isFetching || !users) {
     return <FetchLoading />;
   }
@@ -20,7 +20,7 @@ export default function TableComponent({ users, isFetching }: PlayersProps) {
             </tr>
           </thead>
           <tbody>
-            {users.length > 0 &&
+            {users.length > 0 ? (
               users.map((row, i) => (
                 <tr key={row.id} className="text-lg border-t border-slate-100 hover:bg-slate-50">
                   <td className="py-2 px-2">{i + 1}</td>
@@ -36,7 +36,14 @@ export default function TableComponent({ users, isFetching }: PlayersProps) {
                     {row.totalPixelsPlaced.toLocaleString()}
                   </td>
                 </tr>
-              ))}
+              ))
+            ) : (
+              <tr>
+                <td colSpan={3} className="text-center py-4 text-slate-400">
+                  No pixels painted {period === "Today" ? "today" : `this ${period.toLowerCase()}`}
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
