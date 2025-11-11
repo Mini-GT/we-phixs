@@ -140,11 +140,7 @@ export default function RegisterForm({ setComponent }: LoginRegisterFormProps) {
               placeholder="Confirm Password"
             />
           </div>
-          <Button
-            disabled={mutation.isPending}
-            type="submit"
-            className="w-full mb-4 cursor-pointer"
-          >
+          <Button disabled={mutation.isPending} type="submit" className="w-full cursor-pointer">
             {mutation.isPending ? "Registering..." : "Register"}
           </Button>
         </form>

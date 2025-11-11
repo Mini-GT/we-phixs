@@ -3,7 +3,7 @@ import type { ChangeEvent } from "react";
 
 export function FormField({
   label,
-  value = "",
+  value = null,
   required = false,
   onChange,
   onChangeEvent,
@@ -31,7 +31,7 @@ export function FormField({
         autoComplete="off"
         id={name}
         type={type}
-        value={value}
+        value={value ? value : ""}
         required={required}
         onChange={handleChange}
         placeholder={placeholder}

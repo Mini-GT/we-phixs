@@ -6,8 +6,7 @@ import { getMe } from "api/user.service";
 import { JwtPayload } from "jsonwebtoken";
 import { cookies } from "next/headers";
 import Avatar from "./avatar";
-
-const jwtsecret = process.env.jwtsecretKey;
+import { jwtsecret } from "@/page";
 
 export default async function User() {
   const token = (await cookies()).get("loginToken")?.value;
