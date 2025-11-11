@@ -8,7 +8,7 @@ import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Slide, ToastContainer } from "react-toastify";
 
-export default function Page() {
+export default function LoginPage() {
   const { component, setComponent } = useComponent();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
