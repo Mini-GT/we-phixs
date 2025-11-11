@@ -17,7 +17,6 @@ export default function useInspect() {
       setInspectedCellData(data);
     },
     onError: (err) => {
-      console.log(err);
       displayError(err);
     },
   });
