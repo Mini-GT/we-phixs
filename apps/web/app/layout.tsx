@@ -1,26 +1,17 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
 import "./globals.css";
 import { ComponentProvider } from "./context/component.context";
 import TanstackProvider from "./components/providers/tanstackProvider";
 import { Suspense } from "react";
 import { SelectedContentProvider } from "./context/selectedContent.context";
 import { UserProvider } from "./context/user.context";
-import PixelLoadingScreen from "./components/pixelLoadingScreen";
 import { TabProvider } from "./context/tab.context";
-
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-});
+import { robotoMono } from "./fonts/fonts";
+import { GuildDataProvider } from "./context/guild.context";
 
 export const metadata: Metadata = {
-  title: "WePhix",
-  description: "A collaborative pixel art that turns your imagination into pixels",
+  title: "PhixelPaint",
+  description: "A collaborative pixel art that turns your imagination into pixels.",
 };
 
 export default function RootLayout({
@@ -30,13 +21,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      {/* <body className={`${geistSans.variable} ${geistMono.variable}`}> */}
+      <body className={`${robotoMono.variable}`}>
         <Suspense fallback={<>...</>}>
           <TanstackProvider>
             <ComponentProvider>
               <UserProvider>
                 <TabProvider>
-                  <SelectedContentProvider>{children}</SelectedContentProvider>
+                  <GuildDataProvider>
+                    <SelectedContentProvider>{children}</SelectedContentProvider>
+                  </GuildDataProvider>
                 </TabProvider>
               </UserProvider>
             </ComponentProvider>
