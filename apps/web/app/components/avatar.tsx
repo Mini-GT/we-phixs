@@ -98,7 +98,7 @@ export default function Avatar({ userId }: AvatarProps) {
       </div>
 
       <div
-        className={`absolute right-0 mt-1 w-sm bg-white border border-cyan-300 rounded-xl shadow-lg p-4 z-50 transition-all duration-300 ${
+        className={`absolute flex flex-col gap-2 right-0 mt-1 w-xs sm:w-sm bg-white border border-cyan-300 rounded-xl shadow-lg p-4 z-50 transition-all duration-300 ${
           isOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
         }`}
       >
@@ -137,45 +137,6 @@ export default function Avatar({ userId }: AvatarProps) {
               <span className="text-blue-500 font-bold">{totalPixelsPlaced ?? 0}</span>
             </div>
           </div>
-          {/* <ProtectedRoute requiredRoles={["ADMIN", "MODERATOR"]} requiredPermission={PERMISSIONS.VIEW_USERS} >
-            <Link
-              href="/users"
-              className="text-left px-4 py-2 rounded hover:bg-gray-700 text-white"
-              // onClick={() => setOpen(prev => ({...prev, isProfileMenu: false}))} // Close the dropdown when navigating
-            >
-              Users
-            </Link>
-          </ProtectedRoute>
-          <ProtectedRoute requiredRoles={["ADMIN", "MODERATOR"]} requiredPermission={PERMISSIONS.VIEW_DEVICES} >
-            <Link
-              href="/devices"
-              className="text-left px-4 py-2 rounded hover:bg-gray-700 text-white"
-              // onClick={() => setOpen(prev => ({...prev, isProfileMenu: false}))} // Close the dropdown when navigating
-            >
-              Devices
-            </Link>
-          </ProtectedRoute> */}
-          {/* <Link
-            href="/user/profile"
-            className="text-left px-4 py-2 rounded hover:bg-gray-700 text-white"
-            // onClick={() => setOpen(prev => ({...prev, isProfileMenu: false}))} // Close the dropdown when navigating
-          >
-            Profile
-          </Link>
-          <Link
-            href="/user/notification"
-            className="flex text-left px-4 py-2 rounded hover:bg-gray-700 text-white"
-            // onClick={() => setOpen(prev => ({...prev, isProfileMenu: false}))} // Close the dropdown when navigating
-          >
-            Notification
-          </Link>
-          <Link
-            href="/user/settings"
-            className="text-left px-4 py-2 rounded hover:bg-gray-700 text-white"
-            // onClick={() => setOpen(prev => ({...prev, isProfileMenu: false}))} // Close the dropdown when navigating
-          >
-            Settings
-          </Link> */}
           <IconButton className="w-full border-none hover:scale-97 ">
             <div
               className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-2 px-4 rounded-full transition-all shadow-lg hover:shadow-blue-500/30 cursor-pointer"
