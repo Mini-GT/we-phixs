@@ -1,5 +1,4 @@
-import { MapPin, X } from "lucide-react";
-import IconButton from "./ui/iconButton";
+import { X } from "lucide-react";
 import { InspectCardProps } from "@repo/types";
 import { useSound } from "react-sounds";
 import { convertToTimeAgo } from "@/utils/formatDate";
@@ -9,42 +8,54 @@ export default function InspectCard({ inspectedCellData, setInspectedCellData }:
 
   return (
     <div
-      className={`absolute bottom-4 p-4 w-full max-w-1/5 bg-white rounded-4xl border-2 border-gray-300 transform transition-all duration-300 ease-out ${inspectedCellData ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"}`}
+      className={`absolute bottom-4 group w-[300px] bg-gradient-to-br from-gray-50 to-white rounded-xl shadow-md border border-gray-200 p-3.5 transform transition-all duration-300 ease-out ${inspectedCellData ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"}`}
     >
-      <div className="flex">
-        <div className="flex items-center gap-1 text-sm">
-          <MapPin size={24} className="w-5 text-blue-600" />
-          <span className="font-medium text-lg">
-            Pixel: {inspectedCellData?.x}, {inspectedCellData?.y}
-          </span>
-          <span>
-            {inspectedCellData?.placedAt
-              ? `(${convertToTimeAgo(inspectedCellData.placedAt)})`
-              : null}
-          </span>
+      <div className="flex items-start justify-between gap-1">
+        <div className="flex items-center gap-3 flex-1">
+          {/* Animated icon */}
+          <div
+            className={`rounded-lg p-2 border-1 group-hover:scale-110 transition-transform`}
+            style={{ backgroundColor: inspectedCellData?.color || "white" }}
+          >
+            <svg className="w-4 h-4 text-white" />
+          </div>
+
+          <div className="flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-bold text-gray-900">
+                Pixel: {inspectedCellData?.x}, {inspectedCellData?.y}
+              </span>
+              {inspectedCellData?.user.name && <span className="text-xs text-gray-500">•</span>}
+              <span className="text-xs text-gray-500">
+                {inspectedCellData?.placedAt
+                  ? `(${convertToTimeAgo(inspectedCellData.placedAt)})`
+                  : null}
+              </span>
+            </div>
+            <p>
+              <span className="font-semibold text-blue-600">
+                {inspectedCellData?.user.name ? (
+                  <>
+                    <span className="text-xs text-gray-600">by: </span>
+                    <span>{inspectedCellData.user.name} </span>
+                  </>
+                ) : (
+                  <span>Not yet painted</span>
+                )}
+              </span>
+            </p>
+          </div>
         </div>
-        <IconButton className="text-gray-600 w-1 h-1 ml-auto border-none shadow-none">
-          <X
-            className="w-full h-full p-2"
-            onClick={() => {
-              play();
-              setInspectedCellData(null);
-            }}
-          />
-        </IconButton>
-      </div>
 
-      {/* Left section */}
-      <div className="flex flex-col">
-        <span className="text-md font-semibold text-gray-500 mt-0.5">
-          {inspectedCellData?.user.name ? (
-            <span> Painted by: {inspectedCellData.user.name} </span>
-          ) : (
-            <span>Not yet painted</span>
-          )}
-        </span>
-
-        <div className="mt-2 flex items-center gap-2"></div>
+        <button
+          className="p-1.5 hover:bg-gray-100 rounded-lg cursor-pointer"
+          onClick={() => {
+            play();
+            setInspectedCellData(null);
+          }}
+        >
+          <X className="w-4 h-4" />
+        </button>
       </div>
     </div>
   );
