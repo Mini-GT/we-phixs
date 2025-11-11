@@ -43,9 +43,9 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const [width, height] = useWindowSize();
   const { setSelectedContent } = useSelectedContent();
-  // const { paintCharges, setPaintCharges, cooldown, initializeAudio } = usePaintCharges(hasLoginToken);
-  const { paintCharges, setPaintCharges, setCooldownUntil, displaySeconds, initializeAudio } =
-    usePaintCharges(hasLoginToken || "");
+  const { paintCharges, setPaintCharges, setCooldownUntil, displaySeconds } = usePaintCharges(
+    hasLoginToken || ""
+  );
 
   const { play: playPnlExpand } = useSound("/sounds/panel_expand.mp3");
   const { play: playPnlCollapse } = useSound("/sounds/panel_collapse.mp3");
@@ -196,7 +196,6 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
     if (!canvas) return;
 
     const handleClick = (e: MouseEvent) => {
-      initializeAudio();
       if (isDragging) return;
 
       const rect = canvas.getBoundingClientRect();
@@ -421,17 +420,6 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
   const paintBtn = (tool: ToolType["tool"]) => {
     setTool(tool);
     tool === "paint" ? playPnlExpand() : playPnlCollapse();
-  };
-
-  const formatTime = (ms: number) => {
-    const totalSeconds = Math.ceil(ms / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-
-    if (minutes > 0) {
-      return `${minutes}m ${seconds}s`;
-    }
-    return `${seconds}s`;
   };
 
   return (

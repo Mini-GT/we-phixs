@@ -76,17 +76,6 @@ export default function ColorPalette({
     rate: 1.6,
   });
 
-  const formatTime = (ms: number) => {
-    const totalSeconds = Math.ceil(ms / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-
-    if (minutes > 0) {
-      return `${minutes}m ${seconds}s`;
-    }
-    return `${seconds}s`;
-  };
-
   return (
     <div
       className={`absolute -bottom-4 p-4 w-screen bg-white rounded-t-4xl border-2 border-gray-300 transform transition-all duration-300 ease-out ${tool === "paint" ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"}`}
@@ -103,25 +92,27 @@ export default function ColorPalette({
           <X className="w-full h-full p-2" onClick={() => paintBtn("inspect")} />
         </IconButton>
       </div>
-      <div className="grid grid-cols-30 mt-3 mb-4 gap-1">
-        {colors.map((color, i) => (
-          <button
-            key={i}
-            onClick={() => {
-              setSelectedColor(color);
-              playBtnSoft();
-            }}
-            className={`
+      <div className="h-30 md:h-full overflow-x-auto">
+        <div className="grid grid-cols-10 sm:grid-cols-20 md:grid-cols-30 gap-1">
+          {colors.map((color, i) => (
+            <button
+              key={i}
+              onClick={() => {
+                setSelectedColor(color);
+                playBtnSoft();
+              }}
+              className={`
               w-full h-8 rounded-md border cursor-pointer 
               ${selectedColor === color ? "border-blue-500 border-3" : "border-gray-300"}
             `}
-            style={{ backgroundColor: color }}
-          />
-        ))}
+              style={{ backgroundColor: color }}
+            />
+          ))}
+        </div>
       </div>
       <PrimaryButton
         onClick={() => paintBtn("inspect")}
-        className={`text-2xl m-auto py-4 px-7 flex ${displaySeconds ? "w-65" : "w-55"} items-center justify-center gap-2`}
+        className={`text-2xl m-auto mt-2 py-4 px-7 flex ${displaySeconds ? "w-65" : "w-55"} items-center justify-center gap-2`}
       >
         <Brush size={20} fill="white" />
         <div className="flex items-center gap-1">
