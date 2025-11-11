@@ -35,7 +35,7 @@
 }
 
 .main ol {
-  font-family: var(--font-geist-mono);
+  font-family: var(--font-roboto-mono);
   padding-left: 0;
   margin: 0;
   font-size: 14px;
@@ -67,9 +67,12 @@
   height: 48px;
   padding: 0 20px;
   border: none;
-  font-family: var(--font-geist-sans);
+  font-family: var(--font-roboto-mono);
   border: 1px solid transparent;
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    border-color 0.2s;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -96,9 +99,12 @@ button.secondary {
   height: 48px;
   padding: 0 20px;
   border: none;
-  font-family: var(--font-geist-sans);
+  font-family: var(--font-roboto-mono);
   border: 1px solid transparent;
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    border-color 0.2s;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -112,7 +118,7 @@ button.secondary {
 }
 
 .footer {
-  font-family: var(--font-geist-sans);
+  font-family: var(--font-roboto-mono);
   grid-row-start: 3;
   display: flex;
   gap: 24px;
