@@ -5,4 +5,5 @@ export const queryKeysType = {
   getGuildInviteCode: (guildId: number | undefined) => ["guildInvite", guildId] as const,
   paintCharges: ["paintCharges"] as const,
   allLeaderboard: ["allLeaderboard"] as const,
+  reports: (page: number) => ["reports", page] as const,
 };

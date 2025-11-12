@@ -2,7 +2,7 @@
 import { useRef, useEffect, useState } from "react";
 import PrimaryButton from "./ui/primaryButton";
 import IconButton from "./ui/iconButton";
-import { Brush, FileLock, ZoomInIcon, ZoomOutIcon } from "lucide-react";
+import { Brush, FileLock, MessageSquareWarning, ZoomInIcon, ZoomOutIcon } from "lucide-react";
 import { CanvasType, Coordinantes, queryKeysType, ToolType } from "@repo/types";
 import ColorPalette from "./colorPalette";
 import { useWindowSize } from "@react-hook/window-size";
@@ -430,16 +430,21 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
           {/* <IconButton>
             <Search className="w-5 h-5 text-gray-600" />
           </IconButton> */}
-          <IconButton onClick={() => setSelectedContent("leaderboard")}>
-            <Image width={24} height={24} src="/leaderboard.svg" alt="Leaderboard" />
-          </IconButton>
-          <IconButton onClick={() => setSelectedContent("guild")}>
-            <Image src="/guild.svg" width={24} height={24} alt="Guild" />
-          </IconButton>
           {user && user.role === "ADMIN" && (
-            <IconButton onClick={() => setSelectedContent("adminPanel")}>
-              <FileLock />
-            </IconButton>
+            <>
+              <IconButton onClick={() => setSelectedContent("leaderboard")}>
+                <Image width={24} height={24} src="/leaderboard.svg" alt="Leaderboard" />
+              </IconButton>
+              <IconButton onClick={() => setSelectedContent("guild")}>
+                <Image src="/guild.svg" width={24} height={24} alt="Guild" />
+              </IconButton>
+              <IconButton onClick={() => setSelectedContent("report")}>
+                <MessageSquareWarning />
+              </IconButton>
+              <IconButton onClick={() => setSelectedContent("adminPanel")}>
+                <FileLock />
+              </IconButton>
+            </>
           )}
 
           <IconButton onClick={() => zoomToCenter(0.1)}>

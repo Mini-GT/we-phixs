@@ -10,8 +10,10 @@ type SelectedContentValue =
   | "createCanvas"
   | "createGuild"
   | "guild"
+  | "report"
   | null;
-type TabValue = "Users" | "Canvas";
+
+type TabValue = "Users" | "Canvas" | "Reports";
 
 type ChildrenProps = {
   children: ReactNode;

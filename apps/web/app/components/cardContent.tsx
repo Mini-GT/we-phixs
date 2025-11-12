@@ -18,6 +18,7 @@ import { toast } from "react-toastify";
 import { queryKeysType } from "@repo/types";
 import { removeGuildInvitationCookie } from "api/removeGuildInvitation.service";
 import { displayError } from "@/utils/displayError";
+import ReportFormMotion from "./motion/reportMotion";
 
 export default function CardContent({
   guildInvitationCode,
@@ -98,6 +99,7 @@ export default function CardContent({
       {selectedContent === "leaderboard" && <LeaderboardMotion cardRef={cardRef} />}
       {selectedContent === "guild" && <GuildMotion cardRef={cardRef} />}
       {selectedContent === "createGuild" && <CreateGuildMotion cardRef={cardRef} />}
+      {selectedContent === "report" && <ReportFormMotion cardRef={cardRef} />}
       {selectedContent === "adminPanel" && user?.role === "ADMIN" && (
         <AdminPanelMotion cardRef={cardRef} />
       )}

@@ -1,19 +1,30 @@
 "use client";
 
-import { Presentation, UsersRound } from "lucide-react";
-import { useState } from "react";
+import { MessageSquareWarning, Presentation, UsersRound } from "lucide-react";
 import IconButton from "../ui/iconButton";
 import { useSelectedContent } from "@/context/selectedContent.context";
 import { useTab } from "@/context/tab.context";
 import { TabValue } from "@repo/types";
+import Reports from "../reports";
 
 export default function AdminPanel() {
   const { setSelectedContent } = useSelectedContent();
   const { tab, setTab } = useTab();
-  const tabs: TabValue[] = ["Users", "Canvas"];
+  const tabs: TabValue[] = ["Users", "Canvas", "Reports"];
+
+  const getTabComponent = (t: TabValue) => {
+    switch (t) {
+      case "Canvas":
+        return <Presentation />;
+      case "Reports":
+        return <MessageSquareWarning />;
+      default:
+        return <UsersRound />;
+    }
+  };
 
   return (
-    <div className="flex flex-col gap-auto max-w-full h-[70vh] bg-white rounded-2xl">
+    <div className="flex flex-col gap-auto w-full h-[70vh] bg-white rounded-2xl">
       {/* Header */}
 
       {/* Tabs */}
@@ -26,13 +37,13 @@ export default function AdminPanel() {
               tab === t ? "bg-white text-slate-800" : "text-slate-500 hover:text-slate-700"
             }`}
           >
-            {t === "Users" ? <UsersRound /> : <Presentation />}
+            {getTabComponent(t)}
             {t}
           </button>
         ))}
       </div>
 
-      <div className="flex items-center justify-center w-full h-full">
+      <div className="flex items-center justify-center w-full h-full overflow-hidden">
         {tab === "Canvas" && (
           <IconButton
             onClick={() => setSelectedContent("createCanvas")}
@@ -41,6 +52,7 @@ export default function AdminPanel() {
             Create Canvas +
           </IconButton>
         )}
+        {tab === "Reports" && <Reports />}
       </div>
     </div>
   );
