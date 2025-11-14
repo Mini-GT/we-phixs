@@ -27,4 +27,16 @@ const convertToTimeAgo = (timestamp: Date) => {
   return `${days}d ago`;
 };
 
-export { toReadableDate, convertToTimeAgo };
+const formatDate = (date: Date) => {
+  const newDate = new Date(date);
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(newDate);
+};
+
+export { toReadableDate, convertToTimeAgo, formatDate };
