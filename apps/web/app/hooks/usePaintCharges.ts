@@ -26,17 +26,10 @@ export default function usePaintCharges(hasLoginToken: string) {
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // browser has policy that need users to have interaction in the app first in order to play sounds
-  const initializeAudio = () => {
-    if (!audioInitialized) {
-      setAudioInitialized(true);
-    }
-  };
-
   const { data, isSuccess } = useQuery<PaintChargesDataType>({
     queryKey: queryKeysType.paintCharges,
     queryFn: () => getPaintCharges(user?.id),
-    // enabled: !!user?.id,
+    enabled: !!user?.id,
   });
 
   // fetch initial paint data
@@ -117,6 +110,7 @@ export default function usePaintCharges(hasLoginToken: string) {
     };
   }, [cooldownUntil, paintCharges, hasLoginToken, audioInitialized]);
 
+  // browser has policy that need users to have interaction in the app first in order to play sounds
   // set up audio context on first user interaction
   useEffect(() => {
     const handleFirstInteraction = () => {
