@@ -5,7 +5,6 @@ import { type RefObject } from "react";
 import MotionComponent from "./motion";
 import Image from "next/image";
 import { MoreVertical, UserPlus, X } from "lucide-react";
-import { useGuildData } from "@/context/guild.context";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { GuildDataType, queryKeysType } from "@repo/types";
 import { getGuildByUserId, getGuildInviteCode, leaveGuild } from "api/guild.service";
@@ -61,7 +60,7 @@ export default function GuildMotion({ cardRef }: { cardRef: RefObject<HTMLDivEle
     <MotionComponent>
       <Card
         ref={cardRef}
-        className={`relative w-[95vw] max-w-[600px] gap-4 scrollbar-custom p-6 bg-white border-cyan-300 rounded-4xl`}
+        className={`relative w-[95vw] max-w-[600px] h-[90vh]  gap-4 scrollbar-custom p-3 bg-white border-cyan-300 rounded-4xl`}
       >
         {/* Invitation Card */}
         <AnimatePresence>
@@ -78,8 +77,8 @@ export default function GuildMotion({ cardRef }: { cardRef: RefObject<HTMLDivEle
         </AnimatePresence>
 
         {/* Guild Card */}
-        <div className="overflow-y-auto">
-          <div className="flex items-center justify-between">
+        <div className="h-full overflow-y-auto">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
               <div className="gap-1 text-xl sm:text-2xl font-bold text-gray-800 flex items-center">
                 <Image src="/guild.svg" width={24} height={24} className="w-8" alt="Guild" />
@@ -92,7 +91,8 @@ export default function GuildMotion({ cardRef }: { cardRef: RefObject<HTMLDivEle
               {guildData ? (
                 <div className="relative flex">
                   <IconButton
-                    onClick={() => dotMenu.toggle()}
+                    onClick={dotMenu.toggle}
+                    onBlur={dotMenu.close}
                     className="top-2 right-2 shadow-none border-none text-gray-600 hover:text-gray-900"
                   >
                     <MoreVertical className="w-5 h-5" />
@@ -112,7 +112,9 @@ export default function GuildMotion({ cardRef }: { cardRef: RefObject<HTMLDivEle
                     <div className="absolute top-[90%] right-[60%] bg-white border border-gray-200 rounded-md shadow-md text-gray-700 text-sm text-nowrap">
                       <button
                         className="w-full text-center px-3 py-2 hover:bg-gray-100 cursor-pointer text-red-500"
-                        onClick={() => mutation.mutate({ userId: user?.id, guildId: guildData.id })}
+                        onMouseDown={() =>
+                          mutation.mutate({ userId: user?.id, guildId: guildData.id })
+                        }
                       >
                         Leave guild
                       </button>
@@ -139,6 +141,7 @@ export default function GuildMotion({ cardRef }: { cardRef: RefObject<HTMLDivEle
               members={guildData.members}
               guildLeaderId={guildData.guildLeaderId}
               guildId={guildData.id}
+              descriptionData={guildData.description}
             />
           )}
         </div>

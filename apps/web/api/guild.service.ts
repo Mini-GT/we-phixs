@@ -7,6 +7,7 @@ import {
   KickGuildMember,
   LeaveGuild,
   TransferLeadership,
+  UpdateGuildDescription,
 } from "@repo/types";
 
 const isServer = typeof window === "undefined";
@@ -60,6 +61,19 @@ export async function transferLeadership({ leaderId, newLeaderId, guildId }: Tra
     leaderId,
     newLeaderId,
     guildId,
+  });
+  return res.data;
+}
+
+export async function updateGuildDescription({
+  leaderId,
+  guildId,
+  description,
+}: UpdateGuildDescription) {
+  const res = await api.patch(`/description`, {
+    leaderId,
+    guildId,
+    description,
   });
   return res.data;
 }
