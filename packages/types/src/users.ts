@@ -48,8 +48,9 @@ type LeaderboardPeriods = {
 type UsersLeaderboardType = {
   id: User["id"];
   name: User["name"];
+  profileImage: User["profileImage"];
   totalPixelsPlaced: User["totalPixelsPlaced"];
-  discord?: Omit<DiscordFields, "discordId" | "avatar">;
+  discord?: DiscordFields;
 };
 
 type UpdateProfie = {

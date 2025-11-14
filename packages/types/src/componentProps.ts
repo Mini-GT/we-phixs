@@ -1,6 +1,6 @@
 import { Dispatch, ReactNode, SetStateAction } from "react";
 import { PixelType } from "./cell";
-import { UpdateProfie, User, UsersLeaderboardType } from "./users";
+import { UpdateProfie, UsersLeaderboardType } from "./users";
 
 type ComponentStateValue = "loginForm" | "registerForm" | null;
 type SelectedContentValue =
@@ -33,23 +33,6 @@ type PlayersProps = {
   period: Periods;
 };
 
-type GuildDataType = {
-  id: number;
-  name: string;
-  description: string | null;
-  createdAt: Date;
-  totalPixelsPlaced: number;
-  guildLeaderId: string;
-  members: Pick<User, "id" | "name" | "role" | "totalPixelsPlaced" | "discord">[];
-};
-
-type GuildContentProps = {
-  members: GuildDataType["members"];
-  guildTotalPixelsPlaced: GuildDataType["totalPixelsPlaced"];
-  guildLeaderId: GuildDataType["guildLeaderId"];
-  guildId: number | undefined;
-};
-
 type AvatarPickerProps = {
   setFormData: Dispatch<SetStateAction<UpdateProfie>>;
   onClose: () => void;
@@ -63,7 +46,5 @@ export type {
   PlayersProps,
   InspectCardProps,
   Periods,
-  GuildDataType,
-  GuildContentProps,
   AvatarPickerProps,
 };

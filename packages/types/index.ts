@@ -7,3 +7,4 @@ export * from "./src/error";
 export * from "./src/form";
 export * from "./src/canvas";
 export * from "./src/guild";
+export * from "./src/report";
