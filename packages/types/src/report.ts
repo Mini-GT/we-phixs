@@ -4,7 +4,7 @@ type NewErrorsType = {
   message: string;
 };
 
-type CreateReportType = NewErrorsType & { userId: string };
+type CreateReportType = NewErrorsType;
 
 type ReportData = {
   id: number;

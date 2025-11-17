@@ -196,7 +196,6 @@ export default function GuildContent({
                             <button
                               onMouseDown={() => {
                                 kickMutation.mutate({
-                                  leaderId: guildLeaderId,
                                   memberId: member.id,
                                   guildId,
                                 });
@@ -208,7 +207,6 @@ export default function GuildContent({
                             <button
                               onMouseDown={() => {
                                 transferLeadershipMutation.mutate({
-                                  leaderId: guildLeaderId,
                                   newLeaderId: member.id,
                                   guildId,
                                 });

@@ -20,15 +20,15 @@ const api = axios.create({
   withCredentials: true,
 });
 
-export async function createGuild({ guildName, userId }: CreateGuildType) {
-  const res = await api.post(`/create/${userId}`, {
+export async function createGuild({ guildName }: CreateGuildType) {
+  const res = await api.post(`/create`, {
     guildName,
   });
   return res.data;
 }
 
-export async function getGuildByUserId({ userId }: GetGuildByUserId) {
-  const res = await api.get(`/${userId}`);
+export async function getGuildByUserId() {
+  const res = await api.get("/");
   return res.data;
 }
 
@@ -37,41 +37,35 @@ export async function getGuildInviteCode({ guildId }: GetInviteCode) {
   return res.data;
 }
 
-export async function joinGuildByInvite({ userId, code }: JoinGuildByInvite) {
-  const res = await api.post(`/join/${userId}/${code}`);
+export async function joinGuildByInvite({ code }: JoinGuildByInvite) {
+  const res = await api.post(`/join/${code}`);
   return res.data;
 }
 
-export async function leaveGuild({ userId, guildId }: LeaveGuild) {
-  const res = await api.delete(`/leave/${userId}`, {
+export async function leaveGuild({ guildId }: LeaveGuild) {
+  const res = await api.delete(`/leave`, {
     params: { guildId },
   });
   return res.data;
 }
 
-export async function kickGuildMember({ leaderId, memberId, guildId }: KickGuildMember) {
+export async function kickGuildMember({ memberId, guildId }: KickGuildMember) {
   const res = await api.delete(`/kick`, {
-    params: { leaderId, memberId, guildId },
+    params: { memberId, guildId },
   });
   return res.data;
 }
 
-export async function transferLeadership({ leaderId, newLeaderId, guildId }: TransferLeadership) {
+export async function transferLeadership({ newLeaderId, guildId }: TransferLeadership) {
   const res = await api.patch(`/transfer/leadership`, {
-    leaderId,
     newLeaderId,
     guildId,
   });
   return res.data;
 }
 
-export async function updateGuildDescription({
-  leaderId,
-  guildId,
-  description,
-}: UpdateGuildDescription) {
+export async function updateGuildDescription({ guildId, description }: UpdateGuildDescription) {
   const res = await api.patch(`/description`, {
-    leaderId,
     guildId,
     description,
   });

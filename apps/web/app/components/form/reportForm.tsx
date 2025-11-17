@@ -1,13 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { CheckCircle, Send } from "lucide-react";
 import { NewErrorsType } from "@repo/types";
-import { useUser } from "@/context/user.context";
 import { useMutation } from "@tanstack/react-query";
 import { createReport } from "api/reports.service";
 import { displayError } from "@/utils/displayError";
+import { toast } from "react-toastify";
 
 export default function ReportForm() {
-  const { user } = useUser();
   const [formData, setFormData] = useState({
     category: "",
     subject: "",
@@ -45,11 +44,11 @@ export default function ReportForm() {
     onSuccess: (data) => {
       setFormData({ category: "", subject: "", message: "" });
       setStatus(data);
+      toast.success("Report submitted successfully");
 
       timeoutRef.current = setTimeout(() => setStatus("idle"), 5000);
     },
     onError: (err) => {
-      console.log(err);
       displayError(err);
     },
   });
@@ -57,7 +56,7 @@ export default function ReportForm() {
   const handleSubmit = () => {
     if (!validateForm()) return;
 
-    mutation.mutate({ ...formData, userId: user?.id! });
+    mutation.mutate({ ...formData });
   };
 
   const handleChange = (

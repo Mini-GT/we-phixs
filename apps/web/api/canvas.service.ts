@@ -11,12 +11,11 @@ const api = axios.create({
   withCredentials: true,
 });
 
-export async function updateCanvasPixel({ canvasId, x, y, color, userId }: UpdateCanvasPixelProps) {
+export async function updateCanvasPixel({ canvasId, x, y, color }: UpdateCanvasPixelProps) {
   const res = await api.patch(`/${canvasId}`, {
     x,
     y,
     color,
-    userId,
   });
   return res.data;
 }

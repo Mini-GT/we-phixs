@@ -46,7 +46,7 @@ export default async function Home() {
         }),
         await queryClient.prefetchQuery({
           queryKey: queryKeysType.guildByUserId(id),
-          queryFn: () => getGuildByUserId({ userId: id }),
+          queryFn: () => getGuildByUserId(),
         }),
       ]);
     }

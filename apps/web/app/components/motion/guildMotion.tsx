@@ -28,7 +28,7 @@ export default function GuildMotion({ cardRef }: { cardRef: RefObject<HTMLDivEle
 
   const { data: guildData } = useQuery<GuildDataType>({
     queryKey: queryKeysType.guildByUserId(user?.id),
-    queryFn: () => getGuildByUserId({ userId: user?.id }),
+    queryFn: () => getGuildByUserId(),
     enabled: !!user?.id,
   });
 
@@ -109,7 +109,7 @@ export default function GuildMotion({ cardRef }: { cardRef: RefObject<HTMLDivEle
                     </IconButton>
                   )}
                   {dotMenu.isOpen && (
-                    <div className="absolute top-[90%] right-[60%] bg-white border border-gray-200 rounded-md shadow-md text-gray-700 text-sm text-nowrap">
+                    <div className="absolute top-[90%] z-1 right-[60%] bg-white border border-gray-200 rounded-md shadow-md text-gray-700 text-sm text-nowrap cursor-pointer">
                       <button
                         className="w-full text-center px-3 py-2 hover:bg-gray-100 cursor-pointer text-red-500"
                         onMouseDown={() =>

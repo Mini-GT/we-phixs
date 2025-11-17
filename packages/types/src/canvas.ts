@@ -20,7 +20,6 @@ interface CanvasType extends CreateCanvas {
 
 interface UpdateCanvasPixelProps extends Omit<Pixel, "user"> {
   canvasId: number;
-  userId?: string;
 }
 
 interface InspectCanvas extends Omit<UpdateCanvasPixelProps, "user" | "color" | "userId"> {}

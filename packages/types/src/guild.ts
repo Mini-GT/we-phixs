@@ -15,16 +15,14 @@ type GetInviteCode = {
 };
 
 type JoinGuildByInvite = {
-  userId: string | undefined;
   code: string;
 };
 
 type LeaveGuild = GetGuildByUserId & GetInviteCode;
 
 type KickGuildMember = {
-  leaderId: string | undefined;
   memberId: string | undefined;
-  guildId: number | undefined;
+  guildId: GetInviteCode["guildId"];
 };
 
 type TransferLeadership = Omit<KickGuildMember, "memberId"> & {
