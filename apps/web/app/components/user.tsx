@@ -23,7 +23,7 @@ export default async function User() {
         // prefetch get me data
         await queryClient.prefetchQuery({
           queryKey: queryKeysType.me(userId!),
-          queryFn: () => getMe(userId!),
+          queryFn: () => getMe(),
         });
       }
     }

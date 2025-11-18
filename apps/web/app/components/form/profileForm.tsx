@@ -78,7 +78,7 @@ export default function ProfileForm() {
   });
 
   const handleSave = () => {
-    mutation.mutate({ id: user.id, ...formData });
+    mutation.mutate({ ...formData });
   };
 
   return (
@@ -188,14 +188,14 @@ export default function ProfileForm() {
               Change password
             </button>
 
-            <AnimatePresence initial={false}>
+            <AnimatePresence>
               {showPasswordFields && (
                 <motion.div
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="overflow-hidden mt-4"
+                  className="overflow-hidden"
                 >
                   <div className="space-y-3 px-1 mt-4">
                     <div className="mb-4 h-20">

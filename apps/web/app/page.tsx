@@ -42,7 +42,7 @@ export default async function Home() {
         // }),
         await queryClient.prefetchQuery({
           queryKey: queryKeysType.paintCharges,
-          queryFn: () => getPaintCharges(id),
+          queryFn: () => getPaintCharges(),
         }),
         await queryClient.prefetchQuery({
           queryKey: queryKeysType.guildByUserId(id),

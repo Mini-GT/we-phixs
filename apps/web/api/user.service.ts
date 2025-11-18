@@ -11,18 +11,18 @@ const api = axios.create({
   withCredentials: true,
 });
 
-export async function getMe(id: string) {
-  const res = await api.get(`/${id}`);
+export async function getMe() {
+  const res = await api.get("/");
   return res.data;
 }
 
-export async function getPaintCharges(id: string | undefined) {
-  const res = await api.get(`/paint-charges/${id}`);
+export async function getPaintCharges() {
+  const res = await api.get(`/paint-charges`);
   return res.data;
 }
 
-export async function updateProfile({ id, ...args }: UpdateProfie & { id: string }) {
-  const res = await api.patch(`/profile/update/${id}`, {
+export async function updateProfile({ ...args }: UpdateProfie) {
+  const res = await api.patch(`/profile/update`, {
     ...args,
   });
   return res.data;

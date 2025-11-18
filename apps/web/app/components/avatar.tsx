@@ -14,6 +14,7 @@ import { useUser } from "@/context/user.context";
 import { toast } from "react-toastify";
 import { getProfileImage } from "@/utils/images";
 import { getQueryClient } from "@/getQueryClient";
+import { displayError } from "@/utils/displayError";
 
 type AvatarProps = {
   userId: string | null;
@@ -42,12 +43,16 @@ export default function Avatar({ userId }: AvatarProps) {
     };
   }, [isOpen]);
 
-  const { data } = useQuery<User>({
+  const { data, isError, error } = useQuery<User>({
     queryKey: queryKeysType.me(userId!),
-    queryFn: () => getMe(userId!),
+    queryFn: () => getMe(),
     enabled: !!userId,
     refetchOnWindowFocus: true,
   });
+
+  if (isError) {
+    displayError(error);
+  }
 
   let discordData: DiscordFields | null;
 
@@ -57,7 +62,8 @@ export default function Avatar({ userId }: AvatarProps) {
     discordData = null;
   }
 
-  const { email, totalPixelsPlaced } = data as User;
+  const email = data?.email;
+  const totalPixelsPlaced = data?.totalPixelsPlaced;
 
   useEffect(() => {
     if (!data) return;
