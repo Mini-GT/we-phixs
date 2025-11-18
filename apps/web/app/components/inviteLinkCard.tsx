@@ -6,6 +6,7 @@ import IconButton from "./ui/iconButton";
 import { useQuery } from "@tanstack/react-query";
 import { getGuildInviteCode } from "api/guild.service";
 import FetchLoading from "./loading/fetchLoading";
+import { displayError } from "@/utils/displayError";
 
 const clientUrl = process.env.NEXT_PUBLIC_CLIENT_URL;
 
@@ -13,7 +14,7 @@ export default function InviteLinkCard({ guildId, guildInvitationToggle }: Invit
   const [copied, setCopied] = useState(false);
   const [inviteUrl, setInviteUrl] = useState<string>("");
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: queryKeysType.getGuildInviteCode(guildId),
     queryFn: () => getGuildInviteCode({ guildId }),
 
@@ -23,6 +24,10 @@ export default function InviteLinkCard({ guildId, guildInvitationToggle }: Invit
     refetchOnMount: false,
     refetchOnReconnect: false,
   });
+
+  if (isError) {
+    displayError(error);
+  }
 
   useEffect(() => {
     if (!data) return;

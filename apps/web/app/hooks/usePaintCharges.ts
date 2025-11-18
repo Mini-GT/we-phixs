@@ -6,6 +6,7 @@ import { queryKeysType } from "@repo/types";
 import { useQuery } from "@tanstack/react-query";
 import { getPaintCharges } from "api/user.service";
 import { useSound } from "react-sounds";
+import { displayError } from "@/utils/displayError";
 
 export type PaintChargesDataType = {
   charges: number;
@@ -26,11 +27,15 @@ export default function usePaintCharges(hasLoginToken: string) {
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const { data, isSuccess } = useQuery<PaintChargesDataType>({
+  const { data, isSuccess, isError, error } = useQuery<PaintChargesDataType>({
     queryKey: queryKeysType.paintCharges,
-    queryFn: () => getPaintCharges(user?.id),
+    queryFn: () => getPaintCharges(),
     enabled: !!user?.id,
   });
+
+  if (isError) {
+    displayError(error);
+  }
 
   // fetch initial paint data
   useEffect(() => {

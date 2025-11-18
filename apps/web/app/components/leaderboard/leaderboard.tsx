@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getAllLeaderboard } from "api/leaderboard.service";
 import { useState } from "react";
 import TableComponent from "./table";
+import { displayError } from "@/utils/displayError";
 
 const periods: Periods[] = ["Today", "Week", "Month", "All time"];
 // const tabs = ["Players"] as const;
@@ -12,10 +13,19 @@ export default function Leaderboard() {
   const [tab, setTab] = useState<"Players" | "Factions">("Players");
   const [period, setPeriod] = useState<Periods>("Today");
 
-  const { data: leaderboardData, isFetching } = useQuery<LeaderboardPeriods>({
+  const {
+    data: leaderboardData,
+    isFetching,
+    isError,
+    error,
+  } = useQuery<LeaderboardPeriods>({
     queryKey: queryKeysType.allLeaderboard,
     queryFn: () => getAllLeaderboard(),
   });
+
+  if (isError) {
+    displayError(error);
+  }
 
   return (
     <div className="w-full bg-white rounded-2xl">

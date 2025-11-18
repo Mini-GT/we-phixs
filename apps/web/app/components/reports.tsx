@@ -8,6 +8,7 @@ import { getReports } from "api/reports.service";
 import FetchLoading from "./loading/fetchLoading";
 import { getQueryClient } from "@/getQueryClient";
 import IconButton from "./ui/iconButton";
+import { displayError } from "@/utils/displayError";
 
 export default function Reports() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -15,12 +16,16 @@ export default function Reports() {
   const [page, setPage] = useState(1);
   const queryClient = getQueryClient();
 
-  const { data, isFetching, isPlaceholderData } = useQuery<ReportsDataType>({
+  const { data, isFetching, isPlaceholderData, isError, error } = useQuery<ReportsDataType>({
     queryKey: queryKeysType.reports(page),
     queryFn: () => getReports(page),
     placeholderData: keepPreviousData,
     staleTime: 5000,
   });
+
+  if (isError) {
+    displayError(error);
+  }
 
   useEffect(() => {
     if (!isPlaceholderData && data?.hasMore) {

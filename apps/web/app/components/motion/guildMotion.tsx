@@ -26,13 +26,21 @@ export default function GuildMotion({ cardRef }: { cardRef: RefObject<HTMLDivEle
   const queryClient = getQueryClient();
   // const { guildData, setGuildData } = useGuildData();
 
-  const { data: guildData } = useQuery<GuildDataType>({
+  const {
+    data: guildData,
+    isError,
+    error,
+  } = useQuery<GuildDataType>({
     queryKey: queryKeysType.guildByUserId(user?.id),
     queryFn: () => getGuildByUserId(),
     enabled: !!user?.id,
   });
 
-  const query = useQuery({
+  const {
+    refetch,
+    isError: isInviteError,
+    error: inviteError,
+  } = useQuery({
     queryKey: queryKeysType.getGuildInviteCode(guildData?.id),
     queryFn: () => getGuildInviteCode({ guildId: guildData?.id }),
 
@@ -42,6 +50,11 @@ export default function GuildMotion({ cardRef }: { cardRef: RefObject<HTMLDivEle
     refetchOnMount: false,
     refetchOnReconnect: false,
   });
+
+  if (isError || isInviteError) {
+    if (error) displayError(error);
+    if (inviteError) displayError(inviteError);
+  }
 
   const mutation = useMutation({
     mutationFn: leaveGuild,
@@ -101,7 +114,7 @@ export default function GuildMotion({ cardRef }: { cardRef: RefObject<HTMLDivEle
                     <IconButton
                       onClick={() => {
                         guildInvitationToggle.toggle();
-                        query.refetch();
+                        refetch();
                       }}
                       className="top-2 right-2 shadow-none border-none text-gray-600 hover:text-gray-900"
                     >
