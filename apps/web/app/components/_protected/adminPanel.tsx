@@ -6,6 +6,7 @@ import { useSelectedContent } from "@/context/selectedContent.context";
 import { useTab } from "@/context/tab.context";
 import { TabValue } from "@repo/types";
 import Reports from "../reports";
+import UsersComponent from "../users";
 
 export default function AdminPanel() {
   const { setSelectedContent } = useSelectedContent();
@@ -44,6 +45,7 @@ export default function AdminPanel() {
       </div>
 
       <div className="flex items-center justify-center w-full h-full overflow-hidden">
+        {tab === "Users" && <UsersComponent />}
         {tab === "Canvas" && (
           <IconButton
             onClick={() => setSelectedContent("createCanvas")}

@@ -27,3 +27,9 @@ export async function updateProfile({ ...args }: UpdateProfie) {
   });
   return res.data;
 }
+export async function getAllUsers(page: number) {
+  const res = await api.get("/all", {
+    params: { page },
+  });
+  return res.data;
+}
