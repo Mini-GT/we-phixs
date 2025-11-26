@@ -48,7 +48,7 @@ export default function CardContent({
 
   useEffect(() => {
     if (!user?.id || !guildInvitationCode) return;
-    mutation.mutate({ userId: user.id, code: guildInvitationCode });
+    mutation.mutate({ code: guildInvitationCode });
   }, [user?.id, guildInvitationCode]);
 
   // close card if user clicks outside the card content

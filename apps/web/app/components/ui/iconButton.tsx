@@ -5,6 +5,8 @@ import { twMerge } from "tailwind-merge";
 interface IconButtonProps {
   children: React.ReactNode;
   onClick?: () => void;
+  onBlur?: () => void;
+  onMouseDown?: () => void;
   className?: string;
   type?: "submit" | "button";
   disabled?: boolean;
@@ -13,6 +15,8 @@ interface IconButtonProps {
 export default function IconButton({
   children,
   onClick,
+  onBlur,
+  onMouseDown,
   className,
   disabled = false,
   type = "button",
@@ -24,6 +28,8 @@ export default function IconButton({
     <button
       type={type}
       onClick={onClick}
+      onBlur={onBlur}
+      onMouseDown={onMouseDown}
       disabled={disabled}
       className={twMerge(clsx("w-10 h-10 rounded-full bg-white", baseStyles, className))}
     >

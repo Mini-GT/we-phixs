@@ -33,7 +33,6 @@ export default function RegisterForm({ setComponent }: LoginRegisterFormProps) {
       toast.success(data);
     },
     onError: (err) => {
-      console.error(err);
       displayError(err);
     },
   });

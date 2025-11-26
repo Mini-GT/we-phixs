@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Search, Filter, Calendar, User, MessageSquare } from "lucide-react";
 import { formatDate } from "@/utils/formatDate";
 import { getCategoryColor } from "@/utils/getCategoryColor";
-import { keepPreviousData, useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { queryKeysType, ReportsDataType } from "@repo/types";
 import { getReports } from "api/reports.service";
 import FetchLoading from "./loading/fetchLoading";

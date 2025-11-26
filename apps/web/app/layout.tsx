@@ -10,7 +10,7 @@ import { robotoMono } from "./fonts/fonts";
 import { GuildDataProvider } from "./context/guild.context";
 
 export const metadata: Metadata = {
-  title: "PhixelPaint",
+  title: "Phixel Paint",
   description: "A collaborative pixel art that turns your imagination into pixels.",
 };
 

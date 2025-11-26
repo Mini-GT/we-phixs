@@ -5,9 +5,9 @@ import Link from "next/link";
 
 export default function CardModal({ children }: { children: React.ReactNode }) {
   return (
-    <div className="absolute flex z-50 -inset-2 items-center justify-center backdrop-blur-xs bg-black/50">
+    <div className="absolute flex z-50 inset-0 items-center justify-center backdrop-blur-xs bg-black/50">
       <Card
-        className={`relative w-full max-w-sm p-6 bg-white rounded-2xl shadow-lg animate-popup-enter`}
+        className={`relative w-[90vw] max-w-sm p-6 bg-white rounded-2xl shadow-lg animate-popup-enter`}
       >
         <Link href="/">
           <IconButton

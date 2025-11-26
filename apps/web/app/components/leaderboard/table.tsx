@@ -56,7 +56,7 @@ export default function TableComponent({ users, isFetching, period }: PlayersPro
             ) : (
               <tr>
                 <td colSpan={3} className="text-center py-4 text-slate-400">
-                  No pixels painted {period === "Today" ? "today" : `this ${period.toLowerCase()}`}
+                  No pixels painted {period === "Today" ? "today" : `this ${period?.toLowerCase()}`}
                 </td>
               </tr>
             )}
