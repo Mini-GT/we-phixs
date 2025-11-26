@@ -2,7 +2,13 @@
 import { useRef, useEffect, useState } from "react";
 import PrimaryButton from "./ui/primaryButton";
 import IconButton from "./ui/iconButton";
-import { Brush, FileLock, MessageSquareWarning, ZoomInIcon, ZoomOutIcon } from "lucide-react";
+import {
+  Brush,
+  FileLock,
+  MessageSquareWarning,
+  ZoomInIcon,
+  ZoomOutIcon,
+} from "lucide-react";
 import { CanvasType, Coordinantes, queryKeysType, ToolType } from "@repo/types";
 import ColorPalette from "./colorPalette";
 import { useWindowSize } from "@react-hook/window-size";
@@ -43,9 +49,8 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const [width, height] = useWindowSize();
   const { setSelectedContent } = useSelectedContent();
-  const { paintCharges, setPaintCharges, setCooldownUntil, displaySeconds } = usePaintCharges(
-    hasLoginToken || ""
-  );
+  const { paintCharges, setPaintCharges, setCooldownUntil, displaySeconds } =
+    usePaintCharges(hasLoginToken || "");
 
   const { play: playPnlExpand } = useSound("/sounds/panel_expand.mp3");
   const { play: playPnlCollapse } = useSound("/sounds/panel_collapse.mp3");
@@ -53,11 +58,17 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
     volume: 0.3,
   });
   const [tool, setTool] = useState<ToolType["tool"]>("inspect");
-  const { inspectMutation, inspectedCellData, setInspectedCellData } = useInspect();
+  const { inspectMutation, inspectedCellData, setInspectedCellData } =
+    useInspect();
   const cellSize = 10;
   const gridSize = 300;
-  const [lastTouchDistance, setLastTouchDistance] = useState<number | null>(null);
-  const [lastTouchCenter, setLastTouchCenter] = useState<{ x: number; y: number } | null>(null);
+  const [lastTouchDistance, setLastTouchDistance] = useState<number | null>(
+    null
+  );
+  const [lastTouchCenter, setLastTouchCenter] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
 
   // Optimistic update
   const mutation = useMutation({
@@ -91,7 +102,7 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
     // },
 
     // rollback on error if API fails, cache is restored.
-    onError: (err, _newPixel, context) => {
+    onError: (err) => {
       console.error(err);
 
       // invalidate query whenever there is an error
@@ -126,7 +137,7 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
 
   useEffect(() => {
     setFilledCells(canvasData.pixels);
-  }, [canvasData]);
+  }, [canvasData, setFilledCells]);
 
   // draw everything
   useEffect(() => {
@@ -148,7 +159,10 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
     const scaleOffSetY = (scaleHeight - canvas.height) / 2;
 
     ctx.save();
-    ctx.translate(panOffset.x * scale - scaleOffSetX, panOffset.y * scale - scaleOffSetY);
+    ctx.translate(
+      panOffset.x * scale - scaleOffSetX,
+      panOffset.y * scale - scaleOffSetY
+    );
     ctx.scale(scale, scale);
 
     ctx.fillStyle = "white";
@@ -216,7 +230,8 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
       // console.log(`Clicked cell: (${cellX}, ${cellY})`);
 
       // check bounds
-      if (cellX < 0 || cellY < 0 || cellX >= gridSize || cellY >= gridSize) return;
+      if (cellX < 0 || cellY < 0 || cellX >= gridSize || cellY >= gridSize)
+        return;
 
       // update canvas cell when user clicks
       if (tool === "paint" && selectedColor) {
@@ -230,7 +245,6 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
           x: cellX,
           y: cellY,
           color: selectedColor,
-          userId: user?.id,
         });
       }
 
@@ -247,7 +261,16 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
     canvas.addEventListener("click", handleClick);
     return () => canvas.removeEventListener("click", handleClick);
     // }, [panOffset, scale, isDragging, selectedColor, paintCharges, tool]);
-  }, [panOffset, scale, isDragging, selectedColor, tool]);
+  }, [
+    panOffset,
+    scale,
+    isDragging,
+    selectedColor,
+    tool,
+    canvasData.id,
+    inspectMutation,
+    mutation,
+  ]);
 
   // wheel pan/zoom
   useEffect(() => {
@@ -264,7 +287,15 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
       const zoomIntensity = 0.001;
       const zoomDelta = event.deltaY * -zoomIntensity;
 
-      getNewScale({ canvas, zoomDelta, panOffset, setPanOffset, setScale, centerX, centerY });
+      getNewScale({
+        canvas,
+        zoomDelta,
+        panOffset,
+        setPanOffset,
+        setScale,
+        centerX,
+        centerY,
+      });
     };
 
     canvas.addEventListener("wheel", handleWheel, { passive: false });
@@ -311,7 +342,15 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
 
-    getNewScale({ canvas, zoomDelta, panOffset, setPanOffset, setScale, centerX, centerY });
+    getNewScale({
+      canvas,
+      zoomDelta,
+      panOffset,
+      setPanOffset,
+      setScale,
+      centerX,
+      centerY,
+    });
   };
 
   // ---------- mobile touch pan/zoom ----------
@@ -379,7 +418,8 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
       if (!touch0 || !touch1) return;
       e.preventDefault();
       const canvas = canvasRef.current;
-      if (!canvas || lastTouchDistance === null || lastTouchCenter === null) return;
+      if (!canvas || lastTouchDistance === null || lastTouchCenter === null)
+        return;
 
       const currentDistance = getTouchDistance(touch0, touch1);
       const currentCenter = getTouchCenter(touch0, touch1);
@@ -392,7 +432,15 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
       const centerX = currentCenter.x - rect.left;
       const centerY = currentCenter.y - rect.top;
 
-      getNewScale({ canvas, zoomDelta, panOffset, setPanOffset, setScale, centerX, centerY });
+      getNewScale({
+        canvas,
+        zoomDelta,
+        panOffset,
+        setPanOffset,
+        setScale,
+        centerX,
+        centerY,
+      });
 
       setLastTouchDistance(currentDistance);
       setLastTouchCenter(currentCenter);
@@ -419,7 +467,11 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
 
   const paintBtn = (tool: ToolType["tool"]) => {
     setTool(tool);
-    tool === "paint" ? playPnlExpand() : playPnlCollapse();
+    if (tool === "paint") {
+      playPnlExpand();
+    } else {
+      playPnlCollapse();
+    }
   };
 
   return (
@@ -433,7 +485,12 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
           {user && user.role === "ADMIN" && (
             <>
               <IconButton onClick={() => setSelectedContent("leaderboard")}>
-                <Image width={24} height={24} src="/leaderboard.svg" alt="Leaderboard" />
+                <Image
+                  width={24}
+                  height={24}
+                  src="/leaderboard.svg"
+                  alt="Leaderboard"
+                />
               </IconButton>
               <IconButton onClick={() => setSelectedContent("guild")}>
                 <Image src="/guild.svg" width={24} height={24} alt="Guild" />
@@ -477,9 +534,11 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
             <Brush size={20} fill="white" />
             <div className="flex items-center gap-1">
               Paint <span>{paintCharges}</span>/30
-              {paintCharges < 30 && displaySeconds <= 30 && displaySeconds > 0 && (
-                <span className="text-sm">00:{displaySeconds}s</span>
-              )}
+              {paintCharges < 30 &&
+                displaySeconds <= 30 &&
+                displaySeconds > 0 && (
+                  <span className="text-sm">00:{displaySeconds}s</span>
+                )}
             </div>
           </PrimaryButton>
         )}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { X, Copy, Check } from "lucide-react";
 import { toast } from "react-toastify";
-import { GetInviteCode, InviteLinkCardProps, queryKeysType } from "@repo/types";
+import { InviteLinkCardProps, queryKeysType } from "@repo/types";
 import IconButton from "./ui/iconButton";
 import { useQuery } from "@tanstack/react-query";
 import { getGuildInviteCode } from "api/guild.service";
@@ -10,7 +10,10 @@ import { displayError } from "@/utils/displayError";
 
 const clientUrl = process.env.NEXT_PUBLIC_CLIENT_URL;
 
-export default function InviteLinkCard({ guildId, guildInvitationToggle }: InviteLinkCardProps) {
+export default function InviteLinkCard({
+  guildId,
+  guildInvitationToggle,
+}: InviteLinkCardProps) {
   const [copied, setCopied] = useState(false);
   const [inviteUrl, setInviteUrl] = useState<string>("");
 
@@ -42,6 +45,7 @@ export default function InviteLinkCard({ guildId, guildInvitationToggle }: Invit
         setCopied(false);
       }, 1000);
     } catch (err) {
+      console.error(err);
       toast.error("Something went wrong. Failed to copy");
     }
   };

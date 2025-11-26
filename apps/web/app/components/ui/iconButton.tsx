@@ -31,7 +31,9 @@ export default function IconButton({
       onBlur={onBlur}
       onMouseDown={onMouseDown}
       disabled={disabled}
-      className={twMerge(clsx("w-10 h-10 rounded-full bg-white", baseStyles, className))}
+      className={twMerge(
+        clsx("w-10 h-10 rounded-full bg-white", baseStyles, className)
+      )}
     >
       {children}
     </button>

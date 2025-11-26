@@ -7,7 +7,11 @@ import Image from "next/image";
 import { MoreVertical, UserPlus, X } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { GuildDataType, queryKeysType } from "@repo/types";
-import { getGuildByUserId, getGuildInviteCode, leaveGuild } from "api/guild.service";
+import {
+  getGuildByUserId,
+  getGuildInviteCode,
+  leaveGuild,
+} from "api/guild.service";
 import { useUser } from "@/context/user.context";
 import { useToggle } from "@/hooks/useToggle";
 import InviteLinkCard from "../inviteLinkCard";
@@ -18,7 +22,11 @@ import { displayError } from "@/utils/displayError";
 import Guild from "../guild/guild";
 import GuildContent from "../guild/guildContent";
 
-export default function GuildMotion({ cardRef }: { cardRef: RefObject<HTMLDivElement | null> }) {
+export default function GuildMotion({
+  cardRef,
+}: {
+  cardRef: RefObject<HTMLDivElement | null>;
+}) {
   const { user } = useUser();
   const { setSelectedContent } = useSelectedContent();
   const guildInvitationToggle = useToggle();
@@ -94,7 +102,13 @@ export default function GuildMotion({ cardRef }: { cardRef: RefObject<HTMLDivEle
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
               <div className="gap-1 text-xl sm:text-2xl font-bold text-gray-800 flex items-center">
-                <Image src="/guild.svg" width={24} height={24} className="w-8" alt="Guild" />
+                <Image
+                  src="/guild.svg"
+                  width={24}
+                  height={24}
+                  className="w-8"
+                  alt="Guild"
+                />
                 <h2 className="font-semibold text-slate-800">
                   {guildData ? guildData.name.toUpperCase() : "Guild"}
                 </h2>
@@ -126,7 +140,10 @@ export default function GuildMotion({ cardRef }: { cardRef: RefObject<HTMLDivEle
                       <button
                         className="w-full text-center px-3 py-2 hover:bg-gray-100 cursor-pointer text-red-500"
                         onMouseDown={() =>
-                          mutation.mutate({ userId: user?.id, guildId: guildData.id })
+                          mutation.mutate({
+                            userId: user?.id,
+                            guildId: guildData.id,
+                          })
                         }
                       >
                         Leave guild

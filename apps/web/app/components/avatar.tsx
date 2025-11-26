@@ -22,7 +22,7 @@ type AvatarProps = {
 
 export default function Avatar({ userId }: AvatarProps) {
   const queryClient = getQueryClient();
-  const { user, setUser } = useUser();
+  const { setUser } = useUser();
   const { setSelectedContent } = useSelectedContent();
   const { isOpen, toggle, close } = useToggle();
   const menuRef = useRef<HTMLDivElement>(null);
@@ -41,7 +41,7 @@ export default function Avatar({ userId }: AvatarProps) {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isOpen]);
+  }, [isOpen, close]);
 
   const { data, isError, error } = useQuery<User>({
     queryKey: queryKeysType.me(userId!),
@@ -71,17 +71,19 @@ export default function Avatar({ userId }: AvatarProps) {
     const loginTimes = Number(localStorage.getItem("loginTimes"));
 
     if (loginTimes < 1) {
-      toast.success(`Successfully logged in as ${data?.name || data?.discord?.global_name}`);
+      toast.success(
+        `Successfully logged in as ${data?.name || data?.discord?.global_name}`
+      );
 
       // invalidate user data to get a fresh user's cooldown and charges
-      queryClient.invalidateQueries({ queryKey: queryKeysType.me(user?.id) });
+      queryClient.invalidateQueries({ queryKey: queryKeysType.me(data?.id) });
 
       const current = Number(localStorage.getItem("loginTimes")) || 0;
       localStorage.setItem("loginTimes", String(current + 1));
     }
 
     setUser(data);
-  }, [data]);
+  }, [data, queryClient, setUser]);
 
   return (
     <div ref={menuRef}>
@@ -95,7 +97,7 @@ export default function Avatar({ userId }: AvatarProps) {
           <Image
             width={1024}
             height={1024}
-            src={getProfileImage(user)}
+            src={getProfileImage(data!)}
             alt="User Avatar"
             className="w-full h-full rounded-full object-cover border-1 border-gray-600"
             priority
@@ -105,7 +107,9 @@ export default function Avatar({ userId }: AvatarProps) {
 
       <div
         className={`absolute flex flex-col gap-2 right-0 mt-1 w-xs sm:w-sm bg-white border border-cyan-300 rounded-xl shadow-lg p-4 z-50 transition-all duration-300 ${
-          isOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
+          isOpen
+            ? "opacity-100 scale-100"
+            : "opacity-0 scale-95 pointer-events-none"
         }`}
       >
         <div className="relative flex items-start gap-2">
@@ -121,16 +125,18 @@ export default function Avatar({ userId }: AvatarProps) {
           <Image
             width={1024}
             height={1024}
-            src={getProfileImage(user)}
+            src={getProfileImage(data!)}
             alt="User Avatar"
             className="w-20 mt-1 h-auto rounded-full object-cover border border-cyan-700"
             priority
           />
           <div className="flex flex-col items-start mb-4">
             <p className="text-gray-800 font-bold text-2xl">
-              {user?.name || discordData?.global_name}
+              {data?.name || discordData?.global_name}
             </p>
-            <p className="text-gray-400 font-semibold text-md">{discordData?.username}</p>
+            <p className="text-gray-400 font-semibold text-md">
+              {discordData?.username}
+            </p>
             <p className="text-gray-400 font-semibold text-md">{email}</p>
           </div>
         </div>
@@ -140,7 +146,9 @@ export default function Avatar({ userId }: AvatarProps) {
             <Paintbrush />
             <div className="text-gray-800 text-md font-semibold flex gap-1">
               Pixels painted:
-              <span className="text-blue-500 font-bold">{totalPixelsPlaced ?? 0}</span>
+              <span className="text-blue-500 font-bold">
+                {totalPixelsPlaced ?? 0}
+              </span>
             </div>
           </div>
           <IconButton className="w-full border-none hover:scale-97 ">

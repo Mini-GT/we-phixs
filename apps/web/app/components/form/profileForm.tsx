@@ -3,7 +3,7 @@
 import { Check, Edit2, Lock } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { FormField } from "./formField";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { FieldErrorTypes, queryKeysType, UpdateProfie } from "@repo/types";
 import { useUser } from "@/context/user.context";
 import { toReadableDate } from "@/utils/formatDate";
@@ -26,22 +26,51 @@ const defaultFieldErrors = {
 
 export default function ProfileForm() {
   const { user } = useUser();
-  const [fieldError, setFieldError] = useState<Partial<FieldErrorTypes>>(defaultFieldErrors);
+  const [fieldError] = useState<Partial<FieldErrorTypes>>(defaultFieldErrors);
   const [showPasswordFields, setShowPasswordFields] = useState<boolean>(false);
   const queryClient = getQueryClient();
   const avatarPickToggle = useToggle();
-
-  if (!user) return <div>Couldn't load user data</div>;
-
   const [formData, setFormData] = useState<UpdateProfie>({
-    currentName: user.name ?? user.discord?.global_name,
+    currentName: "",
     newName: null,
     currentPassword: null,
     newPassword: null,
     confirmNewPassword: null,
-    currentProfileImage: getProfileImage(user),
+    currentProfileImage: "",
     newProfileImage: null,
   });
+
+  useEffect(() => {
+    if (!user) return;
+    setFormData({
+      currentName: user.name ?? user.discord?.global_name ?? "",
+      newName: null,
+      currentPassword: null,
+      newPassword: null,
+      confirmNewPassword: null,
+      currentProfileImage: getProfileImage(user),
+      newProfileImage: null,
+    });
+  }, [user]);
+
+  const mutation = useMutation({
+    mutationFn: updateProfile,
+    onError: (err) => {
+      displayError(err);
+    },
+    onSuccess: (data) => {
+      setFormData((prev) => ({
+        ...prev,
+        currentPassword: null,
+        newPassword: null,
+        confirmNewPassword: null,
+      }));
+      queryClient.invalidateQueries({ queryKey: queryKeysType.me(user?.id) });
+      toast.success(data);
+    },
+  });
+
+  if (!user) return <div>{"Couldn't load user data"}</div>;
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -59,23 +88,6 @@ export default function ProfileForm() {
       }
     });
   };
-
-  const mutation = useMutation({
-    mutationFn: updateProfile,
-    onError: (err) => {
-      displayError(err);
-    },
-    onSuccess: (data) => {
-      setFormData((prev) => ({
-        ...prev,
-        currentPassword: null,
-        newPassword: null,
-        confirmNewPassword: null,
-      }));
-      queryClient.invalidateQueries({ queryKey: queryKeysType.me(user.id) });
-      toast.success(data);
-    },
-  });
 
   const handleSave = () => {
     mutation.mutate({ ...formData });
@@ -109,7 +121,10 @@ export default function ProfileForm() {
           </div>
 
           {avatarPickToggle.isOpen && (
-            <AvatarPicker setFormData={setFormData} onClose={avatarPickToggle.close} />
+            <AvatarPicker
+              setFormData={setFormData}
+              onClose={avatarPickToggle.close}
+            />
           )}
         </div>
       </div>

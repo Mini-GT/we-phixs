@@ -29,13 +29,16 @@ export type AvatarTypes =
   | "/imgs/profile/image8.png"
   | "/imgs/profile/image9.png";
 
-export default function AvatarPickera({ setFormData, onClose }: AvatarPickerProps) {
+export default function AvatarPickera({
+  setFormData,
+  onClose,
+}: AvatarPickerProps) {
   const [selectedAvatar, setSelectedAvatar] = useState<AvatarTypes>();
   const { user, setUser } = useUser();
 
   const { data } = useSuspenseQuery<User>({
     queryKey: queryKeysType.me(user?.id),
-    queryFn: () => getMe(user?.id!),
+    queryFn: () => getMe(),
   });
 
   const handleSelect = (avatar: AvatarTypes) => {

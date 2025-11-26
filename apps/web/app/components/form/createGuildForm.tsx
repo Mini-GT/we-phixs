@@ -7,7 +7,6 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import DotsLoader from "../loading/dotsLoading";
 import { displayError } from "@/utils/displayError";
-import { useGuildData } from "@/context/guild.context";
 import { getQueryClient } from "@/getQueryClient";
 
 export default function CreateGuildForm() {

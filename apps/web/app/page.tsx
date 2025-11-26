@@ -13,9 +13,8 @@ import { isTokenExpired, verifyJwt } from "./utils/jwt";
 import { logoutUser } from "api/logout.service";
 import { getGuildByUserId } from "api/guild.service";
 
-export const jwtsecret = process.env.jwtsecretKey;
-
 export default async function Home() {
+  const jwtsecret = process.env.jwtsecretKey;
   const queryClient = getQueryClient();
   const cookieStore = await cookies();
 
@@ -24,7 +23,10 @@ export default async function Home() {
   const guildInvitationCode = cookieStore.get("guildInvite")?.value;
 
   if (loginToken && jwtsecret) {
-    const { id, exp } = verifyJwt(loginToken, jwtsecret) as { id: string; exp: number };
+    const { id, exp } = verifyJwt(loginToken, jwtsecret) as {
+      id: string;
+      exp: number;
+    };
     const isExpired = isTokenExpired(exp);
 
     if (isExpired) {
@@ -63,7 +65,9 @@ export default async function Home() {
           closeButton={false}
           stacked
         />
-        <Canvas hasLoginToken={hasLoginToken}>{!hasLoginToken ? <Login /> : <User />}</Canvas>
+        <Canvas hasLoginToken={hasLoginToken}>
+          {!hasLoginToken ? <Login /> : <User />}
+        </Canvas>
         <CardContent guildInvitationCode={guildInvitationCode} />
       </div>
     </HydrationBoundary>

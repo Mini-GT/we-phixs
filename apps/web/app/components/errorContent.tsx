@@ -1,5 +1,6 @@
 import { ErrorContentProps } from "@repo/types";
 import { AlertTriangle } from "lucide-react";
+import Link from "next/link";
 
 export default function ErrorContent({ message, details }: ErrorContentProps) {
   return (
@@ -9,12 +10,12 @@ export default function ErrorContent({ message, details }: ErrorContentProps) {
           <AlertTriangle className="text-red-500 w-12 h-12" />
           <h1 className="text-2xl font-semibold text-gray-800">{message}</h1>
           <p className="text-gray-600">{details}</p>
-          <a
+          <Link
             href="/"
             className="mt-4 inline-block bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
           >
             Go Home
-          </a>
+          </Link>
         </div>
       </div>
     </div>

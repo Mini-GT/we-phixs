@@ -50,12 +50,20 @@ export default function LoginForm({ setComponent }: LoginRegisterFormProps) {
     <CardModal>
       <CardContent>
         <h2 className="relative flex items-center justify-center text-3xl font-bold text-center text-gray-900">
-          <Image width={40} height={40} src="/imgs/logo.png" alt="wephix logo" />
+          <Image
+            width={40}
+            height={40}
+            src="/imgs/logo.png"
+            alt="wephix logo"
+          />
           <span className={`${pixelify_sans.className}`}>Login</span>
         </h2>
         <form method="POST" onSubmit={handleSubmit} className="mt-4">
           <div className="relative mb-4">
-            <Label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <Label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700"
+            >
               Email
             </Label>
             <Input
@@ -70,7 +78,10 @@ export default function LoginForm({ setComponent }: LoginRegisterFormProps) {
             />
           </div>
           <div className="relative mb-4">
-            <Label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <Label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700"
+            >
               Password
             </Label>
             <Input
@@ -118,7 +129,7 @@ export default function LoginForm({ setComponent }: LoginRegisterFormProps) {
           </Link>
         </form>
         <div className="mt-4 flex justify-center gap-2 text-sm text-nowrap">
-          <span>Don't have an account?</span>
+          <span>{"Don't have an account?"}</span>
           <button
             className="text-blue-600 hover:underline cursor-pointer"
             onClick={() => setComponent("registerForm")}

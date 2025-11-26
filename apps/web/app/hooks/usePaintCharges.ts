@@ -90,7 +90,10 @@ export default function usePaintCharges(hasLoginToken: string) {
 
       // check if we just completed a charge cycle
       // only increment if we haven't incremented in the last 500ms (debounce)
-      if (remainingMsThisCharge > rechargeTime - 100 && now - lastChargeIncrementTime > 500) {
+      if (
+        remainingMsThisCharge > rechargeTime - 100 &&
+        now - lastChargeIncrementTime > 500
+      ) {
         lastChargeIncrementTime = now;
         setPaintCharges((prev) => {
           const newCharges = Math.min(prev + 1, maxCharges);
@@ -103,7 +106,10 @@ export default function usePaintCharges(hasLoginToken: string) {
       }
 
       // display seconds should never be 0 during cooldown
-      const remainingSeconds = Math.max(1, Math.ceil(remainingMsThisCharge / 1000));
+      const remainingSeconds = Math.max(
+        1,
+        Math.ceil(remainingMsThisCharge / 1000)
+      );
       setDisplaySeconds(remainingSeconds);
     }, 100);
 
@@ -113,7 +119,13 @@ export default function usePaintCharges(hasLoginToken: string) {
         timerRef.current = null;
       }
     };
-  }, [cooldownUntil, paintCharges, hasLoginToken, audioInitialized]);
+  }, [
+    cooldownUntil,
+    paintCharges,
+    hasLoginToken,
+    audioInitialized,
+    playSuccess,
+  ]);
 
   // browser has policy that need users to have interaction in the app first in order to play sounds
   // set up audio context on first user interaction

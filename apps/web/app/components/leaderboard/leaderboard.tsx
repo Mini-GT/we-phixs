@@ -10,7 +10,7 @@ const periods: Periods[] = ["Today", "Week", "Month", "All time"];
 // const tabs = ["Players"] as const;
 
 export default function Leaderboard() {
-  const [tab, setTab] = useState<"Players" | "Factions">("Players");
+  // const [tab, setTab] = useState<"Players" | "Factions">("Players");
   const [period, setPeriod] = useState<Periods>("Today");
 
   const {
@@ -66,10 +66,18 @@ export default function Leaderboard() {
 
       <div className="relative h-[70vh]">
         {period.toLowerCase() === "today" && (
-          <TableComponent users={leaderboardData?.daily} period={period} isFetching={isFetching} />
+          <TableComponent
+            users={leaderboardData?.daily}
+            period={period}
+            isFetching={isFetching}
+          />
         )}
         {period.toLowerCase() === "week" && (
-          <TableComponent users={leaderboardData?.weekly} period={period} isFetching={isFetching} />
+          <TableComponent
+            users={leaderboardData?.weekly}
+            period={period}
+            isFetching={isFetching}
+          />
         )}
         {period.toLowerCase() === "month" && (
           <TableComponent

@@ -10,6 +10,7 @@ export function isTokenExpired(exp: number) {
 
     return exp < currentTime;
   } catch (error) {
+    console.error(error);
     return true;
   }
 }

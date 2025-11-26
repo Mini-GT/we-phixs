@@ -39,7 +39,9 @@ export default function CardContent({
     },
     onError: (err) => {
       displayError(err);
-      queryClient.invalidateQueries({ queryKey: queryKeysType.guildByUserId(user?.id) });
+      queryClient.invalidateQueries({
+        queryKey: queryKeysType.guildByUserId(user?.id),
+      });
     },
     onSettled: () => {
       removeGuildInvitationCookie();
@@ -49,7 +51,7 @@ export default function CardContent({
   useEffect(() => {
     if (!user?.id || !guildInvitationCode) return;
     mutation.mutate({ code: guildInvitationCode });
-  }, [user?.id, guildInvitationCode]);
+  }, [user?.id, guildInvitationCode, mutation]);
 
   // close card if user clicks outside the card content
   useEffect(() => {
@@ -75,7 +77,7 @@ export default function CardContent({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [selectedContent]);
+  }, [selectedContent, setSelectedContent]);
 
   useEffect(() => {
     // remove loginTimes to receive fresh login message when user logged in
@@ -96,9 +98,13 @@ export default function CardContent({
   return (
     <AnimatePresence>
       {selectedContent === "profileForm" && <ProfileMotion cardRef={cardRef} />}
-      {selectedContent === "leaderboard" && <LeaderboardMotion cardRef={cardRef} />}
+      {selectedContent === "leaderboard" && (
+        <LeaderboardMotion cardRef={cardRef} />
+      )}
       {selectedContent === "guild" && <GuildMotion cardRef={cardRef} />}
-      {selectedContent === "createGuild" && <CreateGuildMotion cardRef={cardRef} />}
+      {selectedContent === "createGuild" && (
+        <CreateGuildMotion cardRef={cardRef} />
+      )}
       {selectedContent === "report" && <ReportFormMotion cardRef={cardRef} />}
       {selectedContent === "adminPanel" && user?.role === "ADMIN" && (
         <AdminPanelMotion cardRef={cardRef} />

@@ -16,12 +16,13 @@ export default function Reports() {
   const [page, setPage] = useState(1);
   const queryClient = getQueryClient();
 
-  const { data, isFetching, isPlaceholderData, isError, error } = useQuery<ReportsDataType>({
-    queryKey: queryKeysType.reports(page),
-    queryFn: () => getReports(page),
-    placeholderData: keepPreviousData,
-    staleTime: 5000,
-  });
+  const { data, isFetching, isPlaceholderData, isError, error } =
+    useQuery<ReportsDataType>({
+      queryKey: queryKeysType.reports(page),
+      queryFn: () => getReports(page),
+      placeholderData: keepPreviousData,
+      staleTime: 5000,
+    });
 
   if (isError) {
     displayError(error);
@@ -40,7 +41,10 @@ export default function Reports() {
     return <FetchLoading />;
   }
 
-  const categories = ["all", ...new Set(data.reports.map((r) => r.category).filter(Boolean))];
+  const categories = [
+    "all",
+    ...new Set(data.reports.map((r) => r.category).filter(Boolean)),
+  ];
 
   const filteredReports = data.reports.filter((report) => {
     const matchesSearch =
@@ -48,7 +52,8 @@ export default function Reports() {
       report.message?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       report.user.name?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesCategory = filterCategory === "all" || report.category === filterCategory;
+    const matchesCategory =
+      filterCategory === "all" || report.category === filterCategory;
 
     return matchesSearch && matchesCategory;
   });
@@ -93,7 +98,9 @@ export default function Reports() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-slate-600 text-sm">Total Reports</p>
-                <p className="text-3xl font-bold text-slate-800">{data.reports.length}</p>
+                <p className="text-3xl font-bold text-slate-800">
+                  {data.reports.length}
+                </p>
               </div>
               <MessageSquare className="w-10 h-10 text-blue-500" />
             </div>
@@ -103,7 +110,9 @@ export default function Reports() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-slate-600 text-sm">Filtered Results</p>
-                <p className="text-3xl font-bold text-slate-800">{filteredReports.length}</p>
+                <p className="text-3xl font-bold text-slate-800">
+                  {filteredReports.length}
+                </p>
               </div>
               <Filter className="w-10 h-10 text-green-500" />
             </div>
@@ -113,7 +122,9 @@ export default function Reports() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-slate-600 text-sm">Categories</p>
-                <p className="text-3xl font-bold text-slate-800">{categories.length - 1}</p>
+                <p className="text-3xl font-bold text-slate-800">
+                  {categories.length - 1}
+                </p>
               </div>
               <Calendar className="w-10 h-10 text-purple-500" />
             </div>
@@ -141,14 +152,18 @@ export default function Reports() {
                       >
                         {report.category || "Uncategorized"}
                       </span>
-                      <span className="text-xs text-slate-500">ID: #{report.id}</span>
+                      <span className="text-xs text-slate-500">
+                        ID: #{report.id}
+                      </span>
                     </div>
 
                     <h3 className="text-xl font-semibold text-slate-800 mb-2">
                       {report.subject || "No Subject"}
                     </h3>
 
-                    <p className="text-slate-600 mb-4">{report.message || "No message provided"}</p>
+                    <p className="text-slate-600 mb-4">
+                      {report.message || "No message provided"}
+                    </p>
 
                     <div className="flex flex-wrap gap-4 text-sm text-slate-500">
                       <div className="flex items-center gap-2">
