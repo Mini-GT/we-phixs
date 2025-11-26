@@ -63,6 +63,11 @@ type UpdateProfie = {
   newProfileImage: string | null;
 };
 
+type UsersDataType = {
+  users: UsersLeaderboardType[];
+  hasMore: number;
+};
+
 export type {
   User,
   Role,
@@ -73,4 +78,5 @@ export type {
   UsersLeaderboardType,
   LeaderboardPeriods,
   UpdateProfie,
+  UsersDataType,
 };

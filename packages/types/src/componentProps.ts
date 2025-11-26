@@ -30,7 +30,7 @@ type Periods = "Today" | "Week" | "Month" | "All time";
 type PlayersProps = {
   users: UsersLeaderboardType[] | undefined;
   isFetching: boolean;
-  period: Periods;
+  period?: Periods;
 };
 
 type AvatarPickerProps = {
