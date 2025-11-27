@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Search } from "lucide-react";
+// import { Search } from "lucide-react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { queryKeysType, UsersDataType } from "@repo/types";
 import FetchLoading from "./loading/fetchLoading";
@@ -10,18 +10,17 @@ import { getAllUsers } from "api/user.service";
 import TableComponent from "./leaderboard/table";
 
 export default function UsersComponent() {
-  const [searchTerm, setSearchTerm] = useState("");
+  // const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const queryClient = getQueryClient();
 
-  const { data, isFetching, isPlaceholderData, isError, error } = useQuery<UsersDataType>({
-    queryKey: queryKeysType.getAllUsers(page),
-    queryFn: () => getAllUsers(page),
-    placeholderData: keepPreviousData,
-    staleTime: 5000,
-  });
-
-  console.log(data?.users);
+  const { data, isFetching, isPlaceholderData, isError, error } =
+    useQuery<UsersDataType>({
+      queryKey: queryKeysType.getAllUsers(page),
+      queryFn: () => getAllUsers(page),
+      placeholderData: keepPreviousData,
+      staleTime: 5000,
+    });
 
   if (isError) {
     displayError(error);

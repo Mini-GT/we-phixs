@@ -3,7 +3,11 @@ import { GuildContentProps, queryKeysType, User } from "@repo/types";
 import { useState } from "react";
 import { useUser } from "@/context/user.context";
 import { useMutation } from "@tanstack/react-query";
-import { kickGuildMember, transferLeadership, updateGuildDescription } from "api/guild.service";
+import {
+  kickGuildMember,
+  transferLeadership,
+  updateGuildDescription,
+} from "api/guild.service";
 import { toast } from "react-toastify";
 import { displayError } from "@/utils/displayError";
 import { getQueryClient } from "@/getQueryClient";
@@ -25,7 +29,9 @@ export default function GuildContent({
 }: GuildContentProps) {
   const [activeMemberId, setActiveMemberId] = useState<string | null>(null);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
-  const [description, setDescription] = useState<string>(descriptionData || "No description");
+  const [description, setDescription] = useState<string>(
+    descriptionData || "No description"
+  );
   const queryClient = getQueryClient();
   const { user } = useUser();
   const descriptionToggle = useToggle();
@@ -126,13 +132,18 @@ export default function GuildContent({
           <div className="flex items-center gap-2 text-gray-700">
             <span className="text-md">
               Total pixels painted:{" "}
-              <span className="text-gray-900 font-semibold">{guildTotalPixelsPlaced}</span>
+              <span className="text-gray-900 font-semibold">
+                {guildTotalPixelsPlaced}
+              </span>
             </span>
           </div>
           <div className="flex items-center gap-2 text-gray-700">
             <Users className="w-5 h-5" />
             <span className="text-md">
-              Members: <span className="text-blue-600 font-semibold">{members.length}</span>
+              Members:{" "}
+              <span className="text-blue-600 font-semibold">
+                {members.length}
+              </span>
             </span>
           </div>
         </div>
@@ -152,7 +163,9 @@ export default function GuildContent({
               <tbody>
                 <tr className="flex w-full items-center text-sm h-6">
                   <td className="flex items-center gap-2 w-full">
-                    <span className="text-gray-500 font-medium w-6">#{index + 1}</span>
+                    <span className="text-gray-500 font-medium w-6">
+                      #{index + 1}
+                    </span>
                     <div className="flex w-full items-center">
                       <div className="flex-shrink-0 overflow-hidden rounded-full mr-2">
                         <Image
@@ -163,16 +176,20 @@ export default function GuildContent({
                           alt="User image"
                         />
                       </div>
-                      <div className="flex flex-wrap">
-                        <span className="text-gray-900 font-medium mr-1">{member.name}</span>
+                      <div className="flex flex-wrap items-center">
+                        <span className="text-gray-900 font-medium mr-3">
+                          {member.name}
+                        </span>
                         <div
-                          className={`relative flex items-center mr-6 text-[0.6rem] p-[0.1rem] rounded-sm font-bold ${getRoleColor(member.role)}`}
+                          className={`relative flex items-center mr-6 text-[0.7rem] p-1 rounded-sm font-bold ${getRoleColor(member.role)}`}
                         >
                           <span>{member.role.toUpperCase()}</span>
                         </div>
                         {!member.discord?.username ? null : (
                           <div>
-                            <DiscordTooltip username={member.discord.username} />
+                            <DiscordTooltip
+                              username={member.discord.username}
+                            />
                           </div>
                         )}
                       </div>
@@ -185,7 +202,11 @@ export default function GuildContent({
                     </span>
 
                     {guildLeaderId === user?.id && (
-                      <div tabIndex={0} onBlur={() => setActiveMemberId(null)} className="relative">
+                      <div
+                        tabIndex={0}
+                        onBlur={() => setActiveMemberId(null)}
+                        className="relative"
+                      >
                         <MoreVertical
                           onClick={() => handleToggle(member.id)}
                           className="w-4 h-4 text-gray-400 hover:text-gray-600 cursor-pointer"

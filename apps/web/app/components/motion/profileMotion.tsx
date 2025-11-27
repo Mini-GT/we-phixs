@@ -5,10 +5,12 @@ import ProfileForm from "../form/profileForm";
 import { useSelectedContent } from "@/context/selectedContent.context";
 import { type RefObject } from "react";
 import MotionComponent from "./motion";
-import { useUser } from "@/context/user.context";
 
-export default function ProfileMotion({ cardRef }: { cardRef: RefObject<HTMLDivElement | null> }) {
-  const { user } = useUser();
+export default function ProfileMotion({
+  cardRef,
+}: {
+  cardRef: RefObject<HTMLDivElement | null>;
+}) {
   const { setSelectedContent } = useSelectedContent();
 
   return (
@@ -20,7 +22,11 @@ export default function ProfileMotion({ cardRef }: { cardRef: RefObject<HTMLDivE
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <div className="text-xl sm:text-2xl font-bold text-gray-800 flex items-center">
-              <UserRound fill="#8e44ad" strokeWidth={0} className="mr-3 h-7 w-7" />
+              <UserRound
+                fill="#8e44ad"
+                strokeWidth={0}
+                className="mr-3 h-7 w-7"
+              />
               Edit Profile
             </div>
           </div>
