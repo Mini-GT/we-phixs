@@ -482,22 +482,28 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
           {/* <IconButton>
             <Search className="w-5 h-5 text-gray-600" />
           </IconButton> */}
-          {user && user.role === "ADMIN" && (
+          <IconButton onClick={() => setSelectedContent("leaderboard")}>
+            <Image
+              width={24}
+              height={24}
+              src="/leaderboard.svg"
+              alt="Leaderboard"
+            />
+          </IconButton>
+
+          {user && (
             <>
-              <IconButton onClick={() => setSelectedContent("leaderboard")}>
-                <Image
-                  width={24}
-                  height={24}
-                  src="/leaderboard.svg"
-                  alt="Leaderboard"
-                />
-              </IconButton>
               <IconButton onClick={() => setSelectedContent("guild")}>
                 <Image src="/guild.svg" width={24} height={24} alt="Guild" />
               </IconButton>
               <IconButton onClick={() => setSelectedContent("report")}>
                 <MessageSquareWarning />
               </IconButton>
+            </>
+          )}
+
+          {user?.role === "ADMIN" && (
+            <>
               <IconButton onClick={() => setSelectedContent("adminPanel")}>
                 <FileLock />
               </IconButton>
