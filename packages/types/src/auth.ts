@@ -8,7 +8,8 @@ interface RegisterFormType extends loginFormType {
   confirmPassword: string;
 }
 
-export type {
-  loginFormType,
-  RegisterFormType
-}
+type DiscordOauth = {
+  code: string | null;
+};
+
+export type { loginFormType, RegisterFormType, DiscordOauth };
