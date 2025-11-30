@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { CanvasType, Coordinantes, queryKeysType, ToolType } from "@repo/types";
 import ColorPalette from "./colorPalette";
-import { useWindowSize } from "@react-hook/window-size";
+// import { useWindowSize } from "@react-hook/window-size";
 import { useSelectedContent } from "@/context/selectedContent.context";
 import Image from "next/image";
 import { useUser } from "@/context/user.context";
@@ -349,9 +349,10 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
       setIsDragging(true);
     }
 
+    // divide by scale so panning feels consistent across all devices
     setPanOffset((prev) => ({
-      x: prev.x + dx,
-      y: prev.y + dy,
+      x: prev.x + dx / scale,
+      y: prev.y + dy / scale,
     }));
 
     setLastMouse({ x: e.clientX, y: e.clientY });
@@ -419,9 +420,10 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
           setIsDragging(true);
         }
 
+        // divide by scale so panning feels consistent across all devices
         setPanOffset((prev) => ({
-          x: prev.x + dx,
-          y: prev.y + dy,
+          x: prev.x + dx / scale,
+          y: prev.y + dy / scale,
         }));
 
         setLastMouse({ x: touch.clientX, y: touch.clientY });
