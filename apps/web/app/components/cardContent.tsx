@@ -48,10 +48,11 @@ export default function CardContent({
     },
   });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!user?.id || !guildInvitationCode) return;
     mutation.mutate({ code: guildInvitationCode });
-  }, [user?.id, guildInvitationCode, mutation]);
+  }, [user?.id, guildInvitationCode]);
 
   // close card if user clicks outside the card content
   useEffect(() => {
