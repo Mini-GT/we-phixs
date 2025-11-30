@@ -22,7 +22,7 @@ type AvatarProps = {
 
 export default function Avatar({ userId }: AvatarProps) {
   const queryClient = getQueryClient();
-  const { setUser } = useUser();
+  const { user, setUser } = useUser();
   const { setSelectedContent } = useSelectedContent();
   const { isOpen, toggle, close } = useToggle();
   const menuRef = useRef<HTMLDivElement>(null);
@@ -97,7 +97,7 @@ export default function Avatar({ userId }: AvatarProps) {
           <Image
             width={1024}
             height={1024}
-            src={getProfileImage(data!)}
+            src={getProfileImage(user)}
             alt="User Avatar"
             className="w-full h-full rounded-full object-cover border-1 border-gray-600"
             priority

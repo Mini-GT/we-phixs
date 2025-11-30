@@ -1,4 +1,4 @@
-import { UpdateProfie } from "@repo/types";
+import { UpdateProfile } from "@repo/types";
 import axios from "axios";
 
 const isServer = typeof window === "undefined";
@@ -21,7 +21,8 @@ export async function getPaintCharges() {
   return res.data;
 }
 
-export async function updateProfile({ ...args }: UpdateProfie) {
+export async function updateProfile({ ...args }: UpdateProfile) {
+  console.log(args);
   const res = await api.patch(`/profile/update`, {
     ...args,
   });

@@ -53,7 +53,7 @@ type UsersLeaderboardType = {
   discord?: DiscordFields;
 };
 
-type UpdateProfie = {
+type UpdateProfile = {
   currentName: string;
   newName: string | null;
   currentPassword: string | null;
@@ -77,6 +77,6 @@ export type {
   CalculateChargesOutput,
   UsersLeaderboardType,
   LeaderboardPeriods,
-  UpdateProfie,
+  UpdateProfile,
   UsersDataType,
 };

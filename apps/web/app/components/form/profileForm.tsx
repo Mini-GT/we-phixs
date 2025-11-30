@@ -4,13 +4,13 @@ import { Check, Edit2, Lock } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { FormField } from "./formField";
 import { ChangeEvent, useEffect, useState } from "react";
-import { FieldErrorTypes, queryKeysType, UpdateProfie } from "@repo/types";
+import { FieldErrorTypes, queryKeysType, UpdateProfile } from "@repo/types";
 import { useUser } from "@/context/user.context";
 import { toReadableDate } from "@/utils/formatDate";
 import Image from "next/image";
 import { getProfileImage } from "@/utils/images";
-import { useMutation } from "@tanstack/react-query";
-import { updateProfile } from "api/user.service";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getMe, updateProfile } from "api/user.service";
 import { getQueryClient } from "@/getQueryClient";
 import { displayError } from "@/utils/displayError";
 import { toast } from "react-toastify";
@@ -30,7 +30,13 @@ export default function ProfileForm() {
   const [showPasswordFields, setShowPasswordFields] = useState<boolean>(false);
   const queryClient = getQueryClient();
   const avatarPickToggle = useToggle();
-  const [formData, setFormData] = useState<UpdateProfie>({
+
+  const { data } = useQuery({
+    queryKey: queryKeysType.me(user?.id),
+    queryFn: () => getMe(),
+  });
+
+  const [formData, setFormData] = useState<UpdateProfile>({
     currentName: "",
     newName: null,
     currentPassword: null,
@@ -48,10 +54,10 @@ export default function ProfileForm() {
       currentPassword: null,
       newPassword: null,
       confirmNewPassword: null,
-      currentProfileImage: getProfileImage(user),
-      newProfileImage: null,
+      currentProfileImage: getProfileImage(data),
+      newProfileImage: user.profileImage,
     });
-  }, [user]);
+  }, [user, data]);
 
   const mutation = useMutation({
     mutationFn: updateProfile,
@@ -75,21 +81,18 @@ export default function ProfileForm() {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
-    setFormData((prev) => {
+    setFormData((prev: UpdateProfile) => {
       switch (name) {
         case "currentName":
           // user is editing the current name input
           return { ...prev, newName: value };
-        // user is editing the current profile image input
-        case "currentProfileImage":
-          return { ...prev, newProfileImage: value };
         default:
           return { ...prev, [name]: value };
       }
     });
   };
 
-  const handleSave = () => {
+  const handleSave = (formData: UpdateProfile) => {
     mutation.mutate({ ...formData });
   };
 
@@ -271,7 +274,7 @@ export default function ProfileForm() {
         {/* Save Button */}
         <button
           className={`w-full h-12 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-3 px-4 rounded-lg transition-all shadow-lg hover:shadow-blue-500/30 cursor-pointer`}
-          onClick={handleSave}
+          onClick={() => handleSave({ ...formData })}
           disabled={mutation.isPending}
         >
           {mutation.isPending ? "Saving..." : "Save"}

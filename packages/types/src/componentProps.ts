@@ -1,6 +1,6 @@
 import { Dispatch, ReactNode, SetStateAction } from "react";
 import { PixelType } from "./cell";
-import { UpdateProfie, UsersLeaderboardType } from "./users";
+import { UpdateProfile, UsersLeaderboardType } from "./users";
 
 type ComponentStateValue = "loginForm" | "registerForm" | null;
 type SelectedContentValue =
@@ -22,7 +22,9 @@ type ChildrenProps = {
 
 type InspectCardProps = {
   inspectedCellData: PixelType | null;
-  setInspectedCellData: Dispatch<SetStateAction<InspectCardProps["inspectedCellData"]>>;
+  setInspectedCellData: Dispatch<
+    SetStateAction<InspectCardProps["inspectedCellData"]>
+  >;
 };
 
 type Periods = "Today" | "Week" | "Month" | "All time";
@@ -34,7 +36,7 @@ type PlayersProps = {
 };
 
 type AvatarPickerProps = {
-  setFormData: Dispatch<SetStateAction<UpdateProfie>>;
+  setFormData: Dispatch<SetStateAction<UpdateProfile>>;
   onClose: () => void;
 };
 

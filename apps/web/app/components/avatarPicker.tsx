@@ -3,7 +3,12 @@ import { Button } from "./ui/button";
 import { useUser } from "@/context/user.context";
 import Image from "next/image";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { AvatarPickerProps, queryKeysType, User } from "@repo/types";
+import {
+  AvatarPickerProps,
+  queryKeysType,
+  UpdateProfile,
+  User,
+} from "@repo/types";
 import { getMe } from "api/user.service";
 
 const avatars: AvatarTypes[] = [
@@ -29,7 +34,7 @@ export type AvatarTypes =
   | "/imgs/profile/image8.png"
   | "/imgs/profile/image9.png";
 
-export default function AvatarPickera({
+export default function AvatarPicker({
   setFormData,
   onClose,
 }: AvatarPickerProps) {
@@ -47,7 +52,7 @@ export default function AvatarPickera({
       if (!prev) return null;
       return { ...prev, profileImage: avatar };
     });
-    setFormData((prev) => ({
+    setFormData((prev: UpdateProfile) => ({
       ...prev,
       newProfileImage: avatar,
     }));
@@ -78,12 +83,17 @@ export default function AvatarPickera({
         />
       ))}
       <div className="flex justify-center gap-7 col-span-3">
-        {/* <Button className="w-20">Save</Button> */}
         <Button
           className="w-20 cursor-pointer bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
           onClick={handleCancel}
         >
           Cancel
+        </Button>
+        <Button
+          className="w-20 cursor-pointer bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
+          onClick={onClose}
+        >
+          Confirm
         </Button>
       </div>
     </div>
