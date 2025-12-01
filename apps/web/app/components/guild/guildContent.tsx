@@ -79,7 +79,7 @@ export default function GuildContent({
   });
 
   return (
-    <div>
+    <div className="h-full">
       {/* Header */}
       <div className="w-full border-b border-gray-200">
         <div className="relative w-full flex items-center gap-2 text-gray-600 mb-4">
@@ -150,7 +150,7 @@ export default function GuildContent({
       </div>
 
       {/* Members Section */}
-      <div className="space-y-3 mt-4">
+      <div className="space-y-3 mt-4 h-full overflow-y-auto">
         {members.map((member, index) => (
           <div
             key={member.id}

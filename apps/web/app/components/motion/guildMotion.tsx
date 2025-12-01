@@ -21,6 +21,7 @@ import { getQueryClient } from "@/getQueryClient";
 import { displayError } from "@/utils/displayError";
 import Guild from "../guild/guild";
 import GuildContent from "../guild/guildContent";
+import FetchLoading from "../loading/fetchLoading";
 
 export default function GuildMotion({
   cardRef,
@@ -37,6 +38,7 @@ export default function GuildMotion({
   const {
     data: guildData,
     isError,
+    isFetching,
     error,
   } = useQuery<GuildDataType>({
     queryKey: queryKeysType.guildByUserId(user?.id),
@@ -98,8 +100,8 @@ export default function GuildMotion({
         </AnimatePresence>
 
         {/* Guild Card */}
-        <div className="h-full overflow-y-auto">
-          <div className="flex items-center justify-between mb-4">
+        <div className="">
+          <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div className="gap-1 text-xl sm:text-2xl font-bold text-gray-800 flex items-center">
                 <Image
@@ -162,8 +164,11 @@ export default function GuildMotion({
               </IconButton>
             </div>
           </div>
-
-          {!guildData ? (
+        </div>
+        <div className="h-full overflow-hidden">
+          {isFetching ? (
+            <FetchLoading />
+          ) : !guildData ? (
             <Guild />
           ) : (
             <GuildContent
