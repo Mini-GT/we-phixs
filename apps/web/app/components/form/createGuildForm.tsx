@@ -22,7 +22,6 @@ export default function CreateGuildForm() {
       return res;
     },
     onSuccess: (data: GuildDataType) => {
-      console.log(data);
       toast.success("Guild created successfully");
       setGuildName("");
       setSelectedContent("guild");

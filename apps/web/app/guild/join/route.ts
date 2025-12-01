@@ -9,7 +9,7 @@ export async function GET(request: Request) {
   const loginToken = cookieStore.get("loginToken")?.value;
 
   const code = searchParams.get("code");
-  let redirectPath = loginToken ? "/" : "/login";
+  const redirectPath = loginToken ? "/" : "/login";
 
   const destinationUrl = new URL(redirectPath, PUBLIC_DOMAIN);
 
