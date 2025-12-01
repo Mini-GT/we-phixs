@@ -6,53 +6,69 @@ import { useSound } from "react-sounds";
 
 const colors = [
   "#000000",
-  "#4a4a4a",
-  "#7a7a7a",
-  "#a0a0a0",
-  "#d1d1d1",
+  "#3c3c3c",
+  "#787878",
+  "#aaaaaa",
+  "#d2d2d2",
   "#ffffff",
-  "#b91c1c",
-  "#7f1d1d",
-  "#ef4444",
-  "#f87171",
-  "#ea580c",
-  "#f97316",
-  "#f59e0b",
-  "#facc15",
-  "#fef08a",
-  "#a16207",
-  "#4d7c0f",
-  "#16a34a",
-  "#22c55e",
-  "#10b981",
-  "#14b8a6",
-  "#0891b2",
-  "#0ea5e9",
-  "#38bdf8",
-  "#60a5fa",
-  "#2563eb",
-  "#4338ca",
-  "#6d28d9",
-  "#a855f7",
-  "#d946ef",
-  "#ec4899",
-  "#f43f5e",
-  "#78350f",
-  "#92400e",
-  "#b45309",
-  "#eab308",
-  "#a3e635",
-  "#65a30d",
-  "#3f6212",
-  "#166534",
-  "#14532d",
-  "#064e3b",
-  "#075985",
-  "#1e3a8a",
-  "#334155",
-  "#64748b",
-  "#94a3b8",
-  "#e2e8f0",
+  "#600018",
+  "#a50e1e",
+  "#ed1c24",
+  "#fa8072",
+  "#e45c1a",
+  "#ff7f27",
+  "#f6aa09",
+  "#f9dd3b",
+  "#fffabc",
+  "#9c8431",
+  "#c5ad31",
+  "#e8d45f",
+  "#4a6b3a",
+  "#5a944a",
+  "#84c573",
+  "#0eb968",
+  "#13e67b",
+  "#87ff5e",
+  "#0c816e",
+  "#10aea6",
+  "#13e1be",
+  "#0f799f",
+  "#60f7f2",
+  "#bbfaf2",
+  "#28509e",
+  "#4093e4",
+  "#7dc7ff",
+  "#4d31b8",
+  "#6b50f6",
+  "#99b1fb",
+  "#4a4284",
+  "#7a71c4",
+  "#b5aef1",
+  "#780c99",
+  "#aa38b9",
+  "#e09ff9",
+  "#cb007a",
+  "#ec1f80",
+  "#f38da9",
+  "#9b5249",
+  "#d18078",
+  "#fab6a4",
+  "#684634",
+  "#956821",
+  "#dba463",
+  "#7b6352",
+  "#9c846b",
+  "#d6b594",
+  "#d18051",
+  "#f8b277",
+  "#ffc5a5",
+  "#6d643f",
+  "#948c6b",
+  "#cdc59e",
+  "#333941",
+  "#6d758d",
+  "#b3b9d1",
+  "#696969",
 ];
 
 type ColorPaletteProps = {
@@ -84,16 +100,22 @@ export default function ColorPalette({
         {selectedColor && (
           <div className="flex items-center gap-2">
             <span className="text-gray-600 font-bold">Selected: </span>
-            <span className="w-6 h-6 rounded border" style={{ backgroundColor: selectedColor }} />
+            <span
+              className="w-6 h-6 rounded border"
+              style={{ backgroundColor: selectedColor }}
+            />
             {/* <span className="text-sm">{selected}</span> */}
           </div>
         )}
         <IconButton className="text-gray-600 ml-auto border border-gray-300 border-none shadow-none">
-          <X className="w-full h-full p-2" onClick={() => paintBtn("inspect")} />
+          <X
+            className="w-full h-full p-2"
+            onClick={() => paintBtn("inspect")}
+          />
         </IconButton>
       </div>
       <div className="h-30 md:h-full overflow-x-auto">
-        <div className="grid grid-cols-10 sm:grid-cols-20 md:grid-cols-30 gap-1">
+        <div className="grid grid-cols-10 sm:grid-cols-20 md:grid-cols-32 gap-1">
           {colors.map((color, i) => (
             <button
               key={i}

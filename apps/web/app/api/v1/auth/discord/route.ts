@@ -12,6 +12,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(`${process.env.NEXT_PUBLIC_CLIENT_URL}/login`);
   }
 
+  if (!code) {
+    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_CLIENT_URL}/login`);
+  }
+
   try {
     const { token } = await discordOauth({ code });
 
