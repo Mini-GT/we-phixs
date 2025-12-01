@@ -4,8 +4,20 @@ import { cookies } from "next/headers";
 
 export async function logoutUser() {
   try {
-    (await cookies()).delete("loginToken");
-    (await cookies()).delete("hasLoginToken");
+    const cookieStore = await cookies();
+    const domain = process.env.domainUrl;
+
+    cookieStore.delete({
+      name: "loginToken",
+      path: "/",
+      domain: domain,
+    });
+
+    cookieStore.delete({
+      name: "hasLoginToken",
+      path: "/",
+      domain: domain,
+    });
 
     return true;
   } catch (err: any) {
