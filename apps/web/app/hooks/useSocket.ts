@@ -32,7 +32,9 @@ export default function useSocket(hasLoginToken: string | undefined) {
       socket.on("updatedPixel", (data: Pixel) => {
         setFilledCells((prev) => {
           // overwrite if its filled with color instead of placing it on top
-          const existingIndex = prev.findIndex((c) => c.x === data.x && c.y === data.y);
+          const existingIndex = prev.findIndex(
+            (c) => c.x === data.x && c.y === data.y
+          );
 
           if (existingIndex !== -1) {
             const updated = [...prev];
@@ -51,7 +53,6 @@ export default function useSocket(hasLoginToken: string | undefined) {
     }
 
     const socket = socketRef.current;
-
     // if logged in connect
     if (hasLoginToken) {
       if (!socket.connected) {
@@ -65,15 +66,29 @@ export default function useSocket(hasLoginToken: string | undefined) {
       }
     }
 
+    // return () => {
+    //   // DO NOT recreate socket. just clean listeners.
+    //   if (socket) {
+    //     socket.off("connect");
+    //     socket.off("disconnect");
+    //     socket.off("updatedPixel");
+    //   }
+    // };
+  }, [hasLoginToken]);
+
+  // separate cleanup on component unmount
+  useEffect(() => {
     return () => {
-      // DO NOT recreate socket. just clean listeners.
+      const socket = socketRef.current;
       if (socket) {
         socket.off("connect");
         socket.off("disconnect");
         socket.off("updatedPixel");
+        socket.disconnect();
+        socketRef.current = null;
       }
     };
-  }, [hasLoginToken]);
+  }, []);
 
   return { filledCells, setFilledCells };
 }
