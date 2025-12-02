@@ -3,6 +3,7 @@ import IconButton from "./ui/iconButton";
 import PrimaryButton from "./ui/primaryButton";
 import { ToolType } from "@repo/types";
 import { useSound } from "react-sounds";
+import { maxCharges } from "@/hooks/usePaintCharges";
 
 const colors = [
   "#000000",
@@ -138,10 +139,12 @@ export default function ColorPalette({
       >
         <Brush size={20} fill="white" />
         <div className="flex items-center gap-1">
-          Paint <span>{paintCharges}</span>/30
-          {paintCharges < 30 && displaySeconds <= 30 && displaySeconds > 0 && (
-            <span className="text-sm">00:{displaySeconds}s</span>
-          )}
+          Paint <span>{paintCharges}</span>/{maxCharges}
+          {paintCharges < maxCharges &&
+            displaySeconds <= 30 &&
+            displaySeconds > 0 && (
+              <span className="text-sm">00:{displaySeconds}s</span>
+            )}
         </div>
       </PrimaryButton>
     </div>

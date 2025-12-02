@@ -24,7 +24,10 @@ import { useUser } from "@/context/user.context";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { getCanvasById, updateCanvasPixel } from "api/canvas.service";
 import { getQueryClient } from "@/getQueryClient";
-import usePaintCharges, { PaintChargesDataType } from "@/hooks/usePaintCharges";
+import usePaintCharges, {
+  maxCharges,
+  PaintChargesDataType,
+} from "@/hooks/usePaintCharges";
 import { useSound } from "react-sounds";
 import useSocket from "@/hooks/useSocket";
 import useInspect from "@/hooks/useInspect";
@@ -669,8 +672,8 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
           >
             <Brush size={20} fill="white" />
             <div className="flex items-center gap-1">
-              Paint <span>{paintCharges}</span>/30
-              {paintCharges < 30 &&
+              Paint <span>{paintCharges}</span>/{maxCharges}
+              {paintCharges < maxCharges &&
                 displaySeconds <= 30 &&
                 displaySeconds > 0 && (
                   <span className="text-sm">00:{displaySeconds}s</span>

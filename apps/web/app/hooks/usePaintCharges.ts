@@ -13,7 +13,7 @@ export type PaintChargesDataType = {
   cooldownUntil: string | null;
 };
 
-const maxCharges = 30;
+export const maxCharges = 1000;
 const rechargeTime = 30000; // 30 miliseconds(30 seconds) per charge
 
 export default function usePaintCharges(hasLoginToken: string) {
