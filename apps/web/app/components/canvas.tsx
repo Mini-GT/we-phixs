@@ -9,7 +9,13 @@ import {
   ZoomInIcon,
   ZoomOutIcon,
 } from "lucide-react";
-import { CanvasType, Coordinantes, queryKeysType, ToolType } from "@repo/types";
+import {
+  CanvasType,
+  Coordinantes,
+  queryKeysType,
+  ToolType,
+  UpdateCanvasPixelProps,
+} from "@repo/types";
 import ColorPalette from "./colorPalette";
 // import { useWindowSize } from "@react-hook/window-size";
 import { useSelectedContent } from "@/context/selectedContent.context";
@@ -27,6 +33,8 @@ import InspectCard from "./inspectCard";
 import { displayError } from "@/utils/displayError";
 import getNewScale from "@/hooks/useScale";
 import { getTouchCenter, getTouchDistance } from "@/utils/touches";
+import { getCellKey } from "@/utils/getCellKey";
+import { adjustColorOpacity } from "@/utils/adjustColorOpacity";
 
 type CanvasProp = {
   children: React.ReactNode;
@@ -70,65 +78,97 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
     x: number;
     y: number;
   } | null>(null);
+  const [optimisticCells, setOptimisticCells] = useState<
+    Map<
+      string,
+      { x: number; y: number; color: string; previousColor: string | null }
+    >
+  >(new Map());
 
   // Optimistic update
+
   const mutation = useMutation({
     mutationFn: updateCanvasPixel,
+
     // -------- commented optimistic ui cause we are relying the updated canvas cell to the api (might uncomment this in the future... we'll see) --------
-    // onMutate: async (newPixel: UpdateCanvasPixelProps) => {
-    //   // cancel any outgoing refetches for this canvas invalidate query
-    //   await queryClient.cancelQueries({ queryKey: ["canvas", canvasData.id] });
+    onMutate: async (newPixel: UpdateCanvasPixelProps) => {
+      // cancel any outgoing refetches for this canvas invalidate query
+      await queryClient.cancelQueries({ queryKey: ["canvas", canvasData.id] });
 
-    //   // get prev cache data
-    //   const prevData: CanvasType = queryClient.getQueryData<any>(["canvas", canvasData.id]);
+      // get prev cache data
+      const prevData: CanvasType = queryClient.getQueryData<any>([
+        "canvas",
+        canvasData.id,
+      ]);
 
-    //   // set a new cache data for optimistic ui
-    //   queryClient.setQueryData(["canvas", canvasData.id], (old: CanvasType) => {
-    //     if (!old) return old;
+      // set a new cache data for optimistic ui
+      const cellKey = getCellKey(newPixel.x, newPixel.y);
 
-    //     // if we have old pixels in cache data, update the pixel location
-    //     const updatedPixels = old.pixels.some((p) => p.x === newPixel.x && p.y === newPixel.y)
-    //       ? old.pixels.map((p) =>
-    //           p.x === newPixel.x && p.y === newPixel.y
-    //             ? { ...p, color: newPixel.color, userId: newPixel.userId }
-    //             : p
-    //         )
-    //       : [...old.pixels, newPixel];
+      // Check if this cell already has a color (from socket data)
+      const existingCell = filledCells.find(
+        (cell) => cell.x === newPixel.x && cell.y === newPixel.y
+      );
 
-    //     return { ...old, pixels: updatedPixels };
-    //   });
+      // Store the previous color for rollback (null if cell was empty)
+      const previousColor = existingCell?.color || null;
 
-    //   // return snapshot in case we need rollback
-    //   return { prevData };
-    // },
+      // Add optimistic cell with reduced opacity
+      setOptimisticCells((prev) => {
+        const newMap = new Map(prev);
+        newMap.set(cellKey, {
+          x: newPixel.x,
+          y: newPixel.y,
+          color: adjustColorOpacity(newPixel.color),
+          previousColor: previousColor,
+        });
+        return newMap;
+      });
+
+      // return context for rollback
+      return { prevData, cellKey, previousColor };
+    },
 
     // rollback on error if API fails, cache is restored.
-    onError: (err) => {
+    onError: (err, newPixel, context) => {
       console.error(err);
-
-      // invalidate query whenever there is an error
-      queryClient.invalidateQueries({ queryKey: ["canvas", canvasData.id] });
 
       displayError(err);
 
-      // for optimistic ui
-      // if (context?.prevData) {
-      //   queryClient.setQueryData(["canvas", canvasData.id], context.prevData);
-      // }
+      if (context?.cellKey) {
+        // rollback to remove optimistic cell
+        setOptimisticCells((prev) => {
+          const newMap = new Map(prev);
+          newMap.delete(context.cellKey);
+          return newMap;
+        });
+
+        // if we rollback and there was a previous color, restore it in filledCells
+        if (context.previousColor) {
+          setFilledCells((prev) => {
+            // check if the cell still exists in current state
+            const cellExists = prev.some(
+              (cell) => cell.x === newPixel.x && cell.y === newPixel.y
+            );
+
+            // if cell exist restore the previous color
+            if (cellExists) {
+              return prev.map((cell) =>
+                cell.x === newPixel.x && cell.y === newPixel.y
+                  ? { ...cell, color: context.previousColor! }
+                  : cell
+              );
+            }
+
+            return prev;
+          });
+        }
+      }
     },
     onSuccess: (data: PaintChargesDataType) => {
-      // updateCharges(data.charges, data.cooldownMs, data.lastCooldownUpdate);
-      // setPaintCharges((prev) => (prev ? prev - 1 : prev));
-
       setPaintCharges(data.charges);
       setCooldownUntil(data.cooldownUntil);
       playPop();
     },
-
-    // refetch on settle (success or failure), always invalidate.
-    // onSettled: () => {
-    //   queryClient.invalidateQueries({ queryKey: ["canvas", canvasData.id] });
-    // },
   });
 
   const { data: canvasData } = useSuspenseQuery<CanvasType>({
@@ -173,12 +213,73 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, gridSize * cellSize, gridSize * cellSize);
 
-    // draw socket filled cells
+    // create a set of confirmed cells
+    const confirmedCellKeys = new Set(
+      filledCells.map((cell) => getCellKey(cell.x, cell.y))
+    );
+
+    // create a map of cell coordinates to their colors for easy lookup
+    const cellColorMap = new Map(
+      filledCells.map((cell) => [getCellKey(cell.x, cell.y), cell])
+    );
+
+    // draw all cells
+    const cellsToRemove: string[] = [];
+
     filledCells.forEach((cell) => {
-      ctx.fillStyle = cell.color || "";
-      ctx.fillRect(cell.x * cellSize, cell.y * cellSize, cellSize, cellSize);
+      const cellKey = getCellKey(cell.x, cell.y);
+
+      // if there is an optimistic update for this cell, skip drawing the original
+      // (we will draw the optimistic version instead)
+      if (!optimisticCells.has(cellKey)) {
+        ctx.fillStyle = cell.color || "";
+        ctx.fillRect(cell.x * cellSize, cell.y * cellSize, cellSize, cellSize);
+      }
     });
 
+    // draw optimistic cells on top
+    optimisticCells.forEach((cell, cellKey) => {
+      if (confirmedCellKeys.has(cellKey)) {
+        // check if the confirmed color matches what we're expecting
+        const confirmedCell = cellColorMap.get(cellKey);
+
+        // if socket has updated with a different color (the real color from API),
+        // remove the optimistic cell
+        if (confirmedCell && confirmedCell.color !== cell.previousColor) {
+          cellsToRemove.push(cellKey);
+          // draw the confirmed cell instead
+          ctx.fillStyle = confirmedCell.color || "";
+          ctx.fillRect(
+            cell.x * cellSize,
+            cell.y * cellSize,
+            cellSize,
+            cellSize
+          );
+        } else {
+          // wait for the real update then draw optimistic
+          ctx.fillStyle = cell.color;
+          ctx.fillRect(
+            cell.x * cellSize,
+            cell.y * cellSize,
+            cellSize,
+            cellSize
+          );
+        }
+      } else {
+        // cell not confirmed yet, draw optimistic
+        ctx.fillStyle = cell.color;
+        ctx.fillRect(cell.x * cellSize, cell.y * cellSize, cellSize, cellSize);
+      }
+    });
+
+    // clean up confirmed optimistic cells outside the render loop
+    if (cellsToRemove.length > 0) {
+      setOptimisticCells((prev) => {
+        const newMap = new Map(prev);
+        cellsToRemove.forEach((key) => newMap.delete(key));
+        return newMap;
+      });
+    }
     // draw fetched filled cells
     // canvasData.pixels.forEach((cell) => {
     //   ctx.fillStyle = cell.color || "";
@@ -207,7 +308,7 @@ export default function Canvas({ children, hasLoginToken }: CanvasProp) {
       const crossSize = (cellSize * scale) / 1.25;
       drawCross(ctx, cellCenterX, cellCenterY, crossSize, "white");
     }
-  }, [panOffset, scale, filledCells, inspectedCellData, tool]);
+  }, [panOffset, scale, filledCells, inspectedCellData, tool, optimisticCells]);
 
   // handle clicks -> add cell / inspect cell
   useEffect(() => {
