@@ -83,7 +83,6 @@ export default function ForgotPasswordPage() {
 
             <button
               type="button"
-              // href={`${process.env.NEXT_PUBLIC_CLIENT_URL}`}
               onClick={() => redirect("/login")}
               className="w-full rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
             >
