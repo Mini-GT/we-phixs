@@ -13,6 +13,10 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
+    if (!component) setComponent("loginForm");
+  }, [component]);
+
+  useEffect(() => {
     const loginToken = document.cookie
       .split("; ")
       .find((row) => row.startsWith("hasLoginToken="))
@@ -46,7 +50,9 @@ export default function LoginPage() {
         stacked
       />
       {component === "loginForm" && <LoginForm setComponent={setComponent} />}
-      {component === "registerForm" && <RegisterForm setComponent={setComponent} />}
+      {component === "registerForm" && (
+        <RegisterForm setComponent={setComponent} />
+      )}
     </>
   );
 }

@@ -1,19 +1,31 @@
 "use client";
 
 import { ChildrenProps, ComponentStateValue } from "@repo/types";
-import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
+import {
+  createContext,
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useState,
+} from "react";
 
 type ComponentContextType = {
   component: ComponentStateValue;
   setComponent: Dispatch<SetStateAction<ComponentStateValue>>;
 };
 
-export const ComponentContext = createContext<ComponentContextType | undefined>(undefined);
+export const ComponentContext = createContext<ComponentContextType | undefined>(
+  undefined
+);
 
 export function ComponentProvider({ children }: ChildrenProps) {
-  const [component, setComponent] = useState<ComponentStateValue>("loginForm");
+  const [component, setComponent] = useState<ComponentStateValue>(null);
 
-  return <ComponentContext value={{ component, setComponent }}>{children}</ComponentContext>;
+  return (
+    <ComponentContext value={{ component, setComponent }}>
+      {children}
+    </ComponentContext>
+  );
 }
 
 export function useComponent() {
