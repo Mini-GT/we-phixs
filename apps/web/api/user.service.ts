@@ -22,12 +22,12 @@ export async function getPaintCharges() {
 }
 
 export async function updateProfile({ ...args }: UpdateProfile) {
-  console.log(args);
   const res = await api.patch(`/profile/update`, {
     ...args,
   });
   return res.data;
 }
+
 export async function getAllUsers(page: number) {
   const res = await api.get("/all", {
     params: { page },
