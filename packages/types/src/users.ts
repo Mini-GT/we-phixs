@@ -63,6 +63,14 @@ type UpdateProfile = {
   newProfileImage: string | null;
 };
 
+type ResetPassword = Pick<
+  UpdateProfile,
+  "newPassword" | "confirmNewPassword"
+> & {
+  email: string | null;
+  token: string;
+};
+
 type UsersDataType = {
   users: UsersLeaderboardType[];
   hasMore: number;
@@ -79,4 +87,5 @@ export type {
   LeaderboardPeriods,
   UpdateProfile,
   UsersDataType,
+  ResetPassword,
 };

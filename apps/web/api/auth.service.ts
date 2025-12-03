@@ -1,5 +1,10 @@
 import axios from "axios";
-import { DiscordOauth, loginFormType, RegisterFormType } from "@repo/types";
+import {
+  DiscordOauth,
+  loginFormType,
+  RegisterFormType,
+  ResetPassword,
+} from "@repo/types";
 
 const isServer = typeof window === "undefined";
 const baseURL = isServer
@@ -37,6 +42,21 @@ export async function registerUser({
 export async function discordOauth({ code }: DiscordOauth) {
   const res = await api.post("/discord", {
     code,
+  });
+  return res.data;
+}
+
+export async function resetPassword({
+  email,
+  token,
+  newPassword,
+  confirmNewPassword,
+}: ResetPassword) {
+  const res = await api.patch("/password/reset", {
+    email,
+    token,
+    newPassword,
+    confirmNewPassword,
   });
   return res.data;
 }
