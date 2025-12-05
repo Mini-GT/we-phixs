@@ -9,6 +9,7 @@ Users can join or create Guilds, collaborate as groups, climb the daily/weekly/m
 The frontend is a fully responsive Next.js + TailwindCSS UI. The entire stack is containerized with Docker, deployed on OVH Cloud, and served through Caddy with Cloudflare for DNS + SSL.
 
 ---
+<img width="1919" height="913" alt="image" src="https://github.com/user-attachments/assets/12a129c6-fbb3-472c-a836-264c3e1324e4" />
 
 ## 📂 Project Structure
 
