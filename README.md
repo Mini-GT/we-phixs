@@ -1,4 +1,4 @@
-# 📱 WePhixs — Full‑Stack Web App
+# WePhixs — Full‑Stack Web App
 
 ## 📖 Overview
 
