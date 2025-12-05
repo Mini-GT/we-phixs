@@ -1,135 +1,116 @@
-# Turborepo starter
+# 📱 WePhixs — Full‑Stack Web App
 
-This Turborepo starter is maintained by the Turborepo core team.
+## 📖 Overview
 
-## Using this example
+WePhixs is a real-time collaborative pixel‑painting platform where users paint on a shared canvas with live updates powered by Socket.IO. The backend is built with NestJS, using Prisma + PostgreSQL to store pixel data, user activity, guild info, and leaderboard stats.
+The server applies cooldowns and validation to prevent abuse, while the app includes password reset using Resend SMTP for secure one‑time token links.
+Users can join or create Guilds, collaborate as groups, climb the daily/weekly/monthly/all‑time Leaderboards, and inspect any pixel to see who placed it and when. A built‑in Report & Feedback System allows users to submit bugs and feature requests directly inside the app.
 
-Run the following command:
+The frontend is a fully responsive Next.js + TailwindCSS UI. The entire stack is containerized with Docker, deployed on OVH Cloud, and served through Caddy with Cloudflare for DNS + SSL.
 
-```sh
-npx create-turbo@latest
+---
+
+## 📂 Project Structure
+
+```bash
+we-phixs/
+├── apps/
+│   ├── backend/       # NestJS API server
+│   └── web/           # Next.js frontend
+├── packages/
+│   ├── eslint-config/ # Shared ESLint configs
+│   ├── types/         # Shared TypeScript definitions
+│   └── ui/            # Shared React UI components
+├── docker-compose.yml
+├── package.json
+├── pnpm-lock.yaml
+└── turbo.json
 ```
 
-## What's inside?
+---
 
-This Turborepo includes the following packages/apps:
+## ⚙️ Technologies Used
 
-### Apps and Packages
+## 🔹 Backend (NestJS)
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+The backend handles authentication, pixel operations, real‑time events, email flows, and database logic.
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+**Core Technologies:**
 
-### Utilities
+* **NestJS** — modular backend framework
+* **Prisma ORM** — PostgreSQL database layer
+* **Socket.IO** — real‑time communication
+* **bcryptjs** — password hashing
+* **class-validator / class-transformer** — dto validation
+* **uuid / cuid2** — id generation
 
-This Turborepo has some additional tools already setup for you:
+---
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+## 🔹 Frontend (Next.js)
 
-### Build
+The frontend is built using **Next.js** and **TailwindCSS**, with state management powered by **TanStack React Query**.
 
-To build all apps and packages, run the following command:
+**Core UI Libraries:**
 
-```
-cd my-turborepo
+* **TailwindCSS** — utility-first styling
+* **Framer Motion** — animations
+* **Radix UI** — accessible UI primitives
+* **Lucide-react** — icons
+* **React Toastify** — toast notifications
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
+**Client-Side Data & Utils:**
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
+* **React Query** — mutations, caching, optimistic updates
+* **Axios** — API calls
+* **Socket.IO client** — real-time events
+* **Day.js** — date/time formatting
+* **Howler.js** — sound effects
+* **Clsx / class-variance-authority** — class handling
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+---
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+## 🔑 Features
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+### ⭐ Authentication
 
-### Develop
+* Email + password auth
+* Discord OAuth2
+* Forgot password token flow
 
-To develop all apps and packages, run the following command:
+### ⭐ Pixel / Canvas System
 
-```
-cd my-turborepo
+* Real‑time shared pixel board
+* Pixel inspection (who placed, when)
+* Cooldown logic to prevent abuse
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
+### ⭐ Guild System
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
+* Create / join guilds
+* Private boards
+* Member and Leader roles
+* Leaderboards
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+### ⭐ Leaderboard System
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
+* Top users on Daily, Weekly, Monthly, and All Time
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
+---
 
-### Remote Caching
+## 🚀 Deployment
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+* **Hosting**: OVH Cloud
+* **Runtime**: Node.js
+* **Reverse Proxy**: Caddy
+* **Containerization**: Docker
+* **SSL**: Cloudflare (SSL/TLS) configuration
+---
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+## 🐳 Docker Support
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+The repo includes a `docker-compose.yml` for:
 
-```
-cd my-turborepo
+* Backend
+* Frontend
+* PostgreSQL
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+---
