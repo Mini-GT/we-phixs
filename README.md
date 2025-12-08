@@ -120,6 +120,6 @@ The repo includes a `docker-compose.yml` for:
 
 ## Mailcow: Dockerized
 
-* git clone https://github.com/mailcow/mailcow-dockerized
+* https://github.com/mailcow/mailcow-dockerized
 
 ---
