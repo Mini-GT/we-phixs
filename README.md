@@ -3,10 +3,10 @@
 ## 📖 Overview
 
 WePhixs is a real-time collaborative pixel‑painting platform where users paint on a shared canvas with live updates powered by Socket.IO. The backend is built with NestJS, using Prisma + PostgreSQL to store pixel data, user activity, guild info, and leaderboard stats.
-The server applies cooldowns and validation to prevent abuse, while the app includes password reset using Resend SMTP for secure one‑time token links.
+The server applies cooldowns and validation to prevent abuse, while the app includes password reset using Mailcow:Dockerized for SMTP secure one‑time token links.
 Users can join or create Guilds, collaborate as groups, climb the daily/weekly/monthly/all‑time Leaderboards, and inspect any pixel to see who placed it and when. A built‑in Report & Feedback System allows users to submit bugs and feature requests directly inside the app.
 
-The frontend is a fully responsive Next.js + TailwindCSS UI. The entire stack is containerized with Docker, deployed on OVH Cloud, and served through Caddy with Cloudflare for DNS + SSL.
+The frontend is a fully responsive Next.js + TailwindCSS UI. The entire stack is containerized with Docker, deployed on OVH Cloud, having own mail server with mailcow, and served through Caddy with Cloudflare for DNS + SSL.
 
 ---
 <img width="1919" height="913" alt="image" src="https://github.com/user-attachments/assets/12a129c6-fbb3-472c-a836-264c3e1324e4" />
@@ -95,6 +95,10 @@ The frontend is built using **Next.js** and **TailwindCSS**, with state manageme
 
 * Top users on Daily, Weekly, Monthly, and All Time
 
+### ⭐ Own Mailserver
+
+* sending and receiving emails with mailcow:dockerized
+
 ---
 
 ## 🚀 Deployment
@@ -113,5 +117,9 @@ The repo includes a `docker-compose.yml` for:
 * Backend
 * Frontend
 * PostgreSQL
+
+## Mailcow: Dockerized
+
+* git clone https://github.com/mailcow/mailcow-dockerized
 
 ---
