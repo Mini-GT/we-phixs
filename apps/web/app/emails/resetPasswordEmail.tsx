@@ -198,7 +198,7 @@ export default function ResetPasswordEmail({
           >
             Best regards,
             <br />
-            <strong>WePhoneSpec Security</strong>
+            <strong>Phixel Paint Security</strong>
           </p>
         </div>
 
